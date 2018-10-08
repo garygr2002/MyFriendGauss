@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MyFriendGauss2</string>
+    <string name="control_panel_message">Controls go here.</string>
+    <string name="table_item_hint">table item hint</string>
+</resources>
