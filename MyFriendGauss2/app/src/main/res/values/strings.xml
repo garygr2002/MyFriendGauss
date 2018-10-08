@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">MyFriendGauss2</string>
+    <string name="change_dimension">Dimension</string>
+    <string name="copy_problem">Copy</string>
+    <string name="edit_problem">Edit</string>
+    <string name="prefill_entries">Prefill</string>
+    <string name="problem_name">Problem Name</string>
+    <string name="solve_problem">Solve</string>
+    <string name="table_item_hint">table item hint</string>
+    <string name="tale_title_hint">table title hint</string>
+</resources>
