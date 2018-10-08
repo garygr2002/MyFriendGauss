@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss2;
+package com.garycgregg.android.myfriendgauss3;
 
 class BaseGaussEntry {
 

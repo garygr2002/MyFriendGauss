@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss2.database;
+package com.garycgregg.android.myfriendgauss3.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

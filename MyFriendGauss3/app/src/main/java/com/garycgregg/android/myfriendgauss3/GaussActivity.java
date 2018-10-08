@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss2;
+package com.garycgregg.android.myfriendgauss3;
 
 import android.support.v4.app.Fragment;
 

@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss2.database;
+package com.garycgregg.android.myfriendgauss3.database;
 
 public interface ProblemDbSchema {
 

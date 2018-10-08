@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss2;
+package com.garycgregg.android.myfriendgauss3;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

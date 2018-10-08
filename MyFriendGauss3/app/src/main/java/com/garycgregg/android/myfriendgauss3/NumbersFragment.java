@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss2;
+package com.garycgregg.android.myfriendgauss3;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -12,6 +12,8 @@ import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import com.garycgregg.android.myfriendgauss2.R;
 
 import java.util.Locale;
 

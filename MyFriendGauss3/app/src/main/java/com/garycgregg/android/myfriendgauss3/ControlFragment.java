@@ -1,8 +1,10 @@
-package com.garycgregg.android.myfriendgauss2;
+package com.garycgregg.android.myfriendgauss3;
 
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
+import com.garycgregg.android.myfriendgauss2.R;
 
 public class ControlFragment extends CardFragment {
 

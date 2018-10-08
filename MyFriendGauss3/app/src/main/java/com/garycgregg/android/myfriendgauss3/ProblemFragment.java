@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss2;
+package com.garycgregg.android.myfriendgauss3;
 
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -13,6 +13,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.garycgregg.android.myfriendgauss2.R;
 
 public class ProblemFragment extends Fragment {
 

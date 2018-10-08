@@ -1,11 +1,11 @@
-package com.garycgregg.android.myfriendgauss2.database;
+package com.garycgregg.android.myfriendgauss3.database;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
 
-import com.garycgregg.android.myfriendgauss2.Answer;
+import com.garycgregg.android.myfriendgauss3.Answer;
 
-import static com.garycgregg.android.myfriendgauss2.database.ProblemDbSchema.*;
+import static com.garycgregg.android.myfriendgauss3.database.ProblemDbSchema.*;
 
 public class AnswerCursorWrapper extends CursorWrapper {
 

@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss2;
+package com.garycgregg.android.myfriendgauss3;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,12 +6,12 @@ import android.database.CursorWrapper;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Pair;
 
-import com.garycgregg.android.myfriendgauss2.database.AnswerCursorWrapper;
-import com.garycgregg.android.myfriendgauss2.database.MatrixCursorWrapper;
-import com.garycgregg.android.myfriendgauss2.database.ProblemCursorWrapper;
-import com.garycgregg.android.myfriendgauss2.database.ProblemDatabaseHelper;
-import com.garycgregg.android.myfriendgauss2.database.ProblemDbSchema;
-import com.garycgregg.android.myfriendgauss2.database.VectorCursorWrapper;
+import com.garycgregg.android.myfriendgauss3.database.AnswerCursorWrapper;
+import com.garycgregg.android.myfriendgauss3.database.MatrixCursorWrapper;
+import com.garycgregg.android.myfriendgauss3.database.ProblemCursorWrapper;
+import com.garycgregg.android.myfriendgauss3.database.ProblemDatabaseHelper;
+import com.garycgregg.android.myfriendgauss3.database.ProblemDbSchema;
+import com.garycgregg.android.myfriendgauss3.database.VectorCursorWrapper;
 
 import java.util.ArrayList;
 import java.util.Date;

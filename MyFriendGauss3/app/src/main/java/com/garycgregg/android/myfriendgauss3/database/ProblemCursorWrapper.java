@@ -1,13 +1,13 @@
-package com.garycgregg.android.myfriendgauss2.database;
+package com.garycgregg.android.myfriendgauss3.database;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
 
-import com.garycgregg.android.myfriendgauss2.Problem;
+import com.garycgregg.android.myfriendgauss3.Problem;
 
 import java.util.Date;
 
-import static com.garycgregg.android.myfriendgauss2.database.ProblemDbSchema.*;
+import static com.garycgregg.android.myfriendgauss3.database.ProblemDbSchema.*;
 
 public class ProblemCursorWrapper extends CursorWrapper {
 
