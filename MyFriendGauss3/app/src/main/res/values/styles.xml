@@ -1,0 +1,21 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="EntryPane">
+        <item name="android:layout_margin">5dp</item>
+    </style>
+
+    <style name="ProblemPane">
+        <item name="android:divider">?android:listDivider</item>
+        <item name="android:dividerPadding">2dp</item>
+        <item name="android:showDividers">middle</item>
+    </style>
+
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/prefill_entries"
+        android:icon="@drawable/ic_menu_prefill"
+        android:title="@string/prefill_entries"
+        app:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/solve_problem"
+        android:icon="@drawable/ic_menu_solve"
+        android:title="@string/solve_problem"
+        app:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/change_dimension"
+        android:icon="@drawable/ic_menu_dimension"
+        android:title="@string/change_dimension"
+        app:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/copy_problem"
+        android:icon="@drawable/ic_menu_copy"
+        android:title="@string/copy_problem"
+        app:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/edit_problem"
+        android:icon="@drawable/ic_menu_edit"
+        android:title="@string/edit_problem"
+        app:showAsAction="ifRoom|withText" />
+
+</menu>
