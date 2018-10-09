@@ -24,7 +24,6 @@ public class ProblemLab {
     private static final String whereFormat = "%s = ?";
     private static final String problemWhereClause = String.format(whereFormat,
             ProblemDbSchema.ProblemTable.Columns.PROBLEM_ID);
-    private final Context context;
     private final SQLiteDatabase database;
     private final WrapperManager<Answer> answerWrapperManager = new WrapperManager<Answer>() {
 
@@ -88,7 +87,7 @@ public class ProblemLab {
     };
 
     public ProblemLab(Context context) {
-        database = new ProblemDatabaseHelper(this.context = context.getApplicationContext()).
+        database = new ProblemDatabaseHelper(context.getApplicationContext()).
                 getWritableDatabase();
     }
 
@@ -203,12 +202,23 @@ public class ProblemLab {
     }
 
     public Problem getProblem(int problemId) {
-        return get(problemWrapperManager, problemId);
+
+        database.beginTransaction();
+        Problem problem = get(problemWrapperManager, problemId);
+        if (!((null == problem) || problem.isWriteLocked())) {
+
+            problem.setWriteLocked(true);
+            update(problem);
+            problem.setWriteLocked(false);
+        }
+
+        database.endTransaction();
+        return problem;
     }
 
     public List<Problem> getProblems() {
 
-        final List<Problem> problems = new ArrayList<Problem>();
+        final List<Problem> problems = new ArrayList<>();
         getAll(problems, problemWrapperManager);
         return problems;
     }
@@ -356,7 +366,7 @@ public class ProblemLab {
                 whereClause = String.format(whereFormat, fieldName);
             }
 
-            return new Pair<String, String[]>(whereClause, whereArgs);
+            return new Pair<>(whereClause, whereArgs);
         }
 
         protected abstract CursorWrapper getWrapper(Integer problemId);
