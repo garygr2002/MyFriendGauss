@@ -9,12 +9,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.garycgregg.android.myfriendgauss3.GaussActivity">
+        <activity android:name="com.garycgregg.android.myfriendgauss3.ProblemListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity android:name="com.garycgregg.android.myfriendgauss3.ProblemActivity">
         </activity>
     </application>
 

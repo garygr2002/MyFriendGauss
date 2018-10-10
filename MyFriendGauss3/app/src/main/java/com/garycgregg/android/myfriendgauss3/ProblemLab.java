@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.CursorWrapper;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.util.Pair;
 
 import com.garycgregg.android.myfriendgauss3.database.AnswerCursorWrapper;
@@ -20,7 +21,6 @@ import java.util.List;
 public class ProblemLab {
 
     private static final int conflictAlgorithm = SQLiteDatabase.CONFLICT_REPLACE;
-    private static final String TAG = ProblemLab.class.getSimpleName();
     private static final String whereFormat = "%s = ?";
     private static final String problemWhereClause = String.format(whereFormat,
             ProblemDbSchema.ProblemTable.Columns.PROBLEM_ID);
@@ -87,8 +87,14 @@ public class ProblemLab {
     };
 
     public ProblemLab(Context context) {
+
         database = new ProblemDatabaseHelper(context.getApplicationContext()).
                 getWritableDatabase();
+        addProblems();
+    }
+
+    private static String interpret(Integer problemId) {
+        return (null == problemId) ? null : Integer.toString(problemId);
     }
 
     private static <T extends BaseGaussEntry> void build(Double[] vector, T entry) {
@@ -132,6 +138,23 @@ public class ProblemLab {
         return vectors;
     }
 
+    /**
+     * Adds some sample problems to the database. TODO: Delete this.
+     */
+    private void addProblems() {
+
+        final Problem problem = new Problem();
+        for (int i = 1; i <= 100; ++i) {
+
+            problem.setName(String.format("Problem Number %d", i));
+            problem.setCreated(new Date());
+
+            problem.setDimensions((i % 10) + 1);
+            problem.setWriteLocked(false);
+            add(problem);
+        }
+    }
+
     public void add(Answer answer) {
         database.insertWithOnConflict(ProblemDbSchema.AnswerTable.name, null,
                 getContentValues(answer), conflictAlgorithm);
@@ -147,17 +170,35 @@ public class ProblemLab {
                 getContentValues(problem));
     }
 
-    public int delete(int problemId) {
-        return database.delete(ProblemDbSchema.ProblemTable.name, problemWhereClause,
-                new String[]{Integer.toString(problemId)});
+    public int deleteProblems() {
+        return deleteProblem(null);
+    }
+
+    public int deleteProblem(Integer problemId) {
+
+        String[] whereArgs;
+        String whereClause;
+        if (null == problemId) {
+
+            whereArgs = new String[] { };
+            whereClause = "1";
+        }
+
+        else {
+
+            whereArgs = new String[] {interpret(problemId)};
+            whereClause = problemWhereClause;
+        }
+
+        return database.delete(ProblemDbSchema.ProblemTable.name, whereClause, whereArgs);
     }
 
     public int delete(Answer answer) {
         return database.delete(ProblemDbSchema.AnswerTable.name, String.format("%s = ? and %s = ?",
                 ProblemDbSchema.AnswerTable.Columns.PROBLEM_ID,
                 ProblemDbSchema.AnswerTable.Columns.ROW),
-                new String[]{Integer.toString(answer.getProblemId()),
-                        Integer.toString(answer.getRow())});
+                new String[]{interpret(answer.getProblemId()),
+                        interpret(answer.getRow())});
     }
 
     public int delete(Matrix matrix) {
@@ -166,17 +207,17 @@ public class ProblemLab {
                         ProblemDbSchema.MatrixTable.Columns.PROBLEM_ID,
                         ProblemDbSchema.MatrixTable.Columns.ROW,
                         ProblemDbSchema.MatrixTable.Columns.COLUMN),
-                new String[]{Integer.toString(matrix.getProblemId()),
-                        Integer.toString(matrix.getRow()),
-                        Integer.toString(matrix.getColumn())});
+                new String[]{interpret(matrix.getProblemId()),
+                        interpret(matrix.getRow()),
+                        interpret(matrix.getColumn())});
     }
 
     public int delete(Vector vector) {
         return database.delete(ProblemDbSchema.VectorTable.name, String.format("%s = ? and %s = ?",
                 ProblemDbSchema.VectorTable.Columns.PROBLEM_ID,
                 ProblemDbSchema.VectorTable.Columns.ROW),
-                new String[]{Integer.toString(vector.getProblemId()),
-                        Integer.toString(vector.getRow())});
+                new String[]{interpret(vector.getProblemId()),
+                        interpret(vector.getRow())});
     }
 
     public Answer getAnswer(int problemId) {
@@ -242,7 +283,7 @@ public class ProblemLab {
 
             returnValue = database.update(ProblemDbSchema.ProblemTable.name,
                     getContentValues(problem),
-                    problemWhereClause, new String[]{Integer.toString(problemId)});
+                    problemWhereClause, new String[]{interpret(problemId)});
         }
 
         return returnValue;
@@ -362,7 +403,7 @@ public class ProblemLab {
             String whereClause = null;
             if (null != problemId) {
 
-                whereArgs = new String[]{Integer.toString(problemId)};
+                whereArgs = new String[]{interpret(problemId)};
                 whereClause = String.format(whereFormat, fieldName);
             }
 
