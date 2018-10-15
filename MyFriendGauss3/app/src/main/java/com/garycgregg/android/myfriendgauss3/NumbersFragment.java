@@ -13,8 +13,6 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.garycgregg.android.myfriendgauss2.R;
-
 import java.util.Locale;
 
 public class NumbersFragment extends CardFragment {

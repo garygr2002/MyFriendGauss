@@ -14,24 +14,25 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.garycgregg.android.myfriendgauss2.R;
-
 public class ProblemFragment extends Fragment {
 
     private static final String FORMAT_STRING = "%s.%s_argument";
-    private static final String SIZE_ARGUMENT = String.format(FORMAT_STRING,
-            NumbersFragment.class.getName(),
-            "size");
+    private static final String PREFIX = ProblemFragment.class.getName();
+    private static final String ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "problem_id");
+    private static final String SIZE_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "size");
     private static final String TAG = ProblemFragment.class.getSimpleName();
 
     private final ControlFragmentFactory controlFragmentFactory = new ControlFragmentFactory();
     private final NumbersFragmentFactory numbersFragmentFactory = new NumbersFragmentFactory();
     private final SparseArray<PaneCharacteristics> characteristicsArray = new SparseArray<>();
 
-    public static Fragment createInstance(int size) {
+    private int problemId;
+
+    public static Fragment createInstance(int problemId) {
 
         final Bundle arguments = new Bundle();
-        arguments.putSerializable(SIZE_ARGUMENT, size);
+        arguments.putSerializable(ID_ARGUMENT, problemId);
+        arguments.putSerializable(SIZE_ARGUMENT, 3);  // TODO: Change this.
 
         final Fragment fragment = new ProblemFragment();
         fragment.setArguments(arguments);
@@ -69,9 +70,13 @@ public class ProblemFragment extends Fragment {
 
         final View view = inflater.inflate(R.layout.fragment_problem, container, false);
         final FragmentManager manager = getFragmentManager();
+        final Bundle arguments = getArguments();
+
+        problemId = arguments.getInt(ID_ARGUMENT);
+        Log.i(TAG, String.format("The received problem ID is: %d", problemId));
 
         addFragment(manager, R.id.control_pane, controlFragmentFactory);
-        numbersFragmentFactory.setSize(getArguments().getInt(SIZE_ARGUMENT, 1));
+        numbersFragmentFactory.setSize(arguments.getInt(SIZE_ARGUMENT, 1));
 
         addNumbersFragment(manager, R.id.matrix_pane);
         addNumbersFragment(manager, R.id.answer_pane);

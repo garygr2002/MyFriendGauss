@@ -90,6 +90,8 @@ public class ProblemLab {
 
         database = new ProblemDatabaseHelper(context.getApplicationContext()).
                 getWritableDatabase();
+
+        deleteProblems();
         addProblems();
     }
 
@@ -144,7 +146,7 @@ public class ProblemLab {
     private void addProblems() {
 
         final Problem problem = new Problem();
-        for (int i = 1; i <= 100; ++i) {
+        for (int i = 1; i <= 5; ++i) {
 
             problem.setName(String.format("Problem Number %d", i));
             problem.setCreated(new Date());

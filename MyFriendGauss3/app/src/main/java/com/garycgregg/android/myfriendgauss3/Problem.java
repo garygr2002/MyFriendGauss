@@ -55,6 +55,10 @@ public class Problem {
         return solved;
     }
 
+    public boolean isSolved() {
+        return null != getSolved();
+    }
+
     public void setSolved(Date solved) {
         this.solved = solved;
     }

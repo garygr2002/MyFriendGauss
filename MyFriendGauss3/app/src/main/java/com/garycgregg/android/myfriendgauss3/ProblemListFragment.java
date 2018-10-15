@@ -6,14 +6,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.garycgregg.android.myfriendgauss2.R;
 
 import java.util.List;
 
@@ -26,7 +23,7 @@ public class ProblemListFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
 
-        // TODO: Move creating the problem lab to the ProblemActivity.
+        // TODO: Move creating the problem lab to the ProblemListActivity.
         super.onAttach(context);
         problemLab = new ProblemLab(context);
     }
@@ -77,6 +74,7 @@ public class ProblemListFragment extends Fragment {
         private Problem problem;
         private TextView problemDate;
         private TextView problemName;
+        private ImageView solvedImageView;
 
         public ProblemHolder(LayoutInflater inflater, ViewGroup parent) {
 
@@ -85,19 +83,21 @@ public class ProblemListFragment extends Fragment {
 
             problemName = itemView.findViewById(R.id.problem_name);
             problemDate = itemView.findViewById(R.id.problem_date);
+            solvedImageView = itemView.findViewById(R.id.problem_solved);
         }
 
         public void bind(Problem problem) {
 
             this.problem = problem;
             problemName.setText(problem.getName());
+
             problemDate.setText(problem.getCreated().toString());
+            solvedImageView.setVisibility(problem.isSolved() ? View.VISIBLE : View.GONE);
         }
 
         @Override
         public void onClick(View view) {
-            Toast.makeText(getActivity(), String.format("'%s' has been clicked!",
-                    problem.getName()), Toast.LENGTH_SHORT).show();
+            startActivity(ProblemActivity.newIntent(getActivity(), problem.getProblemId()));
         }
     }
 }

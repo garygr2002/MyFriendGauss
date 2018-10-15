@@ -8,8 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.garycgregg.android.myfriendgauss2.R;
-
 public abstract class CardFragment extends Fragment {
 
     @Nullable
