@@ -14,7 +14,6 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
     private static final String PREFIX = CardFragment.class.getName();
     private static final String ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "problem_id");
 
-    private long nullProblemId;
     private long problemId;
     private ProblemLab problemLab;
 
@@ -35,17 +34,22 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
         return problemLab;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        problemId = getArguments().getLong(ID_ARGUMENT);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         final CardView view = (CardView) inflater.inflate(R.layout.fragment_card, container,
                 false);
-        final ProblemLabSource problemLabSource = ((ProblemLabSource) getActivity());
 
+        final ProblemLabSource problemLabSource = ((ProblemLabSource) getActivity());
         problemLab = problemLabSource.getProblemLab();
-        nullProblemId = problemLab.getNullProblemId();
-        problemId = getArguments().getLong(ID_ARGUMENT, nullProblemId);
 
         createContent(inflater, (ViewGroup) view.findViewById(R.id.card_content));
         return view;
