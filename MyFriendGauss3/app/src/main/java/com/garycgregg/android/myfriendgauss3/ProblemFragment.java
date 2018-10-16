@@ -184,7 +184,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
             // There is no such existing fragment. Create one using the given factory.
             manager.beginTransaction().add(paneId,
                     factory.createFragment((null == problem) ? nullProblemId :
-                            problem.getProblemId())).commit();
+                            problem.getProblemId(), nullProblemId)).commit();
         }
 
         else if (replace) {
@@ -195,7 +195,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
              */
             manager.beginTransaction().replace(paneId,
                     factory.createFragment((null == problem) ? nullProblemId :
-                            problem.getProblemId())).commit();
+                            problem.getProblemId(), nullProblemId)).commit();
         }
     }
 
@@ -241,9 +241,10 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
          * Creates a fragment.
          *
          * @param problemId The problem ID associated with the fragment
+         * @param nullProblemId An ID that no problem may have
          * @return A newly created fragment
          */
-        Fragment createFragment(long problemId);
+        Fragment createFragment(long problemId, long nullProblemId);
     }
 
     private static class PaneCharacteristics {
@@ -284,10 +285,10 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
     private static class ControlFragmentFactory implements FragmentFactory {
 
         @Override
-        public Fragment createFragment(long problemId) {
+        public Fragment createFragment(long problemId, long nullProblemId) {
 
             final CardFragment fragment = ControlFragment.createInstance();
-            CardFragment.customizeInstance(fragment, problemId);
+            CardFragment.customizeInstance(fragment, problemId, nullProblemId);
             return fragment;
         }
     }
@@ -341,7 +342,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
         }
 
         @Override
-        public Fragment createFragment(long problemId) {
+        public Fragment createFragment(long problemId, long nullProblemId) {
 
             final boolean isNotMatrix = !isMatrix();
             final int size = getSize();
@@ -350,7 +351,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
                     getBackgroundColor(), isEnabled(),
                     size, isNotMatrix ? 1 : size, isNotMatrix);
 
-            CardFragment.customizeInstance(fragment, problemId);
+            CardFragment.customizeInstance(fragment, problemId, nullProblemId);
             return fragment;
         }
     }
