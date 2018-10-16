@@ -9,20 +9,14 @@ import android.view.WindowManager;
 
 public abstract class SingleFragmentActivity extends AppCompatActivity implements ProblemLabSource {
 
-    private long nullProblemId;
     private ProblemLab problemLab;
-
-    protected abstract Fragment createFragment();
-
-    @Override
-    public long getNullProblemId() {
-        return nullProblemId;
-    }
 
     @Override
     public ProblemLab getProblemLab() {
         return problemLab;
     }
+
+    protected abstract Fragment createFragment();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,7 +25,6 @@ public abstract class SingleFragmentActivity extends AppCompatActivity implement
         // See: https://stackoverflow.com/questions/9732761/prevent-the-keyboard-from-displaying-on-activity-start
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-        nullProblemId = ((GaussApplication) getApplication()).getNullProblemId();
         problemLab = new ProblemLab(getApplicationContext());
         setContentView(R.layout.activity_single_fragment);
 

@@ -31,11 +31,6 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
     }
 
     @Override
-    public long getNullProblemId() {
-        return nullProblemId;
-    }
-
-    @Override
     public ProblemLab getProblemLab() {
         return problemLab;
     }
@@ -48,8 +43,8 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
                 false);
         final ProblemLabSource problemLabSource = ((ProblemLabSource) getActivity());
 
-        nullProblemId = problemLabSource.getNullProblemId();
         problemLab = problemLabSource.getProblemLab();
+        nullProblemId = problemLab.getNullProblemId();
         problemId = getArguments().getLong(ID_ARGUMENT, nullProblemId);
 
         createContent(inflater, (ViewGroup) view.findViewById(R.id.card_content));

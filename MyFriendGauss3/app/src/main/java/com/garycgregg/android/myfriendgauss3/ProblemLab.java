@@ -244,6 +244,15 @@ class ProblemLab {
         return matrices;
     }
 
+    /**
+     * Gets the null problem ID to be used in the problem lab.
+     *
+     * @return The null problem ID to be used in the problem lab
+     */
+    public long getNullProblemId() {
+        return 0L;
+    }
+
     public Problem getProblem(long problemId) {
 
         database.beginTransaction();

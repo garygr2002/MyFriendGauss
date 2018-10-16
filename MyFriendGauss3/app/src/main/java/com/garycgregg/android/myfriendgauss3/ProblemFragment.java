@@ -40,11 +40,6 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
     }
 
     @Override
-    public long getNullProblemId() {
-        return nullProblemId;
-    }
-
-    @Override
     public ProblemLab getProblemLab() {
         return problemLab;
     }
@@ -81,8 +76,8 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
         final View view = inflater.inflate(R.layout.fragment_problem, container, false);
         final ProblemLabSource problemLabSource = ((ProblemLabSource) getActivity());
 
-        nullProblemId = problemLabSource.getNullProblemId();
         problemLab = problemLabSource.getProblemLab();
+        nullProblemId = problemLab.getNullProblemId();
 
         int size = 1;
         problem = problemLab.getProblem(getArguments().getLong(ID_ARGUMENT, nullProblemId));
@@ -188,7 +183,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
 
             // There is no such existing fragment. Create one using the given factory.
             manager.beginTransaction().add(paneId,
-                    factory.createFragment((null == problem) ? getNullProblemId() :
+                    factory.createFragment((null == problem) ? nullProblemId :
                             problem.getProblemId())).commit();
         }
 
@@ -199,7 +194,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
              * it replaced.
              */
             manager.beginTransaction().replace(paneId,
-                    factory.createFragment((null == problem) ? getNullProblemId() :
+                    factory.createFragment((null == problem) ? nullProblemId :
                             problem.getProblemId())).commit();
         }
     }
