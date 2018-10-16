@@ -305,6 +305,46 @@ class ProblemLab {
                 problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
     }
 
+    public int updateDimensions(Problem problem) {
+
+        return database.update(ProblemDbSchema.ProblemTable.name,
+                getContentDimensions(problem),
+                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
+    }
+
+    public int updateName(Problem problem) {
+
+        return database.update(ProblemDbSchema.ProblemTable.name,
+                getContentName(problem),
+                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
+    }
+
+    private ContentValues getContentDimensions(Problem problem, ContentValues existingValues) {
+
+        final ContentValues values = (null == existingValues) ? new ContentValues() :
+                existingValues;
+
+        values.put(ProblemDbSchema.ProblemTable.Columns.DIMENSIONS, problem.getDimensions());
+        return values;
+    }
+
+    private ContentValues getContentDimensions(Problem problem) {
+        return getContentDimensions(problem, null);
+    }
+
+    private ContentValues getContentName(Problem problem, ContentValues existingValues) {
+
+        final ContentValues values = (null == existingValues) ? new ContentValues() :
+                existingValues;
+
+        values.put(ProblemDbSchema.ProblemTable.Columns.NAME, problem.getName());
+        return values;
+    }
+
+    private ContentValues getContentName(Problem problem) {
+        return getContentName(problem, null);
+    }
+
     private ContentValues getContentValues(Answer answer) {
 
         final ContentValues values = new ContentValues();
@@ -329,16 +369,14 @@ class ProblemLab {
 
     private ContentValues getContentValues(Problem problem) {
 
-        final ContentValues values = new ContentValues();
-        values.put(ProblemDbSchema.ProblemTable.Columns.NAME, problem.getName());
-
-        values.put(ProblemDbSchema.ProblemTable.Columns.DIMENSIONS, problem.getDimensions());
+        final ContentValues values = getContentName(problem);
+        getContentDimensions(problem, values);
         values.put(ProblemDbSchema.ProblemTable.Columns.CREATED, problem.getCreated().getTime());
 
         final Date solved = problem.getSolved();
         if (null != solved) {
 
-            values.put(ProblemDbSchema.ProblemTable.Columns.CREATED, problem.getSolved().getTime());
+            values.put(ProblemDbSchema.ProblemTable.Columns.SOLVED, problem.getSolved().getTime());
         }
 
         values.put(ProblemDbSchema.ProblemTable.Columns.WRITE_LOCK,
