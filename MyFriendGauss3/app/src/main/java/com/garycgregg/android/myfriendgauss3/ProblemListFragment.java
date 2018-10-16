@@ -38,12 +38,23 @@ public class ProblemListFragment extends Fragment {
     }
 
     private void updateUI() {
-        problemRecyclerView.setAdapter(adapter = new ProblemAdapter(problemLab.getProblems()));
+
+        final List<Problem> problemList = problemLab.getProblems();
+        if (null == adapter) {
+
+            problemRecyclerView.setAdapter(adapter = new ProblemAdapter(problemList));
+        }
+
+        else {
+
+            adapter.setProblems(problemList);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     private class ProblemAdapter extends RecyclerView.Adapter<ProblemHolder> {
 
-        private final List<Problem> problemList;
+        private List<Problem> problemList;
 
         public ProblemAdapter(List<Problem> problemList) {
             this.problemList = problemList;
@@ -62,6 +73,10 @@ public class ProblemListFragment extends Fragment {
         @Override
         public int getItemCount() {
             return problemList.size();
+        }
+
+        public void setProblems(List<Problem> problemList) {
+            this.problemList = problemList;
         }
     }
 
@@ -93,7 +108,8 @@ public class ProblemListFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            startActivity(ProblemActivity.newIntent(getActivity(), problem.getProblemId()));
+            startActivity(ProblemActivity.newIntent(getActivity(), problem.getProblemId(),
+                    problemLab.getNullProblemId()));
         }
     }
 }
