@@ -20,23 +20,19 @@ public class ProblemListFragment extends Fragment {
     private ProblemLab problemLab;
     private RecyclerView problemRecyclerView;
 
-    @Override
-    public void onAttach(Context context) {
-
-        // TODO: Move creating the problem lab to the ProblemListActivity.
-        super.onAttach(context);
-        problemLab = new ProblemLab(context);
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         final View view = inflater.inflate(R.layout.fragment_problem_list, container,
                 false);
-        problemRecyclerView = view.findViewById(R.id.problem_recycler_view);
 
-        problemRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        final Context context = getActivity();
+        problemLab = ((ProblemLabSource) context).getProblemLab();
+
+        problemRecyclerView = view.findViewById(R.id.problem_recycler_view);
+        problemRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+
         updateUI();
         return view;
     }
@@ -47,7 +43,7 @@ public class ProblemListFragment extends Fragment {
 
     private class ProblemAdapter extends RecyclerView.Adapter<ProblemHolder> {
 
-        private List<Problem> problemList;
+        private final List<Problem> problemList;
 
         public ProblemAdapter(List<Problem> problemList) {
             this.problemList = problemList;
@@ -72,9 +68,9 @@ public class ProblemListFragment extends Fragment {
     private class ProblemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private Problem problem;
-        private TextView problemDate;
-        private TextView problemName;
-        private ImageView solvedImageView;
+        private final TextView problemDate;
+        private final TextView problemName;
+        private final ImageView solvedImageView;
 
         public ProblemHolder(LayoutInflater inflater, ViewGroup parent) {
 

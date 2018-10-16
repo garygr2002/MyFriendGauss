@@ -10,7 +10,7 @@ public class ProblemActivity extends SingleFragmentActivity {
     private static final String PREFIX = ProblemActivity.class.getName();
     private static final String ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "problem_id");
 
-    public static final Intent newIntent(Context packageContext, int problemId) {
+    public static Intent newIntent(Context packageContext, long problemId) {
 
         final Intent intent = new Intent(packageContext, ProblemActivity.class);
         intent.putExtra(ID_ARGUMENT, problemId);
@@ -19,6 +19,7 @@ public class ProblemActivity extends SingleFragmentActivity {
 
     @Override
     protected Fragment createFragment() {
-        return ProblemFragment.createInstance(getIntent().getIntExtra(ID_ARGUMENT, 0));
+        return ProblemFragment.createInstance(getIntent().getLongExtra(ID_ARGUMENT,
+                0L)); // TODO: Change defaultValue.
     }
 }

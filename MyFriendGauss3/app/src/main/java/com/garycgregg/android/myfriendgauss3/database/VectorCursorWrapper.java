@@ -14,7 +14,7 @@ public class VectorCursorWrapper extends CursorWrapper {
     public Vector getVector() {
 
         final Vector vector = new Vector();
-        vector.setProblemId(getInt(getColumnIndex(ProblemDbSchema.VectorTable.Columns.PROBLEM_ID)));
+        vector.setProblemId(getLong(getColumnIndex(ProblemDbSchema.VectorTable.Columns.PROBLEM_ID)));
 
         vector.setRow(getInt(getColumnIndex(ProblemDbSchema.VectorTable.Columns.ROW)));
         vector.setEntry(getDouble(getColumnIndex(ProblemDbSchema.VectorTable.Columns.ENTRY)));

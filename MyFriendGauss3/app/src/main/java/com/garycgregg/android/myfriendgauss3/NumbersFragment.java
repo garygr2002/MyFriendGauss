@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -33,7 +32,7 @@ public class NumbersFragment extends CardFragment {
             PREFIX_STRING, "rows");
     private Locale locale;
 
-    public static Fragment createInstance(String label, int backgroundColor, boolean enabled,
+    public static CardFragment createInstance(String label, int backgroundColor, boolean enabled,
                                           int rows, int columns, boolean singleColumnHint) {
 
         final Bundle arguments = new Bundle();
@@ -46,7 +45,7 @@ public class NumbersFragment extends CardFragment {
         arguments.putBoolean(ENABLED_ARGUMENT, enabled);
         arguments.putBoolean(HINT_FORMAT_ARGUMENT, singleColumnHint);
 
-        final Fragment fragment = new NumbersFragment();
+        final CardFragment fragment = new NumbersFragment();
         fragment.setArguments(arguments);
         return fragment;
     }
@@ -54,7 +53,7 @@ public class NumbersFragment extends CardFragment {
     @Override
     protected void createContent(LayoutInflater inflater, ViewGroup container) {
 
-        final Context activity = getActivity();
+        final Context context = getActivity();
         final Bundle arguments = getArguments();
         final int defaultValue = 1;
         final Resources resources = getResources();
@@ -82,7 +81,7 @@ public class NumbersFragment extends CardFragment {
         final TableLayout tableLayout = container.findViewById(R.id.table_layout);
         for (int row = 0; row < rows; ++row) {
 
-            tableRow = new TableRow(activity);
+            tableRow = new TableRow(context);
             for (column = 0; column < columns; ++column) {
 
                 editText = (EditText) inflater.inflate(R.layout.content_entry, tableRow,

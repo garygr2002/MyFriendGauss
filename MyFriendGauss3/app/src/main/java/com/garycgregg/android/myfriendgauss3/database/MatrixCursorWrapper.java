@@ -16,7 +16,7 @@ public class MatrixCursorWrapper extends CursorWrapper {
     public Matrix getMatrix() {
 
         final Matrix matrix = new Matrix();
-        matrix.setProblemId(getInt(getColumnIndex(MatrixTable.Columns.PROBLEM_ID)));
+        matrix.setProblemId(getLong(getColumnIndex(MatrixTable.Columns.PROBLEM_ID)));
         matrix.setRow(getInt(getColumnIndex(MatrixTable.Columns.ROW)));
 
         matrix.setColumn(getInt(getColumnIndex(MatrixTable.Columns.COLUMN)));

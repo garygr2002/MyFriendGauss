@@ -16,7 +16,7 @@ public class AnswerCursorWrapper extends CursorWrapper {
     public Answer getAnswer() {
 
         final Answer answer = new Answer();
-        answer.setProblemId(getInt(getColumnIndex(AnswerTable.Columns.PROBLEM_ID)));
+        answer.setProblemId(getLong(getColumnIndex(AnswerTable.Columns.PROBLEM_ID)));
 
         answer.setRow(getInt(getColumnIndex(AnswerTable.Columns.ROW)));
         answer.setEntry(getDouble(getColumnIndex(AnswerTable.Columns.ENTRY)));

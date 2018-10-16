@@ -3,7 +3,7 @@ package com.garycgregg.android.myfriendgauss3;
 class BaseGaussEntry {
 
     private double entry;
-    private int problemId;
+    private long problemId;
     private int row;
 
     public double getEntry() {
@@ -14,11 +14,11 @@ class BaseGaussEntry {
         this.entry = entry;
     }
 
-    public int getProblemId() {
+    public long getProblemId() {
         return problemId;
     }
 
-    public void setProblemId(int problemId) {
+    public void setProblemId(long problemId) {
         this.problemId = problemId;
     }
 

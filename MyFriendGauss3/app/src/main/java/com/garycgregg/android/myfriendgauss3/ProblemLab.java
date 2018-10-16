@@ -3,8 +3,8 @@ package com.garycgregg.android.myfriendgauss3;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.CursorWrapper;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 import android.util.Pair;
 
 import com.garycgregg.android.myfriendgauss3.database.AnswerCursorWrapper;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ProblemLab {
+class ProblemLab {
 
     private static final int conflictAlgorithm = SQLiteDatabase.CONFLICT_REPLACE;
     private static final String whereFormat = "%s = ?";
@@ -28,7 +28,7 @@ public class ProblemLab {
     private final WrapperManager<Answer> answerWrapperManager = new WrapperManager<Answer>() {
 
         @Override
-        public CursorWrapper getWrapper(Integer problemId) {
+        public CursorWrapper getWrapper(Long problemId) {
 
             final Pair<String, String[]> arguments =
                     createArguments(ProblemDbSchema.AnswerTable.Columns.PROBLEM_ID, problemId);
@@ -43,7 +43,7 @@ public class ProblemLab {
     private final WrapperManager<Matrix> matrixWrapperManager = new WrapperManager<Matrix>() {
 
         @Override
-        public CursorWrapper getWrapper(Integer problemId) {
+        public CursorWrapper getWrapper(Long problemId) {
 
             final Pair<String, String[]> arguments =
                     createArguments(ProblemDbSchema.MatrixTable.Columns.PROBLEM_ID, problemId);
@@ -58,7 +58,7 @@ public class ProblemLab {
     private final WrapperManager<Problem> problemWrapperManager = new WrapperManager<Problem>() {
 
         @Override
-        public CursorWrapper getWrapper(Integer problemId) {
+        public CursorWrapper getWrapper(Long problemId) {
 
             final Pair<String, String[]> arguments =
                     createArguments(ProblemDbSchema.ProblemTable.Columns.PROBLEM_ID, problemId);
@@ -73,7 +73,7 @@ public class ProblemLab {
     private final WrapperManager<Vector> vectorWrapperManager = new WrapperManager<Vector>() {
 
         @Override
-        public CursorWrapper getWrapper(Integer problemId) {
+        public CursorWrapper getWrapper(Long problemId) {
 
             final Pair<String, String[]> arguments =
                     createArguments(ProblemDbSchema.VectorTable.Columns.PROBLEM_ID, problemId);
@@ -90,14 +90,16 @@ public class ProblemLab {
 
         database = new ProblemDatabaseHelper(context.getApplicationContext()).
                 getWritableDatabase();
-
-        deleteProblems();
-        addProblems();
+        insureProblemsExist();
     }
 
-    private static String interpret(Integer problemId) {
-        return (null == problemId) ? null : Integer.toString(problemId);
-    }
+//    private static String interpret(Integer value) {
+//        return (null == value) ? null : Integer.toString(value);
+//    }
+//
+//    private static String interpret(Long value) {
+//        return (null == value) ? null : Long.toString(value);
+//    }
 
     private static <T extends BaseGaussEntry> void build(Double[] vector, T entry) {
 
@@ -176,19 +178,17 @@ public class ProblemLab {
         return deleteProblem(null);
     }
 
-    public int deleteProblem(Integer problemId) {
+    public int deleteProblem(Long problemId) {
 
         String[] whereArgs;
         String whereClause;
         if (null == problemId) {
 
-            whereArgs = new String[] { };
+            whereArgs = new String[]{};
             whereClause = "1";
-        }
+        } else {
 
-        else {
-
-            whereArgs = new String[] {interpret(problemId)};
+            whereArgs = new String[]{Long.toString(problemId)};
             whereClause = problemWhereClause;
         }
 
@@ -199,8 +199,8 @@ public class ProblemLab {
         return database.delete(ProblemDbSchema.AnswerTable.name, String.format("%s = ? and %s = ?",
                 ProblemDbSchema.AnswerTable.Columns.PROBLEM_ID,
                 ProblemDbSchema.AnswerTable.Columns.ROW),
-                new String[]{interpret(answer.getProblemId()),
-                        interpret(answer.getRow())});
+                new String[]{Long.toString(answer.getProblemId()),
+                        Integer.toString(answer.getRow())});
     }
 
     public int delete(Matrix matrix) {
@@ -209,17 +209,17 @@ public class ProblemLab {
                         ProblemDbSchema.MatrixTable.Columns.PROBLEM_ID,
                         ProblemDbSchema.MatrixTable.Columns.ROW,
                         ProblemDbSchema.MatrixTable.Columns.COLUMN),
-                new String[]{interpret(matrix.getProblemId()),
-                        interpret(matrix.getRow()),
-                        interpret(matrix.getColumn())});
+                new String[]{Long.toString(matrix.getProblemId()),
+                        Integer.toString(matrix.getRow()),
+                        Integer.toString(matrix.getColumn())});
     }
 
     public int delete(Vector vector) {
         return database.delete(ProblemDbSchema.VectorTable.name, String.format("%s = ? and %s = ?",
                 ProblemDbSchema.VectorTable.Columns.PROBLEM_ID,
                 ProblemDbSchema.VectorTable.Columns.ROW),
-                new String[]{interpret(vector.getProblemId()),
-                        interpret(vector.getRow())});
+                new String[]{Long.toString(vector.getProblemId()),
+                        Integer.toString(vector.getRow())});
     }
 
     public Answer getAnswer(int problemId) {
@@ -244,7 +244,7 @@ public class ProblemLab {
         return matrices;
     }
 
-    public Problem getProblem(int problemId) {
+    public Problem getProblem(long problemId) {
 
         database.beginTransaction();
         Problem problem = get(problemWrapperManager, problemId);
@@ -277,18 +277,23 @@ public class ProblemLab {
         return vectors;
     }
 
+    /**
+     * Insures some sample problems exist. TODO: Delete this.
+     */
+    private void insureProblemsExist() {
+
+        if (DatabaseUtils.queryNumEntries(database,
+                ProblemDbSchema.ProblemTable.name) <= 0) {
+
+            addProblems();
+        }
+    }
+
     public int update(Problem problem) {
 
-        int returnValue = 0;
-        final Integer problemId = problem.getProblemId();
-        if (null != problemId) {
-
-            returnValue = database.update(ProblemDbSchema.ProblemTable.name,
-                    getContentValues(problem),
-                    problemWhereClause, new String[]{interpret(problemId)});
-        }
-
-        return returnValue;
+        return database.update(ProblemDbSchema.ProblemTable.name,
+                getContentValues(problem),
+                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
     }
 
     private ContentValues getContentValues(Answer answer) {
@@ -362,13 +367,14 @@ public class ProblemLab {
                 null, whereClause, whereArgs, null, null, null));
     }
 
-    private <T> T get(WrapperManager<T> wrapperManager, int problemId) {
+    private <T> T get(WrapperManager<T> wrapperManager, long problemId) {
 
         final CursorWrapper wrapper = wrapperManager.getWrapper(problemId);
         T returnValue = null;
         try {
 
-            if (0 < wrapper.getCount()) {
+            final int count = wrapper.getCount();
+            if (0 < count) {
 
                 wrapper.moveToFirst();
                 returnValue = wrapperManager.get(wrapper);
@@ -399,20 +405,20 @@ public class ProblemLab {
 
     private abstract class WrapperManager<T> {
 
-        protected Pair<String, String[]> createArguments(String fieldName, Integer problemId) {
+        protected Pair<String, String[]> createArguments(String fieldName, Long problemId) {
 
             String[] whereArgs = null;
             String whereClause = null;
             if (null != problemId) {
 
-                whereArgs = new String[]{interpret(problemId)};
+                whereArgs = new String[]{Long.toString(problemId)};
                 whereClause = String.format(whereFormat, fieldName);
             }
 
             return new Pair<>(whereClause, whereArgs);
         }
 
-        protected abstract CursorWrapper getWrapper(Integer problemId);
+        protected abstract CursorWrapper getWrapper(Long problemId);
 
         protected abstract T get(CursorWrapper wrapper);
     }

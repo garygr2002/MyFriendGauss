@@ -7,7 +7,7 @@ public class Problem {
     private Date created;
     private int dimensions;
     private String name;
-    private Integer problemId;
+    private long problemId;
     private Date solved;
     private int writeLocked;
 
@@ -43,11 +43,11 @@ public class Problem {
         this.name = name;
     }
 
-    public Integer getProblemId() {
+    public long getProblemId() {
         return problemId;
     }
 
-    public void setProblemId(Integer problemId) {
+    public void setProblemId(long problemId) {
         this.problemId = problemId;
     }
 

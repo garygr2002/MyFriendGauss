@@ -14,25 +14,25 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ProblemFragment extends Fragment {
+public class ProblemFragment extends Fragment implements ProblemLabSource {
 
     private static final String FORMAT_STRING = "%s.%s_argument";
     private static final String PREFIX = ProblemFragment.class.getName();
     private static final String ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "problem_id");
-    private static final String SIZE_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "size");
     private static final String TAG = ProblemFragment.class.getSimpleName();
 
     private final ControlFragmentFactory controlFragmentFactory = new ControlFragmentFactory();
     private final NumbersFragmentFactory numbersFragmentFactory = new NumbersFragmentFactory();
     private final SparseArray<PaneCharacteristics> characteristicsArray = new SparseArray<>();
 
-    private int problemId;
+    private long nullProblemId;
+    private Problem problem;
+    private ProblemLab problemLab;
 
-    public static Fragment createInstance(int problemId) {
+    public static Fragment createInstance(long problemId) {
 
         final Bundle arguments = new Bundle();
-        arguments.putSerializable(ID_ARGUMENT, problemId);
-        arguments.putSerializable(SIZE_ARGUMENT, 3);  // TODO: Change this.
+        arguments.putLong(ID_ARGUMENT, problemId);
 
         final Fragment fragment = new ProblemFragment();
         fragment.setArguments(arguments);
@@ -40,12 +40,22 @@ public class ProblemFragment extends Fragment {
     }
 
     @Override
+    public long getNullProblemId() {
+        return nullProblemId;
+    }
+
+    @Override
+    public ProblemLab getProblemLab() {
+        return problemLab;
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        final Resources resources = getActivity().getResources();
 
+        final Resources resources = getActivity().getResources();
         characteristicsArray.put(R.id.matrix_pane, new PaneCharacteristics("Matrix\nEntries",
                 resources.getColor(R.color.tableEntryMatrix), true, true));
 
@@ -69,18 +79,25 @@ public class ProblemFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
 
         final View view = inflater.inflate(R.layout.fragment_problem, container, false);
+        final ProblemLabSource problemLabSource = ((ProblemLabSource) getActivity());
+
+        nullProblemId = problemLabSource.getNullProblemId();
+        problemLab = problemLabSource.getProblemLab();
+
+        int size = 1;
+        problem = problemLab.getProblem(getArguments().getLong(ID_ARGUMENT, nullProblemId));
+        if (null != problem) {
+
+            size = problem.getDimensions();
+        }
+
         final FragmentManager manager = getFragmentManager();
-        final Bundle arguments = getArguments();
-
-        problemId = arguments.getInt(ID_ARGUMENT);
-        Log.i(TAG, String.format("The received problem ID is: %d", problemId));
-
         addFragment(manager, R.id.control_pane, controlFragmentFactory);
-        numbersFragmentFactory.setSize(arguments.getInt(SIZE_ARGUMENT, 1));
 
+        numbersFragmentFactory.setSize(size);
         addNumbersFragment(manager, R.id.matrix_pane);
-        addNumbersFragment(manager, R.id.answer_pane);
 
+        addNumbersFragment(manager, R.id.answer_pane);
         addNumbersFragment(manager, R.id.vector_pane);
         return view;
     }
@@ -148,6 +165,19 @@ public class ProblemFragment extends Fragment {
      * @param factory A factory for generating a fragment
      */
     private void addFragment(FragmentManager manager, int paneId, FragmentFactory factory) {
+        addFragment(manager, paneId, factory, false);
+    }
+
+    /**
+     * Uses a fragment factory to add a fragment manager for a given ID.
+     *
+     * @param manager The fragment manager
+     * @param paneId  The ID for which to add a fragment
+     * @param factory A factory for generating a fragment
+     * @param replace True to replace the indicated pane if it exists, false otherwise
+     */
+    private void addFragment(FragmentManager manager, int paneId, FragmentFactory factory,
+                             boolean replace) {
 
         /*
          * Try to find an existing fragment for the given ID. Is there no such existing
@@ -157,7 +187,20 @@ public class ProblemFragment extends Fragment {
         if (null == fragment) {
 
             // There is no such existing fragment. Create one using the given factory.
-            manager.beginTransaction().add(paneId, factory.createFragment()).commit();
+            manager.beginTransaction().add(paneId,
+                    factory.createFragment((null == problem) ? getNullProblemId() :
+                            problem.getProblemId())).commit();
+        }
+
+        else if (replace) {
+
+            /*
+             * There is an existing fragment with this pane ID, but the caller wants
+             * it replaced.
+             */
+            manager.beginTransaction().replace(paneId,
+                    factory.createFragment((null == problem) ? getNullProblemId() :
+                            problem.getProblemId())).commit();
         }
     }
 
@@ -202,9 +245,10 @@ public class ProblemFragment extends Fragment {
         /**
          * Creates a fragment.
          *
+         * @param problemId The problem ID associated with the fragment
          * @return A newly created fragment
          */
-        Fragment createFragment();
+        Fragment createFragment(long problemId);
     }
 
     private static class PaneCharacteristics {
@@ -245,8 +289,11 @@ public class ProblemFragment extends Fragment {
     private static class ControlFragmentFactory implements FragmentFactory {
 
         @Override
-        public Fragment createFragment() {
-            return ControlFragment.createInstance();
+        public Fragment createFragment(long problemId) {
+
+            final CardFragment fragment = ControlFragment.createInstance();
+            CardFragment.customizeInstance(fragment, problemId);
+            return fragment;
         }
     }
 
@@ -299,13 +346,17 @@ public class ProblemFragment extends Fragment {
         }
 
         @Override
-        public Fragment createFragment() {
+        public Fragment createFragment(long problemId) {
 
             final boolean isNotMatrix = !isMatrix();
             final int size = getSize();
 
-            return NumbersFragment.createInstance(getLabel(), getBackgroundColor(), isEnabled(),
+            final CardFragment fragment = NumbersFragment.createInstance(getLabel(),
+                    getBackgroundColor(), isEnabled(),
                     size, isNotMatrix ? 1 : size, isNotMatrix);
+
+            CardFragment.customizeInstance(fragment, problemId);
+            return fragment;
         }
     }
 }
