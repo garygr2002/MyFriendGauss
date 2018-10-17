@@ -11,20 +11,6 @@ public class ControlFragment extends CardFragment {
     private EditText problemNameEditText;
 
     @Override
-    public void onPause() {
-
-        super.onPause();
-        final String existingName = problem.getName();
-
-        final String setName = problemNameEditText.getText().toString();
-        if (!setName.equals(existingName)) {
-
-            problem.setName(setName);
-            getProblemLab().updateName(problem);
-        }
-    }
-
-    @Override
     protected void createContent(LayoutInflater inflater, ViewGroup container) {
 
         final View view = inflater.inflate(R.layout.content_control, container, true);
@@ -39,5 +25,33 @@ public class ControlFragment extends CardFragment {
         }
 
         problemNameEditText.setText(problem.getName());
+    }
+
+    @Override
+    public void onDestroyView() {
+
+        super.onDestroyView();
+        problem = null;
+    }
+
+    @Override
+    public void onPause() {
+
+        super.onPause();
+        updateName();
+    }
+
+    /**
+     * Updates the problem name in the problem lab.
+     */
+    private void updateName() {
+
+        final String existingName = problem.getName();
+        final String setName = problemNameEditText.getText().toString();
+        if (!((null == setName) || (existingName == setName) || setName.equals(existingName))) {
+
+            problem.setName(setName);
+            getProblemLab().updateName(problem);
+        }
     }
 }

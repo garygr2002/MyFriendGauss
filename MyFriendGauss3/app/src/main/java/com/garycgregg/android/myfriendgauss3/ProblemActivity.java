@@ -19,6 +19,7 @@ public class ProblemActivity extends SingleFragmentActivity {
 
     @Override
     protected Fragment createFragment() {
+
         return ProblemFragment.createInstance(getIntent().getLongExtra(ID_ARGUMENT,
                 ProblemLab.getNullId()));
     }

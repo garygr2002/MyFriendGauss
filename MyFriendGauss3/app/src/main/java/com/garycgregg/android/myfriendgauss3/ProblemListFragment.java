@@ -124,8 +124,7 @@ public class ProblemListFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            startActivityForResult(ProblemActivity.newIntent(getActivity(), problem.getProblemId(),
-                    position), 5);
+            startActivity(ProblemActivity.newIntent(getActivity(), problem.getProblemId()));
         }
     }
 }
