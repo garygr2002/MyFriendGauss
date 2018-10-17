@@ -37,6 +37,13 @@ public class ProblemListFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+
+        super.onResume();
+        updateUI();
+    }
+
     private void updateUI() {
 
         final List<Problem> problemList = problemLab.getProblems();
