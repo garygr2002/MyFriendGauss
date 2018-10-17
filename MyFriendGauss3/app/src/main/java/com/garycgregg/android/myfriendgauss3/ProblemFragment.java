@@ -85,19 +85,13 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
         final View view = inflater.inflate(R.layout.fragment_problem, container, false);
         final ProblemLabSource problemLabSource = ((ProblemLabSource) getActivity());
 
-        problemLab = problemLabSource.getProblemLab();
-        int size = 1;
-
-        problem = problemLab.getProblem(getArguments().getLong(ID_ARGUMENT, nullId));
-        if (null != problem) {
-
-            size = problem.getDimensions();
-        }
+        problemLab = ((ProblemLabSource) getActivity()).getProblemLab();
+        problem = problemLab.getProblem(problemId);
 
         final FragmentManager manager = getFragmentManager();
         addFragment(manager, R.id.control_pane, controlFragmentFactory);
 
-        numbersFragmentFactory.setSize(size);
+        numbersFragmentFactory.setSize((null == problem) ? 1 : problem.getDimensions());
         addNumbersFragment(manager, R.id.matrix_pane);
 
         addNumbersFragment(manager, R.id.answer_pane);
@@ -110,6 +104,15 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
 
         super.onDestroy();
         characteristicsArray.clear();
+        nullId = problemId = 0L;
+    }
+
+    @Override
+    public void onDestroyView() {
+
+        super.onDestroyView();
+        problem = null;
+        problemLab = null;
     }
 
     @Override
