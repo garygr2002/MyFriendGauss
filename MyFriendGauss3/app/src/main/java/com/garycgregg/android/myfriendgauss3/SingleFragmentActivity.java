@@ -37,4 +37,11 @@ public abstract class SingleFragmentActivity extends AppCompatActivity implement
                     fragment).commit();
         }
     }
+
+    @Override
+    protected void onDestroy() {
+
+        super.onDestroy();
+        problemLab = null;
+    }
 }
