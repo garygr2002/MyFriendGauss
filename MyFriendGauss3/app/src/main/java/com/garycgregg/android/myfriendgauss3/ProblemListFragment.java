@@ -38,6 +38,13 @@ public class ProblemListFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+
+        super.onDestroyView();
+        problemLab = null;
+    }
+
+    @Override
     public void onResume() {
 
         super.onResume();
@@ -63,13 +70,13 @@ public class ProblemListFragment extends Fragment {
 
         private List<Problem> problemList;
 
-        public ProblemAdapter(List<Problem> problemList) {
+        ProblemAdapter(List<Problem> problemList) {
             this.problemList = problemList;
         }
 
         @Override
         public void onBindViewHolder(ProblemHolder holder, int position) {
-            holder.bind(problemList.get(position));
+            holder.bind(problemList.get(position), position);
         }
 
         @Override
@@ -82,19 +89,20 @@ public class ProblemListFragment extends Fragment {
             return problemList.size();
         }
 
-        public void setProblems(List<Problem> problemList) {
+        void setProblems(List<Problem> problemList) {
             this.problemList = problemList;
         }
     }
 
     private class ProblemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        private int position;
         private Problem problem;
         private final TextView problemDate;
         private final TextView problemName;
         private final ImageView solvedImageView;
 
-        public ProblemHolder(LayoutInflater inflater, ViewGroup parent) {
+        ProblemHolder(LayoutInflater inflater, ViewGroup parent) {
 
             super(inflater.inflate(R.layout.list_item_problem, parent, false));
             itemView.setOnClickListener(this);
@@ -104,8 +112,9 @@ public class ProblemListFragment extends Fragment {
             solvedImageView = itemView.findViewById(R.id.problem_solved);
         }
 
-        public void bind(Problem problem) {
+        void bind(Problem problem, int position) {
 
+            this.position = position;
             this.problem = problem;
             problemName.setText(problem.getName());
 
@@ -115,8 +124,8 @@ public class ProblemListFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            startActivity(ProblemActivity.newIntent(getActivity(), problem.getProblemId(),
-                    problemLab.getNullId()));
+            startActivityForResult(ProblemActivity.newIntent(getActivity(), problem.getProblemId(),
+                    position), 5);
         }
     }
 }

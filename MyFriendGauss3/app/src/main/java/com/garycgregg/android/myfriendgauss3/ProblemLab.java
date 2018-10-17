@@ -21,6 +21,7 @@ import java.util.List;
 class ProblemLab {
 
     private static final int conflictAlgorithm = SQLiteDatabase.CONFLICT_REPLACE;
+    private static final long nullId = 0L;
     private static final String whereFormat = "%s = ?";
     private static final String problemWhereClause = String.format(whereFormat,
             ProblemDbSchema.ProblemTable.Columns.PROBLEM_ID);
@@ -86,20 +87,21 @@ class ProblemLab {
         }
     };
 
+    /**
+     * Gets the null problem ID to be used in the problem lab.
+     *
+     * @return The null problem ID to be used in the problem lab
+     */
+    public static long getNullId() {
+        return nullId;
+    }
+
     public ProblemLab(Context context) {
 
         database = new ProblemDatabaseHelper(context.getApplicationContext()).
                 getWritableDatabase();
         insureProblemsExist();
     }
-
-//    private static String interpret(Integer value) {
-//        return (null == value) ? null : Integer.toString(value);
-//    }
-//
-//    private static String interpret(Long value) {
-//        return (null == value) ? null : Long.toString(value);
-//    }
 
     private static <T extends BaseGaussEntry> void build(Double[] vector, T entry) {
 
@@ -242,15 +244,6 @@ class ProblemLab {
         final List<Matrix> matrices = new ArrayList<>();
         getAll(matrices, matrixWrapperManager);
         return matrices;
-    }
-
-    /**
-     * Gets the null problem ID to be used in the problem lab.
-     *
-     * @return The null problem ID to be used in the problem lab
-     */
-    public long getNullId() {
-        return 0L;
     }
 
     public Problem getProblem(long problemId) {

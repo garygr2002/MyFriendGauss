@@ -1,6 +1,5 @@
 package com.garycgregg.android.myfriendgauss3;
 
-import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +9,6 @@ public class ControlFragment extends CardFragment {
 
     private Problem problem;
     private EditText problemNameEditText;
-
-    public static CardFragment createInstance() {
-        return new ControlFragment();
-    }
 
     @Override
     public void onPause() {
