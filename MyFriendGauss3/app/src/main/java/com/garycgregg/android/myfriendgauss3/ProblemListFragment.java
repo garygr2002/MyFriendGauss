@@ -109,7 +109,7 @@ public class ProblemListFragment extends Fragment {
         @Override
         public void onClick(View view) {
             startActivity(ProblemActivity.newIntent(getActivity(), problem.getProblemId(),
-                    problemLab.getNullProblemId()));
+                    problemLab.getNullId()));
         }
     }
 }

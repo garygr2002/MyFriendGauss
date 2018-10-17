@@ -249,7 +249,7 @@ class ProblemLab {
      *
      * @return The null problem ID to be used in the problem lab
      */
-    public long getNullProblemId() {
+    public long getNullId() {
         return 0L;
     }
 

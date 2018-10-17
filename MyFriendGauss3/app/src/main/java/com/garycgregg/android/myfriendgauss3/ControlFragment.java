@@ -1,5 +1,6 @@
 package com.garycgregg.android.myfriendgauss3;
 
+import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +19,14 @@ public class ControlFragment extends CardFragment {
     public void onPause() {
 
         super.onPause();
-        problem.setName(problemNameEditText.getText().toString());
-        getProblemLab().updateName(problem);
+        final String existingName = problem.getName();
+
+        final String setName = problemNameEditText.getText().toString();
+        if (!setName.equals(existingName)) {
+
+            problem.setName(setName);
+            getProblemLab().updateName(problem);
+        }
     }
 
     @Override

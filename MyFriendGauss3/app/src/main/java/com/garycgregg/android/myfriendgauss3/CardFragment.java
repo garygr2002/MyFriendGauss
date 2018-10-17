@@ -13,11 +13,12 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
     private static final String FORMAT_STRING = "%s.%s_argument";
     private static final String PREFIX = CardFragment.class.getName();
     private static final String ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "problem_id");
+    private static final String NULL_ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "null_id");
 
     private long problemId;
     private ProblemLab problemLab;
 
-    public static void customizeInstance(CardFragment fragment, long problemId) {
+    public static void customizeInstance(CardFragment fragment, long problemId, long nullId) {
 
         Bundle arguments = fragment.getArguments();
         if (null == arguments) {
@@ -26,6 +27,7 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
         }
 
         arguments.putLong(ID_ARGUMENT, problemId);
+        arguments.putLong(NULL_ID_ARGUMENT, nullId);
         fragment.setArguments(arguments);
     }
 
@@ -38,7 +40,11 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        problemId = getArguments().getLong(ID_ARGUMENT);
+        final Bundle arguments = (null == savedInstanceState) ? getArguments() :
+                savedInstanceState;
+
+        problemId = arguments.getLong(ID_ARGUMENT,
+                arguments.getLong(NULL_ID_ARGUMENT, 0L));
     }
 
     @Nullable
@@ -53,6 +59,13 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
 
         createContent(inflater, (ViewGroup) view.findViewById(R.id.card_content));
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        super.onSaveInstanceState(outState);
+        outState.putLong(ID_ARGUMENT, problemId);
     }
 
     protected abstract void createContent(LayoutInflater inflater, ViewGroup container);

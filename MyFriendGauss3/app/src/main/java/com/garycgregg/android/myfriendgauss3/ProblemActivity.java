@@ -12,12 +12,12 @@ public class ProblemActivity extends SingleFragmentActivity {
     private static final String NULL_ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX,
             "null_id");
 
-    public static Intent newIntent(Context packageContext, long problemId, long nullProblemId) {
+    public static Intent newIntent(Context packageContext, long problemId, long nullId) {
 
         final Intent intent = new Intent(packageContext, ProblemActivity.class);
         intent.putExtra(ID_ARGUMENT, problemId);
 
-        intent.putExtra(NULL_ID_ARGUMENT, nullProblemId);
+        intent.putExtra(NULL_ID_ARGUMENT, nullId);
         return intent;
     }
 
@@ -25,9 +25,9 @@ public class ProblemActivity extends SingleFragmentActivity {
     protected Fragment createFragment() {
 
         final Intent intent = getIntent();
-        final long nullProblemId = intent.getLongExtra(NULL_ID_ARGUMENT, 0L);
+        final long nullId = intent.getLongExtra(NULL_ID_ARGUMENT, 0L);
 
-        return ProblemFragment.createInstance(intent.getLongExtra(ID_ARGUMENT,
-                nullProblemId));
+        return ProblemFragment.createInstance(intent.getLongExtra(ID_ARGUMENT, nullId),
+                nullId);
     }
 }

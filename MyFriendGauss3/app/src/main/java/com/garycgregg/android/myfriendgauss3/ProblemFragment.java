@@ -19,20 +19,23 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
     private static final String FORMAT_STRING = "%s.%s_argument";
     private static final String PREFIX = ProblemFragment.class.getName();
     private static final String ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "problem_id");
+    private static final String NULL_ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "null_id");
     private static final String TAG = ProblemFragment.class.getSimpleName();
 
     private final ControlFragmentFactory controlFragmentFactory = new ControlFragmentFactory();
     private final NumbersFragmentFactory numbersFragmentFactory = new NumbersFragmentFactory();
     private final SparseArray<PaneCharacteristics> characteristicsArray = new SparseArray<>();
 
-    private long nullProblemId;
+    private long nullId;
     private Problem problem;
+    private long problemId;
     private ProblemLab problemLab;
 
-    public static Fragment createInstance(long problemId) {
+    public static Fragment createInstance(long problemId, long nullId) {
 
         final Bundle arguments = new Bundle();
         arguments.putLong(ID_ARGUMENT, problemId);
+        arguments.putLong(NULL_ID_ARGUMENT, nullId);
 
         final Fragment fragment = new ProblemFragment();
         fragment.setArguments(arguments);
@@ -49,6 +52,12 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
 
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        final Bundle arguments = (null == savedInstanceState) ? getArguments() :
+                savedInstanceState;
+
+        problemId = arguments.getLong(ID_ARGUMENT,
+                nullId = arguments.getLong(NULL_ID_ARGUMENT, 0L));
 
         final Resources resources = getActivity().getResources();
         characteristicsArray.put(R.id.matrix_pane, new PaneCharacteristics("Matrix\nEntries",
@@ -77,10 +86,9 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
         final ProblemLabSource problemLabSource = ((ProblemLabSource) getActivity());
 
         problemLab = problemLabSource.getProblemLab();
-        nullProblemId = problemLab.getNullProblemId();
-
         int size = 1;
-        problem = problemLab.getProblem(getArguments().getLong(ID_ARGUMENT, nullProblemId));
+
+        problem = problemLab.getProblem(getArguments().getLong(ID_ARGUMENT, nullId));
         if (null != problem) {
 
             size = problem.getDimensions();
@@ -152,6 +160,14 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
         menu.findItem(R.id.solve_problem).setEnabled(false);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        super.onSaveInstanceState(outState);
+        outState.putLong(ID_ARGUMENT, problemId);
+        outState.putLong(NULL_ID_ARGUMENT, nullId);
+    }
+
     /**
      * Uses a fragment factory to add a fragment manager for a given ID.
      *
@@ -183,8 +199,8 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
 
             // There is no such existing fragment. Create one using the given factory.
             manager.beginTransaction().add(paneId,
-                    factory.createFragment((null == problem) ? nullProblemId :
-                            problem.getProblemId(), nullProblemId)).commit();
+                    factory.createFragment((null == problem) ? nullId :
+                            problem.getProblemId(), nullId)).commit();
         }
 
         else if (replace) {
@@ -194,8 +210,8 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
              * it replaced.
              */
             manager.beginTransaction().replace(paneId,
-                    factory.createFragment((null == problem) ? nullProblemId :
-                            problem.getProblemId(), nullProblemId)).commit();
+                    factory.createFragment((null == problem) ? nullId :
+                            problem.getProblemId(), nullId)).commit();
         }
     }
 
@@ -241,10 +257,10 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
          * Creates a fragment.
          *
          * @param problemId The problem ID associated with the fragment
-         * @param nullProblemId An ID that no problem may have
+         * @param nullId An ID that no problem may have
          * @return A newly created fragment
          */
-        Fragment createFragment(long problemId, long nullProblemId);
+        Fragment createFragment(long problemId, long nullId);
     }
 
     private static class PaneCharacteristics {
@@ -285,10 +301,10 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
     private static class ControlFragmentFactory implements FragmentFactory {
 
         @Override
-        public Fragment createFragment(long problemId, long nullProblemId) {
+        public Fragment createFragment(long problemId, long nullId) {
 
             final CardFragment fragment = ControlFragment.createInstance();
-            CardFragment.customizeInstance(fragment, problemId, nullProblemId);
+            CardFragment.customizeInstance(fragment, problemId, nullId);
             return fragment;
         }
     }
@@ -342,7 +358,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
         }
 
         @Override
-        public Fragment createFragment(long problemId, long nullProblemId) {
+        public Fragment createFragment(long problemId, long nullId) {
 
             final boolean isNotMatrix = !isMatrix();
             final int size = getSize();
@@ -351,7 +367,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
                     getBackgroundColor(), isEnabled(),
                     size, isNotMatrix ? 1 : size, isNotMatrix);
 
-            CardFragment.customizeInstance(fragment, problemId, nullProblemId);
+            CardFragment.customizeInstance(fragment, problemId, nullId);
             return fragment;
         }
     }
