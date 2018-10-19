@@ -81,7 +81,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
         problemLab = ((ProblemLabSource) getActivity()).getProblemLab();
         problem = problemLab.getProblem(problemId);
 
-        final FragmentManager manager = getFragmentManager();
+        final FragmentManager manager = getChildFragmentManager();
         addFragment(manager, R.id.control_pane, controlFragmentFactory);
 
         numbersFragmentFactory.setSize((null == problem) ? 1 : problem.getDimensions());

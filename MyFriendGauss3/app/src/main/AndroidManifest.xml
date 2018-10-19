@@ -16,7 +16,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.garycgregg.android.myfriendgauss3.ProblemActivity">
+        <activity android:name="com.garycgregg.android.myfriendgauss3.ProblemPagerActivity">
         </activity>
     </application>
 

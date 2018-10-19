@@ -97,7 +97,6 @@ public class ProblemListFragment extends Fragment {
     private class ProblemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private int position;
-        private Problem problem;
         private final TextView problemDate;
         private final TextView problemName;
         private final ImageView solvedImageView;
@@ -115,7 +114,6 @@ public class ProblemListFragment extends Fragment {
         void bind(Problem problem, int position) {
 
             this.position = position;
-            this.problem = problem;
             problemName.setText(problem.getName());
 
             problemDate.setText(problem.getCreated().toString());
@@ -124,7 +122,7 @@ public class ProblemListFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            startActivity(ProblemActivity.newIntent(getActivity(), problem.getProblemId()));
+            startActivity(ProblemPagerActivity.newIntent(getActivity(), position));
         }
     }
 }
