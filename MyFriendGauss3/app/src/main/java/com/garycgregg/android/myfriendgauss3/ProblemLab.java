@@ -20,8 +20,10 @@ import java.util.List;
 
 class ProblemLab {
 
+    public static final int MAX_DIMENSIONS = 15;
+    public static final long NULL_ID = 0L;
+
     private static final int conflictAlgorithm = SQLiteDatabase.CONFLICT_REPLACE;
-    private static final long nullId = 0L;
     private static final String whereFormat = "%s = ?";
     private static final String problemWhereClause = String.format(whereFormat,
             ProblemDbSchema.ProblemTable.Columns.PROBLEM_ID);
@@ -86,15 +88,6 @@ class ProblemLab {
             return ((VectorCursorWrapper) wrapper).getVector();
         }
     };
-
-    /**
-     * Gets the null problem ID to be used in the problem lab.
-     *
-     * @return The null problem ID to be used in the problem lab
-     */
-    public static long getNullId() {
-        return nullId;
-    }
 
     public ProblemLab(Context context) {
 
@@ -373,7 +366,7 @@ class ProblemLab {
         }
 
         values.put(ProblemDbSchema.ProblemTable.Columns.WRITE_LOCK,
-                problem.isWriteLocked() ? Problem.getTrue() : Problem.getFalse());
+                problem.isWriteLocked() ? Problem.TRUE : Problem.FALSE);
         return values;
     }
 

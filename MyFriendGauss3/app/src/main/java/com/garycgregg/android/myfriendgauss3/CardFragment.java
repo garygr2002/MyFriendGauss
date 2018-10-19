@@ -14,7 +14,7 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
     private static final String PREFIX = CardFragment.class.getName();
     private static final String ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "problem_id");
 
-    private long problemId = ProblemLab.getNullId();
+    private long problemId = ProblemLab.NULL_ID;
     private ProblemLab problemLab;
 
     public static void customizeInstance(CardFragment fragment, long problemId) {
@@ -40,7 +40,7 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
         super.onCreate(savedInstanceState);
         final Bundle arguments = (null == savedInstanceState) ? getArguments() :
                 savedInstanceState;
-        problemId = arguments.getLong(ID_ARGUMENT, ProblemLab.getNullId());
+        problemId = arguments.getLong(ID_ARGUMENT, ProblemLab.NULL_ID);
     }
 
     @Nullable
@@ -61,7 +61,7 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
     public void onDestroy() {
 
         super.onDestroy();
-        problemId = ProblemLab.getNullId();
+        problemId = ProblemLab.NULL_ID;
     }
 
     @Override

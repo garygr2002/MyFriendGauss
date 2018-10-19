@@ -52,7 +52,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
 
         final Bundle arguments = (null == savedInstanceState) ? getArguments() :
                 savedInstanceState;
-        problemId = arguments.getLong(ID_ARGUMENT, ProblemLab.getNullId());
+        problemId = arguments.getLong(ID_ARGUMENT, ProblemLab.NULL_ID);
 
         final Resources resources = getActivity().getResources();
         characteristicsArray.put(R.id.matrix_pane, new PaneCharacteristics("Matrix\nEntries",
@@ -97,7 +97,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
 
         super.onDestroy();
         characteristicsArray.clear();
-        problemId = ProblemLab.getNullId();
+        problemId = ProblemLab.NULL_ID;
     }
 
     @Override
@@ -194,7 +194,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
 
             // There is no such existing fragment. Create one using the given factory.
             manager.beginTransaction().add(paneId,
-                    factory.createFragment((null == problem) ? ProblemLab.getNullId() :
+                    factory.createFragment((null == problem) ? ProblemLab.NULL_ID :
                             problem.getProblemId())).commit();
         }
 
@@ -205,7 +205,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
              * it replaced.
              */
             manager.beginTransaction().replace(paneId,
-                    factory.createFragment((null == problem) ? ProblemLab.getNullId() :
+                    factory.createFragment((null == problem) ? ProblemLab.NULL_ID :
                             problem.getProblemId())).commit();
         }
     }

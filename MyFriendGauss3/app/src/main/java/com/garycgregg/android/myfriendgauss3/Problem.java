@@ -4,20 +4,15 @@ import java.util.Date;
 
 public class Problem {
 
+    public static final int FALSE = 0;
+    public static final int TRUE = ~FALSE;
+
     private Date created;
     private int dimensions;
     private String name;
     private long problemId;
     private Date solved;
     private int writeLocked;
-
-    public static int getFalse() {
-        return 0;
-    }
-
-    public static int getTrue() {
-        return -1;
-    }
 
     public Date getCreated() {
         return created;
@@ -64,10 +59,10 @@ public class Problem {
     }
 
     public boolean isWriteLocked() {
-        return getFalse() != writeLocked;
+        return FALSE != writeLocked;
     }
 
     public void setWriteLocked(boolean writeLocked) {
-        this.writeLocked = writeLocked ? getTrue() : getFalse();
+        this.writeLocked = writeLocked ? TRUE : FALSE;
     }
 }

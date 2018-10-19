@@ -27,7 +27,7 @@ public class ProblemCursorWrapper extends CursorWrapper {
         final int columnIndex = getColumnIndex(ProblemTable.Columns.SOLVED);
         problem.setSolved(isNull(columnIndex) ? null : new Date(getLong(columnIndex)));
 
-        problem.setWriteLocked(Problem.getFalse() ==
+        problem.setWriteLocked(Problem.FALSE ==
                 getInt(getColumnIndex(ProblemTable.Columns.WRITE_LOCK)));
         return problem;
     }

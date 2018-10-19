@@ -47,7 +47,8 @@ public class ControlFragment extends CardFragment {
     private void updateName() {
 
         final String setName = problemNameEditText.getText().toString();
-        if (!setName.equals(problem.getName())) {
+        final String existingName = problem.getName();
+        if ((null == existingName) || (!setName.equals(problem.getName()))) {
 
             problem.setName(setName);
             getProblemLab().updateName(problem);
