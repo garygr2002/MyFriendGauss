@@ -7,6 +7,7 @@ import android.util.Log;
 
 public class ProblemDatabaseHelper extends SQLiteOpenHelper {
 
+    // SQL for creating the Answer table
     private static final String CREATE_ANSWER_TABLE = String.format("create table %s(\n" +
                     "\t%s integer not null,\n" +
                     "\t%s integer not null,\n" +
@@ -20,6 +21,8 @@ public class ProblemDatabaseHelper extends SQLiteOpenHelper {
             ProblemDbSchema.AnswerTable.Columns.ROW,
             ProblemDbSchema.AnswerTable.Columns.ENTRY
     );
+
+    // SQL for creating the Matrix table
     private static final String CREATE_MATRIX_TABLE = String.format("create table %s(\n" +
                     "\t%s integer not null,\n" +
                     "\t%s integer not null,\n" +
@@ -35,6 +38,8 @@ public class ProblemDatabaseHelper extends SQLiteOpenHelper {
             ProblemDbSchema.MatrixTable.Columns.COLUMN,
             ProblemDbSchema.MatrixTable.Columns.ENTRY
     );
+
+    // SQL for creating the Problem table
     private static final String CREATE_PROBLEM_TABLE = String.format("create table %s(\n" +
                     "\t%s integer primary key autoincrement,\n" +
                     "\t%s text not null,\n" +
@@ -49,6 +54,8 @@ public class ProblemDatabaseHelper extends SQLiteOpenHelper {
             ProblemDbSchema.ProblemTable.Columns.CREATED,
             ProblemDbSchema.ProblemTable.Columns.SOLVED,
             ProblemDbSchema.ProblemTable.Columns.WRITE_LOCK);
+
+    // SQL for creating the Vector table
     private static final String CREATE_VECTOR_TABLE = String.format("create table %s(\n" +
                     "\t%s integer not null,\n" +
                     "\t%s integer not null,\n" +
@@ -62,31 +69,53 @@ public class ProblemDatabaseHelper extends SQLiteOpenHelper {
             ProblemDbSchema.VectorTable.Columns.ROW,
             ProblemDbSchema.VectorTable.Columns.ENTRY
     );
+
+    // An array of create table commands to be submitted in sequence
     private static final String[] CREATE_COMMANDS = {
             CREATE_PROBLEM_TABLE,
             CREATE_MATRIX_TABLE,
             CREATE_ANSWER_TABLE,
             CREATE_VECTOR_TABLE
     };
+
+    // The name of the database
     private static final String DATABASE_NAME = "gauss_problem.db";
+
+    // The format for a drop table command
     private static final String DROP_TABLE_FORMAT = "drop table if exists %s";
+
+    // SQL command to drop the Problem table
     private static final String DROP_PROBLEM_TABLE = String.format(DROP_TABLE_FORMAT,
             ProblemDbSchema.ProblemTable.name);
+
+    // SQL command to drop the Matrix table
     private static final String DROP_MATRIX_TABLE = String.format(DROP_TABLE_FORMAT,
             ProblemDbSchema.MatrixTable.name);
+
+    // SQL command to drop the Answer table
     private static final String DROP_ANSWER_TABLE = String.format(DROP_TABLE_FORMAT,
             ProblemDbSchema.AnswerTable.name);
+
+    // SQL command to drop the Vector table
     private static final String DROP_VECTOR_TABLE = String.format(DROP_TABLE_FORMAT,
             ProblemDbSchema.VectorTable.name);
+
+    // An array of drop table commands to be submitted in sequence
     private static final String[] DROP_COMMANDS = {
             DROP_VECTOR_TABLE,
             DROP_ANSWER_TABLE,
             DROP_MATRIX_TABLE,
             DROP_PROBLEM_TABLE
     };
-    private static final String TAG = ProblemDatabaseHelper.class.getSimpleName();
+
+    // The version of this database
     private static final int VERSION = 1;
 
+    /**
+     * Constructs a database helper object.
+     *
+     * @param context The context associated with the database object
+     */
     public ProblemDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, VERSION);
     }
@@ -134,14 +163,10 @@ public class ProblemDatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion < newVersion) {
 
             /*
-             * The new database version is greater than the old. Log a debug message, and execute
-             * the drop commands.
+             * The new database version is greater than the old. Execute the drop commands and
+             * recreate the tables.
              */
-            Log.d(TAG,
-                    "onUpgrade(SQLiteDatabase, int, int) has been called with a higher version!");
             executeCommands(sqLiteDatabase, DROP_COMMANDS);
-
-            // Recreate the tables.
             createTables(sqLiteDatabase);
         }
     }

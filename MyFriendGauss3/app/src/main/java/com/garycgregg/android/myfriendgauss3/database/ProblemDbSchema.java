@@ -2,10 +2,13 @@ package com.garycgregg.android.myfriendgauss3.database;
 
 public interface ProblemDbSchema {
 
+    // Schema for the Answer table
     interface AnswerTable {
 
+        // The name of the table
         String name = "answer";
 
+        // The names of the columns
         interface Columns {
 
             /*
@@ -27,10 +30,13 @@ create table answer(
         }
     }
 
+    // Schema for the Matrix table
     interface MatrixTable {
 
+        // The name of the table
         String name = "matrix";
 
+        // The names of the columns
         interface Columns {
 
             /*
@@ -54,10 +60,13 @@ create table matrix(
         }
     }
 
+    // Schema for the Problem table
     interface ProblemTable {
 
+        // The name of the table
         String name = "problem";
 
+        // The names of the columns
         interface Columns {
 
             /*
@@ -81,10 +90,13 @@ create table problem(
         }
     }
 
+    // Schema for the Vector table
     interface VectorTable {
 
+        // The name of the table
         String name = "vector";
 
+        // The names of the columns
         interface Columns {
 
             /*
