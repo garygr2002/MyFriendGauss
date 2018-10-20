@@ -12,7 +12,8 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
 
     private static final String FORMAT_STRING = "%s.%s_argument";
     private static final String PREFIX = CardFragment.class.getName();
-    private static final String ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX, "problem_id");
+    private static final String PROBLEM_ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX,
+            "problem_id");
 
     private long problemId = ProblemLab.NULL_ID;
     private ProblemLab problemLab;
@@ -25,7 +26,7 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
             arguments = new Bundle();
         }
 
-        arguments.putLong(ID_ARGUMENT, problemId);
+        arguments.putLong(PROBLEM_ID_ARGUMENT, problemId);
         fragment.setArguments(arguments);
     }
 
@@ -40,7 +41,7 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
         super.onCreate(savedInstanceState);
         final Bundle arguments = (null == savedInstanceState) ? getArguments() :
                 savedInstanceState;
-        problemId = arguments.getLong(ID_ARGUMENT, ProblemLab.NULL_ID);
+        problemId = arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID);
     }
 
     @Nullable
@@ -75,7 +76,7 @@ public abstract class CardFragment extends Fragment implements ProblemLabSource 
     public void onSaveInstanceState(Bundle outState) {
 
         super.onSaveInstanceState(outState);
-        outState.putLong(ID_ARGUMENT, problemId);
+        outState.putLong(PROBLEM_ID_ARGUMENT, problemId);
     }
 
     protected abstract void createContent(LayoutInflater inflater, ViewGroup container);
