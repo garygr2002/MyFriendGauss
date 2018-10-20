@@ -8,6 +8,11 @@ public class GaussFragment extends Fragment implements ProblemLabSource {
     private ProblemLabSource problemLabSource;
 
     @Override
+    public ProblemLab getProblemLab() {
+        return (null == problemLabSource) ? null : problemLabSource.getProblemLab();
+    }
+
+    @Override
     public void onAttach(Context context) {
 
         super.onAttach(context);
@@ -20,10 +25,5 @@ public class GaussFragment extends Fragment implements ProblemLabSource {
 
         problemLabSource = null;
         super.onDetach();
-    }
-
-    @Override
-    public ProblemLab getProblemLab() {
-        return (null == problemLabSource) ? null : problemLabSource.getProblemLab();
     }
 }

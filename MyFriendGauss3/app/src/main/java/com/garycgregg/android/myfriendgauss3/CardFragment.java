@@ -28,6 +28,12 @@ public abstract class CardFragment extends GaussFragment {
         fragment.setArguments(arguments);
     }
 
+    protected abstract void createContent(LayoutInflater inflater, ViewGroup container);
+
+    protected long getProblemId() {
+        return problemId;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
@@ -60,11 +66,5 @@ public abstract class CardFragment extends GaussFragment {
 
         super.onSaveInstanceState(outState);
         outState.putLong(PROBLEM_ID_ARGUMENT, problemId);
-    }
-
-    protected abstract void createContent(LayoutInflater inflater, ViewGroup container);
-
-    protected long getProblemId() {
-        return problemId;
     }
 }

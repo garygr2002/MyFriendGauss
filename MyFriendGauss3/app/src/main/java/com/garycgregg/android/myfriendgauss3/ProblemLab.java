@@ -31,19 +31,24 @@ class ProblemLab {
     private final WrapperManager<Answer> answerWrapperManager = new WrapperManager<Answer>() {
 
         @Override
+        public Answer get(CursorWrapper wrapper) {
+            return ((AnswerCursorWrapper) wrapper).getAnswer();
+        }
+
+        @Override
         public CursorWrapper getWrapper(Long problemId) {
 
             final Pair<String, String[]> arguments =
                     createArguments(ProblemDbSchema.AnswerTable.Columns.PROBLEM_ID, problemId);
             return queryAnswers(arguments.first, arguments.second);
         }
-
-        @Override
-        public Answer get(CursorWrapper wrapper) {
-            return ((AnswerCursorWrapper) wrapper).getAnswer();
-        }
     };
     private final WrapperManager<Matrix> matrixWrapperManager = new WrapperManager<Matrix>() {
+
+        @Override
+        public Matrix get(CursorWrapper wrapper) {
+            return ((MatrixCursorWrapper) wrapper).getMatrix();
+        }
 
         @Override
         public CursorWrapper getWrapper(Long problemId) {
@@ -52,13 +57,13 @@ class ProblemLab {
                     createArguments(ProblemDbSchema.MatrixTable.Columns.PROBLEM_ID, problemId);
             return queryMatrices(arguments.first, arguments.second);
         }
-
-        @Override
-        public Matrix get(CursorWrapper wrapper) {
-            return ((MatrixCursorWrapper) wrapper).getMatrix();
-        }
     };
     private final WrapperManager<Problem> problemWrapperManager = new WrapperManager<Problem>() {
+
+        @Override
+        public Problem get(CursorWrapper wrapper) {
+            return ((ProblemCursorWrapper) wrapper).getProblem();
+        }
 
         @Override
         public CursorWrapper getWrapper(Long problemId) {
@@ -67,13 +72,13 @@ class ProblemLab {
                     createArguments(ProblemDbSchema.ProblemTable.Columns.PROBLEM_ID, problemId);
             return queryProblems(arguments.first, arguments.second);
         }
-
-        @Override
-        public Problem get(CursorWrapper wrapper) {
-            return ((ProblemCursorWrapper) wrapper).getProblem();
-        }
     };
     private final WrapperManager<Vector> vectorWrapperManager = new WrapperManager<Vector>() {
+
+        @Override
+        public Vector get(CursorWrapper wrapper) {
+            return ((VectorCursorWrapper) wrapper).getVector();
+        }
 
         @Override
         public CursorWrapper getWrapper(Long problemId) {
@@ -81,11 +86,6 @@ class ProblemLab {
             final Pair<String, String[]> arguments =
                     createArguments(ProblemDbSchema.VectorTable.Columns.PROBLEM_ID, problemId);
             return queryVectors(arguments.first, arguments.second);
-        }
-
-        @Override
-        public Vector get(CursorWrapper wrapper) {
-            return ((VectorCursorWrapper) wrapper).getVector();
         }
     };
 
@@ -137,23 +137,6 @@ class ProblemLab {
         return vectors;
     }
 
-    /**
-     * Adds some sample problems to the database. TODO: Delete this.
-     */
-    private void addProblems() {
-
-        final Problem problem = new Problem();
-        for (int i = 1; i <= 5; ++i) {
-
-            problem.setName(String.format("Problem Number %d", i));
-            problem.setCreated(new Date());
-
-            problem.setDimensions((i % 10) + 1);
-            problem.setWriteLocked(false);
-            add(problem);
-        }
-    }
-
     public void add(Answer answer) {
         database.insertWithOnConflict(ProblemDbSchema.AnswerTable.name, null,
                 getContentValues(answer), conflictAlgorithm);
@@ -169,25 +152,21 @@ class ProblemLab {
                 getContentValues(problem));
     }
 
-    public int deleteProblems() {
-        return deleteProblem(null);
-    }
+    /**
+     * Adds some sample problems to the database. TODO: Delete this.
+     */
+    private void addProblems() {
 
-    public int deleteProblem(Long problemId) {
+        final Problem problem = new Problem();
+        for (int i = 1; i <= 5; ++i) {
 
-        String[] whereArgs;
-        String whereClause;
-        if (null == problemId) {
+            problem.setName(String.format("Problem Number %d", i));
+            problem.setCreated(new Date());
 
-            whereArgs = new String[]{};
-            whereClause = "1";
-        } else {
-
-            whereArgs = new String[]{Long.toString(problemId)};
-            whereClause = problemWhereClause;
+            problem.setDimensions((i % 10) + 1);
+            problem.setWriteLocked(false);
+            add(problem);
         }
-
-        return database.delete(ProblemDbSchema.ProblemTable.name, whereClause, whereArgs);
     }
 
     public int delete(Answer answer) {
@@ -217,6 +196,63 @@ class ProblemLab {
                         Integer.toString(vector.getRow())});
     }
 
+    public int deleteProblem(Long problemId) {
+
+        String[] whereArgs;
+        String whereClause;
+        if (null == problemId) {
+
+            whereArgs = new String[]{};
+            whereClause = "1";
+        } else {
+
+            whereArgs = new String[]{Long.toString(problemId)};
+            whereClause = problemWhereClause;
+        }
+
+        return database.delete(ProblemDbSchema.ProblemTable.name, whereClause, whereArgs);
+    }
+
+    public int deleteProblems() {
+        return deleteProblem(null);
+    }
+
+    private <T> T get(WrapperManager<T> wrapperManager, long problemId) {
+
+        final CursorWrapper wrapper = wrapperManager.getWrapper(problemId);
+        T returnValue = null;
+        try {
+
+            final int count = wrapper.getCount();
+            if (0 < count) {
+
+                wrapper.moveToFirst();
+                returnValue = wrapperManager.get(wrapper);
+            }
+        } finally {
+            wrapper.close();
+        }
+
+        return returnValue;
+    }
+
+    private <T> void getAll(List<T> list, WrapperManager<T> wrapperManager) {
+
+        list.clear();
+        final CursorWrapper wrapper = wrapperManager.getWrapper(null);
+        try {
+
+            wrapper.moveToFirst();
+            while (!wrapper.isAfterLast()) {
+
+                list.add(wrapperManager.get(wrapper));
+                wrapper.moveToNext();
+            }
+        } finally {
+            wrapper.close();
+        }
+    }
+
     public Answer getAnswer(int problemId) {
         return get(answerWrapperManager, problemId);
     }
@@ -226,83 +262,6 @@ class ProblemLab {
         final List<Answer> answers = new ArrayList<>();
         getAll(answers, answerWrapperManager);
         return answers;
-    }
-
-    public Matrix getMatrix(int problemId) {
-        return get(matrixWrapperManager, problemId);
-    }
-
-    public List<Matrix> getMatrices() {
-
-        final List<Matrix> matrices = new ArrayList<>();
-        getAll(matrices, matrixWrapperManager);
-        return matrices;
-    }
-
-    public Problem getProblem(long problemId) {
-
-        database.beginTransaction();
-        Problem problem = get(problemWrapperManager, problemId);
-        if (!((null == problem) || problem.isWriteLocked())) {
-
-            problem.setWriteLocked(true);
-            update(problem);
-            problem.setWriteLocked(false);
-        }
-
-        database.endTransaction();
-        return problem;
-    }
-
-    public List<Problem> getProblems() {
-
-        final List<Problem> problems = new ArrayList<>();
-        getAll(problems, problemWrapperManager);
-        return problems;
-    }
-
-    public Vector getVector(int problemId) {
-        return get(vectorWrapperManager, problemId);
-    }
-
-    public List<Vector> getVectors() {
-
-        final List<Vector> vectors = new ArrayList<>();
-        getAll(vectors, vectorWrapperManager);
-        return vectors;
-    }
-
-    /**
-     * Insures some sample problems exist. TODO: Delete this.
-     */
-    private void insureProblemsExist() {
-
-        if (DatabaseUtils.queryNumEntries(database,
-                ProblemDbSchema.ProblemTable.name) <= 0) {
-
-            addProblems();
-        }
-    }
-
-    public int update(Problem problem) {
-
-        return database.update(ProblemDbSchema.ProblemTable.name,
-                getContentValues(problem),
-                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
-    }
-
-    public int updateDimensions(Problem problem) {
-
-        return database.update(ProblemDbSchema.ProblemTable.name,
-                getContentDimensions(problem),
-                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
-    }
-
-    public int updateName(Problem problem) {
-
-        return database.update(ProblemDbSchema.ProblemTable.name,
-                getContentName(problem),
-                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
     }
 
     private ContentValues getContentDimensions(Problem problem, ContentValues existingValues) {
@@ -380,6 +339,62 @@ class ProblemLab {
         return values;
     }
 
+    public List<Matrix> getMatrices() {
+
+        final List<Matrix> matrices = new ArrayList<>();
+        getAll(matrices, matrixWrapperManager);
+        return matrices;
+    }
+
+    public Matrix getMatrix(int problemId) {
+        return get(matrixWrapperManager, problemId);
+    }
+
+    public Problem getProblem(long problemId) {
+
+        database.beginTransaction();
+        Problem problem = get(problemWrapperManager, problemId);
+        if (!((null == problem) || problem.isWriteLocked())) {
+
+            problem.setWriteLocked(true);
+            update(problem);
+            problem.setWriteLocked(false);
+        }
+
+        database.endTransaction();
+        return problem;
+    }
+
+    public List<Problem> getProblems() {
+
+        final List<Problem> problems = new ArrayList<>();
+        getAll(problems, problemWrapperManager);
+        return problems;
+    }
+
+    public Vector getVector(int problemId) {
+        return get(vectorWrapperManager, problemId);
+    }
+
+    public List<Vector> getVectors() {
+
+        final List<Vector> vectors = new ArrayList<>();
+        getAll(vectors, vectorWrapperManager);
+        return vectors;
+    }
+
+    /**
+     * Insures some sample problems exist. TODO: Delete this.
+     */
+    private void insureProblemsExist() {
+
+        if (DatabaseUtils.queryNumEntries(database,
+                ProblemDbSchema.ProblemTable.name) <= 0) {
+
+            addProblems();
+        }
+    }
+
     private AnswerCursorWrapper queryAnswers(String whereClause, String[] whereArgs) {
         return new AnswerCursorWrapper(database.query(ProblemDbSchema.AnswerTable.name,
                 null, whereClause, whereArgs, null, null, null));
@@ -400,40 +415,25 @@ class ProblemLab {
                 null, whereClause, whereArgs, null, null, null));
     }
 
-    private <T> T get(WrapperManager<T> wrapperManager, long problemId) {
+    public int update(Problem problem) {
 
-        final CursorWrapper wrapper = wrapperManager.getWrapper(problemId);
-        T returnValue = null;
-        try {
-
-            final int count = wrapper.getCount();
-            if (0 < count) {
-
-                wrapper.moveToFirst();
-                returnValue = wrapperManager.get(wrapper);
-            }
-        } finally {
-            wrapper.close();
-        }
-
-        return returnValue;
+        return database.update(ProblemDbSchema.ProblemTable.name,
+                getContentValues(problem),
+                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
     }
 
-    private <T> void getAll(List<T> list, WrapperManager<T> wrapperManager) {
+    public int updateDimensions(Problem problem) {
 
-        list.clear();
-        final CursorWrapper wrapper = wrapperManager.getWrapper(null);
-        try {
+        return database.update(ProblemDbSchema.ProblemTable.name,
+                getContentDimensions(problem),
+                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
+    }
 
-            wrapper.moveToFirst();
-            while (!wrapper.isAfterLast()) {
+    public int updateName(Problem problem) {
 
-                list.add(wrapperManager.get(wrapper));
-                wrapper.moveToNext();
-            }
-        } finally {
-            wrapper.close();
-        }
+        return database.update(ProblemDbSchema.ProblemTable.name,
+                getContentName(problem),
+                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
     }
 
     private abstract class WrapperManager<T> {
@@ -451,8 +451,8 @@ class ProblemLab {
             return new Pair<>(whereClause, whereArgs);
         }
 
-        protected abstract CursorWrapper getWrapper(Long problemId);
-
         protected abstract T get(CursorWrapper wrapper);
+
+        protected abstract CursorWrapper getWrapper(Long problemId);
     }
 }

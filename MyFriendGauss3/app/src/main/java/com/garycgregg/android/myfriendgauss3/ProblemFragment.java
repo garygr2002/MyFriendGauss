@@ -22,10 +22,9 @@ public class ProblemFragment extends GaussFragment {
             "problem_id");
     private static final String TAG = ProblemFragment.class.getSimpleName();
 
+    private final SparseArray<PaneCharacteristics> characteristicsArray = new SparseArray<>();
     private final ControlFragmentFactory controlFragmentFactory = new ControlFragmentFactory();
     private final NumbersFragmentFactory numbersFragmentFactory = new NumbersFragmentFactory();
-    private final SparseArray<PaneCharacteristics> characteristicsArray = new SparseArray<>();
-
     private Problem problem;
     private long problemId;
 
@@ -37,6 +36,86 @@ public class ProblemFragment extends GaussFragment {
         final Fragment fragment = new ProblemFragment();
         fragment.setArguments(arguments);
         return fragment;
+    }
+
+    /**
+     * Uses a fragment factory to add a fragment manager for a given ID.
+     *
+     * @param manager The fragment manager
+     * @param paneId  The ID for which to add a fragment
+     * @param factory A factory for generating a fragment
+     */
+    private void addFragment(FragmentManager manager, int paneId, FragmentFactory factory) {
+        addFragment(manager, paneId, factory, false);
+    }
+
+    /**
+     * Uses a fragment factory to add a fragment manager for a given ID.
+     *
+     * @param manager The fragment manager
+     * @param paneId  The ID for which to add a fragment
+     * @param factory A factory for generating a fragment
+     * @param replace True to replace the indicated pane if it exists, false otherwise
+     */
+    private void addFragment(FragmentManager manager, int paneId, FragmentFactory factory,
+                             boolean replace) {
+
+        /*
+         * Try to find an existing fragment for the given ID. Is there no such existing
+         * fragment?
+         */
+        Fragment fragment = manager.findFragmentById(paneId);
+        if (null == fragment) {
+
+            // There is no such existing fragment. Create one using the given factory.
+            manager.beginTransaction().add(paneId,
+                    factory.createFragment((null == problem) ? ProblemLab.NULL_ID :
+                            problem.getProblemId())).commit();
+        }
+
+        else if (replace) {
+
+            /*
+             * There is an existing fragment with this pane ID, but the caller wants
+             * it replaced.
+             */
+            manager.beginTransaction().replace(paneId,
+                    factory.createFragment((null == problem) ? ProblemLab.NULL_ID :
+                            problem.getProblemId())).commit();
+        }
+    }
+
+    /**
+     * Adds a numbers fragment to the fragment manager for a given ID.
+     *
+     * @param manager The fragment manager
+     * @param paneId  The ID for which to add a fragment
+     */
+    private void addNumbersFragment(FragmentManager manager, int paneId) {
+
+        /*
+         * We need pane characteristics for the given ID. Try to find any published
+         * characteristics. Are there any?
+         */
+        final PaneCharacteristics paneCharacteristics = characteristicsArray.get(paneId);
+        if (null != paneCharacteristics) {
+
+            /*
+             * There are existing pane characteristics for the given ID. Set the label and
+             * background color in the fragment factory from the pane characteristics.
+             */
+            numbersFragmentFactory.setLabel(paneCharacteristics.getLabel());
+            numbersFragmentFactory.setBackgroundColor(paneCharacteristics.getColorResource());
+
+            /*
+             * Set the enabled status and the matrix status in the fragment factory from the
+             * pane characteristics. As needed, used the factory to create a new fragment for
+             * the fragment manager.
+             */
+            numbersFragmentFactory.setEnabled(paneCharacteristics.isEnabled());
+            numbersFragmentFactory.setMatrix(paneCharacteristics.isMatrix());
+            addFragment(manager, paneId, numbersFragmentFactory);
+        }
     }
 
     @Override
@@ -157,86 +236,6 @@ public class ProblemFragment extends GaussFragment {
     }
 
     /**
-     * Uses a fragment factory to add a fragment manager for a given ID.
-     *
-     * @param manager The fragment manager
-     * @param paneId  The ID for which to add a fragment
-     * @param factory A factory for generating a fragment
-     */
-    private void addFragment(FragmentManager manager, int paneId, FragmentFactory factory) {
-        addFragment(manager, paneId, factory, false);
-    }
-
-    /**
-     * Uses a fragment factory to add a fragment manager for a given ID.
-     *
-     * @param manager The fragment manager
-     * @param paneId  The ID for which to add a fragment
-     * @param factory A factory for generating a fragment
-     * @param replace True to replace the indicated pane if it exists, false otherwise
-     */
-    private void addFragment(FragmentManager manager, int paneId, FragmentFactory factory,
-                             boolean replace) {
-
-        /*
-         * Try to find an existing fragment for the given ID. Is there no such existing
-         * fragment?
-         */
-        Fragment fragment = manager.findFragmentById(paneId);
-        if (null == fragment) {
-
-            // There is no such existing fragment. Create one using the given factory.
-            manager.beginTransaction().add(paneId,
-                    factory.createFragment((null == problem) ? ProblemLab.NULL_ID :
-                            problem.getProblemId())).commit();
-        }
-
-        else if (replace) {
-
-            /*
-             * There is an existing fragment with this pane ID, but the caller wants
-             * it replaced.
-             */
-            manager.beginTransaction().replace(paneId,
-                    factory.createFragment((null == problem) ? ProblemLab.NULL_ID :
-                            problem.getProblemId())).commit();
-        }
-    }
-
-    /**
-     * Adds a numbers fragment to the fragment manager for a given ID.
-     *
-     * @param manager The fragment manager
-     * @param paneId  The ID for which to add a fragment
-     */
-    private void addNumbersFragment(FragmentManager manager, int paneId) {
-
-        /*
-         * We need pane characteristics for the given ID. Try to find any published
-         * characteristics. Are there any?
-         */
-        final PaneCharacteristics paneCharacteristics = characteristicsArray.get(paneId);
-        if (null != paneCharacteristics) {
-
-            /*
-             * There are existing pane characteristics for the given ID. Set the label and
-             * background color in the fragment factory from the pane characteristics.
-             */
-            numbersFragmentFactory.setLabel(paneCharacteristics.getLabel());
-            numbersFragmentFactory.setBackgroundColor(paneCharacteristics.getColorResource());
-
-            /*
-             * Set the enabled status and the matrix status in the fragment factory from the
-             * pane characteristics. As needed, used the factory to create a new fragment for
-             * the fragment manager.
-             */
-            numbersFragmentFactory.setEnabled(paneCharacteristics.isEnabled());
-            numbersFragmentFactory.setMatrix(paneCharacteristics.isMatrix());
-            addFragment(manager, paneId, numbersFragmentFactory);
-        }
-    }
-
-    /**
      * Contains an interface for a fragment factory.
      */
     private interface FragmentFactory {
@@ -248,41 +247,6 @@ public class ProblemFragment extends GaussFragment {
          * @return A newly created fragment
          */
         Fragment createFragment(long problemId);
-    }
-
-    private static class PaneCharacteristics {
-
-        private final int colorResource;
-
-        private final boolean enabled;
-
-        private final String label;
-
-        private final boolean matrix;
-
-        PaneCharacteristics(String label, int colorResource, boolean enabled, boolean matrix) {
-
-            this.label = label;
-            this.colorResource = colorResource;
-            this.enabled = enabled;
-            this.matrix = matrix;
-        }
-
-        int getColorResource() {
-            return colorResource;
-        }
-
-        String getLabel() {
-            return label;
-        }
-
-        boolean isEnabled() {
-            return enabled;
-        }
-
-        boolean isMatrix() {
-            return matrix;
-        }
     }
 
     private static class ControlFragmentFactory implements FragmentFactory {
@@ -301,8 +265,22 @@ public class ProblemFragment extends GaussFragment {
         private int backgroundColor;
         private boolean enabled;
         private String label;
-        private int size;
         private boolean matrix;
+        private int size;
+
+        @Override
+        public Fragment createFragment(long problemId) {
+
+            final boolean isNotMatrix = !isMatrix();
+            final int size = getSize();
+
+            final CardFragment fragment = NumbersFragment.createInstance(getLabel(),
+                    getBackgroundColor(), isEnabled(),
+                    size, isNotMatrix ? 1 : size, isNotMatrix);
+
+            CardFragment.customizeInstance(fragment, problemId);
+            return fragment;
+        }
 
         int getBackgroundColor() {
             return backgroundColor;
@@ -343,19 +321,40 @@ public class ProblemFragment extends GaussFragment {
         void setSize(int size) {
             this.size = size;
         }
+    }
 
-        @Override
-        public Fragment createFragment(long problemId) {
+    private static class PaneCharacteristics {
 
-            final boolean isNotMatrix = !isMatrix();
-            final int size = getSize();
+        private final int colorResource;
 
-            final CardFragment fragment = NumbersFragment.createInstance(getLabel(),
-                    getBackgroundColor(), isEnabled(),
-                    size, isNotMatrix ? 1 : size, isNotMatrix);
+        private final boolean enabled;
 
-            CardFragment.customizeInstance(fragment, problemId);
-            return fragment;
+        private final String label;
+
+        private final boolean matrix;
+
+        PaneCharacteristics(String label, int colorResource, boolean enabled, boolean matrix) {
+
+            this.label = label;
+            this.colorResource = colorResource;
+            this.enabled = enabled;
+            this.matrix = matrix;
+        }
+
+        int getColorResource() {
+            return colorResource;
+        }
+
+        String getLabel() {
+            return label;
+        }
+
+        boolean isEnabled() {
+            return enabled;
+        }
+
+        boolean isMatrix() {
+            return matrix;
         }
     }
 }

@@ -62,6 +62,11 @@ public class ProblemListFragment extends GaussFragment {
         }
 
         @Override
+        public int getItemCount() {
+            return problemList.size();
+        }
+
+        @Override
         public void onBindViewHolder(ProblemHolder holder, int position) {
             holder.bind(problemList.get(position), position);
         }
@@ -71,11 +76,6 @@ public class ProblemListFragment extends GaussFragment {
             return new ProblemHolder(LayoutInflater.from(getActivity()), parent);
         }
 
-        @Override
-        public int getItemCount() {
-            return problemList.size();
-        }
-
         void setProblems(List<Problem> problemList) {
             this.problemList = problemList;
         }
@@ -83,10 +83,10 @@ public class ProblemListFragment extends GaussFragment {
 
     private class ProblemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private int position;
         private final TextView problemDate;
         private final TextView problemName;
         private final ImageView solvedImageView;
+        private int position;
 
         ProblemHolder(LayoutInflater inflater, ViewGroup parent) {
 

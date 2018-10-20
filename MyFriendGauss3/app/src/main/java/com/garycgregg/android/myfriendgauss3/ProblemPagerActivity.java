@@ -18,15 +18,15 @@ public class ProblemPagerActivity extends AppCompatActivity implements  ProblemL
     private static final String POSITION_ARGUMENT = String.format(FORMAT_STRING, PREFIX,
             "position");
 
+    private ProblemLab problemLab;
+    private List<Problem> problemList;
+
     public static Intent newIntent(Context packageContext, int position) {
 
         final Intent intent = new Intent(packageContext, ProblemPagerActivity.class);
         intent.putExtra(POSITION_ARGUMENT, position);
         return intent;
     }
-
-    private ProblemLab problemLab;
-    private List<Problem> problemList;
 
     @Override
     public ProblemLab getProblemLab() {
@@ -46,13 +46,13 @@ public class ProblemPagerActivity extends AppCompatActivity implements  ProblemL
         viewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
 
             @Override
-            public Fragment getItem(int position) {
-                return ProblemFragment.createInstance(problemList.get(position).getProblemId());
+            public int getCount() {
+                return problemList.size();
             }
 
             @Override
-            public int getCount() {
-                return problemList.size();
+            public Fragment getItem(int position) {
+                return ProblemFragment.createInstance(problemList.get(position).getProblemId());
             }
         });
 

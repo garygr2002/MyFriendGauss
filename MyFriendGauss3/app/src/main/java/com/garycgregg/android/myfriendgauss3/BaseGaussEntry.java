@@ -10,20 +10,20 @@ class BaseGaussEntry {
         return entry;
     }
 
-    public void setEntry(double entry) {
-        this.entry = entry;
-    }
-
     public long getProblemId() {
         return problemId;
     }
 
-    public void setProblemId(long problemId) {
-        this.problemId = problemId;
-    }
-
     public int getRow() {
         return row;
+    }
+
+    public void setEntry(double entry) {
+        this.entry = entry;
+    }
+
+    public void setProblemId(long problemId) {
+        this.problemId = problemId;
     }
 
     public void setRow(int row) {

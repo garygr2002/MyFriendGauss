@@ -11,12 +11,12 @@ public abstract class SingleFragmentActivity extends AppCompatActivity implement
 
     private ProblemLab problemLab;
 
+    protected abstract Fragment createFragment();
+
     @Override
     public ProblemLab getProblemLab() {
         return problemLab;
     }
-
-    protected abstract Fragment createFragment();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
