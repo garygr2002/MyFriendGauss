@@ -9,7 +9,6 @@ public class VectorCursorWrapper extends CursorWrapper {
 
     /**
      * Creates a Vector object.
-     * @return A vector object
      */
     public VectorCursorWrapper(Cursor cursor) {
         super(cursor);
@@ -17,6 +16,7 @@ public class VectorCursorWrapper extends CursorWrapper {
 
     /**
      * Creates a Vector object.
+     *
      * @return A Vector object
      */
     public Vector getVector() {

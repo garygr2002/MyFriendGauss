@@ -9,27 +9,46 @@ import android.view.ViewGroup;
 
 public abstract class CardFragment extends GaussFragment {
 
-    private static final String FORMAT_STRING = "%s.%s_argument";
-    private static final String PREFIX = CardFragment.class.getName();
-    private static final String PROBLEM_ID_ARGUMENT = String.format(FORMAT_STRING, PREFIX,
-            "problem_id");
+    // The problem ID argument
+    private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            CardFragment.class.getName(), "problem_id");
 
+    // The problem ID associated with this instance
     private long problemId = ProblemLab.NULL_ID;
 
+    /**
+     * Customizes an instance of a CardFragment with the required argument(s).
+     *
+     * @param fragment  An existing CardFragment, if any
+     * @param problemId The problem ID to be associated with the instance
+     */
     public static void customizeInstance(CardFragment fragment, long problemId) {
 
+        // Get the existing arguments, if any.
         Bundle arguments = fragment.getArguments();
         if (null == arguments) {
 
+            // Create a new, empty arguments object if there is none already.
             arguments = new Bundle();
         }
 
+        // Add the problem ID, and set or reset the arguments in the fragment instance.
         arguments.putLong(PROBLEM_ID_ARGUMENT, problemId);
         fragment.setArguments(arguments);
     }
 
+    /**
+     * Creates content subclass content.
+     *
+     * @param inflater  An inflater for layouts
+     * @param container A container for the subclass content
+     */
     protected abstract void createContent(LayoutInflater inflater, ViewGroup container);
 
+    /**
+     * Gets the problem ID.
+     * @return The problem ID
+     */
     protected long getProblemId() {
         return problemId;
     }
@@ -37,6 +56,10 @@ public abstract class CardFragment extends GaussFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
+        /*
+         * Call through to the superclass method. Use the saved instance state for arguments if it
+         * is not null. Otherwise use the instance supplied arguments. Set the problem ID.
+         */
         super.onCreate(savedInstanceState);
         final Bundle arguments = (null == savedInstanceState) ? getArguments() :
                 savedInstanceState;
@@ -47,9 +70,9 @@ public abstract class CardFragment extends GaussFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
+        // Create a card view followed by subclass content. Return the card view.
         final CardView view = (CardView) inflater.inflate(R.layout.fragment_card, container,
                 false);
-
         createContent(inflater, (ViewGroup) view.findViewById(R.id.card_content));
         return view;
     }
@@ -57,6 +80,7 @@ public abstract class CardFragment extends GaussFragment {
     @Override
     public void onDestroy() {
 
+        // Clear the problem ID. Call through to the superclass method.
         problemId = ProblemLab.NULL_ID;
         super.onDestroy();
     }
@@ -64,7 +88,8 @@ public abstract class CardFragment extends GaussFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
+        // Call through to the superclass method, and save the problem ID.
         super.onSaveInstanceState(outState);
-        outState.putLong(PROBLEM_ID_ARGUMENT, problemId);
+        outState.putLong(PROBLEM_ID_ARGUMENT, getProblemId());
     }
 }

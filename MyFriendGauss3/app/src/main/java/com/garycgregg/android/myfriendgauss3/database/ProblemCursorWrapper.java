@@ -13,7 +13,6 @@ public class ProblemCursorWrapper extends CursorWrapper {
 
     /**
      * Creates a Problem object.
-     * @return A problem object
      */
     public ProblemCursorWrapper(Cursor cursor) {
         super(cursor);
@@ -21,6 +20,7 @@ public class ProblemCursorWrapper extends CursorWrapper {
 
     /**
      * Creates a Problem object.
+     *
      * @return A Problem object
      */
     public Problem getProblem() {

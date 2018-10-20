@@ -16,22 +16,48 @@ import java.util.Locale;
 
 public class NumbersFragment extends CardFragment {
 
-    private static final String FORMAT_STRING = "%s.%s_argument";
+    // The prefix for instance arguments
     private static final String PREFIX_STRING = NumbersFragment.class.getName();
-    private static final String BACKGROUND_COLOR_ARGUMENT = String.format(FORMAT_STRING,
+
+    // The background color argument
+    private static final String BACKGROUND_COLOR_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "background_color");
-    private static final String COLUMNS_ARGUMENT = String.format(FORMAT_STRING,
+
+    // The number of columns argument
+    private static final String COLUMNS_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "columns");
-    private static final String ENABLED_ARGUMENT = String.format(FORMAT_STRING,
+
+    // The fragment enabled argument
+    private static final String ENABLED_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "enabled");
-    private static final String HINT_FORMAT_ARGUMENT = String.format(FORMAT_STRING,
+
+    // The format for the hint in each control
+    private static final String HINT_FORMAT_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "hint_format");
-    private static final String LABEL_ARGUMENT = String.format(FORMAT_STRING,
+
+    // The label argument
+    private static final String LABEL_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "label");
-    private static final String ROWS_ARGUMENT = String.format(FORMAT_STRING,
+
+    // The number of rows argument
+    private static final String ROWS_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "rows");
+
+    // The current locale
     private Locale locale;
 
+    /**
+     *
+     * Creates an instance of a NumbersFragment with the required argument(s).
+     *
+     * @param label The label argument
+     * @param backgroundColor The background color argument
+     * @param enabled The fragment enabled argument
+     * @param rows The number of rows argument
+     * @param columns The number of columns argument
+     * @param singleColumnHint True if the fragment will have a single column, false otherwise
+     * @return A new card fragment
+     */
     public static CardFragment createInstance(String label, int backgroundColor, boolean enabled,
                                           int rows, int columns, boolean singleColumnHint) {
 

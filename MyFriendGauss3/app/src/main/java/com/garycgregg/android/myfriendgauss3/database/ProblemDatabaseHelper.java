@@ -3,7 +3,6 @@ package com.garycgregg.android.myfriendgauss3.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class ProblemDatabaseHelper extends SQLiteOpenHelper {
 
