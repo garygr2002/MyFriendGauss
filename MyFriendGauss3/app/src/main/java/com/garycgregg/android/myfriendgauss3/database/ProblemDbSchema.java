@@ -2,30 +2,28 @@ package com.garycgregg.android.myfriendgauss3.database;
 
 public interface ProblemDbSchema {
 
-    interface ProblemTable {
+    interface AnswerTable {
 
-        String name = "problem";
+        String name = "answer";
 
         interface Columns {
 
             /*
 
-create table problem(
-	problem_id integer primary key autoincrement,
-	name text not null,
-	dimensions integer not null,
-	created datetime not null,
-	solved datetime,
-	write_lock integer not null);
+create table answer(
+	problem_id integer not null,
+	row integer not null,
+	entry real not null,
+        primary key(problem_id, row),
+	foreign key(problem_id) references problem(problem_id)
+	on delete cascade
+	on update cascade);
 
              */
 
+            String ENTRY = "entry";
             String PROBLEM_ID = "problem_id";
-            String NAME = "name";
-            String DIMENSIONS = "dimensions";
-            String CREATED = "created";
-            String SOLVED = "solved";
-            String WRITE_LOCK = "write_lock";
+            String ROW = "row";
         }
     }
 
@@ -49,35 +47,37 @@ create table matrix(
 
              */
 
-            String PROBLEM_ID = "problem_id";
-            String ROW = "row";
             String COLUMN = "column";
             String ENTRY = "entry";
+            String PROBLEM_ID = "problem_id";
+            String ROW = "row";
         }
     }
 
-    interface AnswerTable {
+    interface ProblemTable {
 
-        String name = "answer";
+        String name = "problem";
 
         interface Columns {
 
             /*
 
-create table answer(
-	problem_id integer not null,
-	row integer not null,
-	entry real not null,
-        primary key(problem_id, row),
-	foreign key(problem_id) references problem(problem_id)
-	on delete cascade
-	on update cascade);
+create table problem(
+	problem_id integer primary key autoincrement,
+	name text not null,
+	dimensions integer not null,
+	created datetime not null,
+	solved datetime,
+	write_lock integer not null);
 
              */
 
+            String CREATED = "created";
+            String DIMENSIONS = "dimensions";
+            String NAME = "name";
             String PROBLEM_ID = "problem_id";
-            String ROW = "row";
-            String ENTRY = "entry";
+            String SOLVED = "solved";
+            String WRITE_LOCK = "write_lock";
         }
     }
 
@@ -100,9 +100,9 @@ create table vector(
 
              */
 
+            String ENTRY = "entry";
             String PROBLEM_ID = "problem_id";
             String ROW = "row";
-            String ENTRY = "entry";
         }
     }
 }
