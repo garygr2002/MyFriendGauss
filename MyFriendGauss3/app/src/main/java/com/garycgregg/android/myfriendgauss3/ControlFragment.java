@@ -30,8 +30,8 @@ public class ControlFragment extends CardFragment {
     @Override
     public void onDestroyView() {
 
-        super.onDestroyView();
         problem = null;
+        super.onDestroyView();
     }
 
     @Override

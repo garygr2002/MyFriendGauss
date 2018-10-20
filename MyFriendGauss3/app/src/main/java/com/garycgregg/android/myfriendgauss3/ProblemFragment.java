@@ -14,7 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ProblemFragment extends Fragment implements ProblemLabSource {
+public class ProblemFragment extends GaussFragment {
 
     private static final String FORMAT_STRING = "%s.%s_argument";
     private static final String PREFIX = ProblemFragment.class.getName();
@@ -28,7 +28,6 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
 
     private Problem problem;
     private long problemId;
-    private ProblemLab problemLab;
 
     public static Fragment createInstance(long problemId) {
 
@@ -38,11 +37,6 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
         final Fragment fragment = new ProblemFragment();
         fragment.setArguments(arguments);
         return fragment;
-    }
-
-    @Override
-    public ProblemLab getProblemLab() {
-        return problemLab;
     }
 
     @Override
@@ -79,8 +73,7 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
                              @Nullable Bundle savedInstanceState) {
 
         final View view = inflater.inflate(R.layout.fragment_problem, container, false);
-        problemLab = ((ProblemLabSource) getActivity()).getProblemLab();
-        problem = problemLab.getProblem(problemId);
+        problem = getProblemLab().getProblem(problemId);
 
         final FragmentManager manager = getChildFragmentManager();
         addFragment(manager, R.id.control_pane, controlFragmentFactory);
@@ -96,17 +89,16 @@ public class ProblemFragment extends Fragment implements ProblemLabSource {
     @Override
     public void onDestroy() {
 
-        super.onDestroy();
         characteristicsArray.clear();
         problemId = ProblemLab.NULL_ID;
+        super.onDestroy();
     }
 
     @Override
     public void onDestroyView() {
 
-        super.onDestroyView();
         problem = null;
-        problemLab = null;
+        super.onDestroyView();
     }
 
     @Override

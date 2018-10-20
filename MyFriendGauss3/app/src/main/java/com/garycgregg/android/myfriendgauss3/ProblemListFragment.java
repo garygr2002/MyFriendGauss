@@ -1,9 +1,7 @@
 package com.garycgregg.android.myfriendgauss3;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,10 +12,9 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class ProblemListFragment extends Fragment {
+public class ProblemListFragment extends GaussFragment {
 
     private ProblemAdapter adapter;
-    private ProblemLab problemLab;
     private RecyclerView problemRecyclerView;
 
     @Nullable
@@ -27,21 +24,11 @@ public class ProblemListFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_problem_list, container,
                 false);
 
-        final Context context = getActivity();
-        problemLab = ((ProblemLabSource) context).getProblemLab();
-
         problemRecyclerView = view.findViewById(R.id.problem_recycler_view);
-        problemRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        problemRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         updateUI();
         return view;
-    }
-
-    @Override
-    public void onDestroyView() {
-
-        super.onDestroyView();
-        problemLab = null;
     }
 
     @Override
@@ -53,7 +40,7 @@ public class ProblemListFragment extends Fragment {
 
     private void updateUI() {
 
-        final List<Problem> problemList = problemLab.getProblems();
+        final List<Problem> problemList = getProblemLab().getProblems();
         if (null == adapter) {
 
             problemRecyclerView.setAdapter(adapter = new ProblemAdapter(problemList));
@@ -69,8 +56,8 @@ public class ProblemListFragment extends Fragment {
     private class ProblemAdapter extends RecyclerView.Adapter<ProblemHolder> {
 
         private List<Problem> problemList;
-
         ProblemAdapter(List<Problem> problemList) {
+
             this.problemList = problemList;
         }
 
