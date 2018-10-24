@@ -149,7 +149,7 @@ class ProblemLab {
 
     public long add(Problem problem) {
         return database.insert(ProblemDbSchema.ProblemTable.name, null,
-                getContentValues(problem));
+                getContentValues(problem, true));
     }
 
     /**
@@ -264,6 +264,25 @@ class ProblemLab {
         return answers;
     }
 
+    private ContentValues getContentCreated(Problem problem, ContentValues existingValues) {
+
+        final ContentValues values = (null == existingValues) ? new ContentValues() :
+                existingValues;
+
+        final Date created = problem.getCreated();
+        if (null != created) {
+
+            values.put(ProblemDbSchema.ProblemTable.Columns.CREATED, created.getTime());
+        }
+
+        return values;
+    }
+
+    private ContentValues getContentCreated(Problem problem) {
+        return getContentCreated(problem,
+                null);
+    }
+
     private ContentValues getContentDimensions(Problem problem, ContentValues existingValues) {
 
         final ContentValues values = (null == existingValues) ? new ContentValues() :
@@ -287,7 +306,27 @@ class ProblemLab {
     }
 
     private ContentValues getContentName(Problem problem) {
-        return getContentName(problem, null);
+        return getContentName(problem,
+                null);
+    }
+
+    private ContentValues getContentSolved(Problem problem, ContentValues existingValues) {
+
+        final ContentValues values = (null == existingValues) ? new ContentValues() :
+                existingValues;
+
+        final Date solved = problem.getSolved();
+        if (null != solved) {
+
+            values.put(ProblemDbSchema.ProblemTable.Columns.SOLVED, solved.getTime());
+        }
+
+        return values;
+    }
+
+    private ContentValues getContentSolved(Problem problem) {
+        return getContentSolved(problem,
+                null);
     }
 
     private ContentValues getContentValues(Answer answer) {
@@ -312,21 +351,22 @@ class ProblemLab {
         return values;
     }
 
-    private ContentValues getContentValues(Problem problem) {
+    private ContentValues getContentValues(Problem problem, boolean setCreated) {
 
         final ContentValues values = getContentName(problem);
         getContentDimensions(problem, values);
-        values.put(ProblemDbSchema.ProblemTable.Columns.CREATED, problem.getCreated().getTime());
+        if (setCreated) {
 
-        final Date solved = problem.getSolved();
-        if (null != solved) {
-
-            values.put(ProblemDbSchema.ProblemTable.Columns.SOLVED, problem.getSolved().getTime());
+            getContentCreated(problem, values);
         }
 
-        values.put(ProblemDbSchema.ProblemTable.Columns.WRITE_LOCK,
-                problem.isWriteLocked() ? Problem.TRUE : Problem.FALSE);
+        getContentSolved(problem, values);
+        getContentWriteLock(problem, values);
         return values;
+    }
+
+    private ContentValues getContentValues(Problem problem) {
+        return getContentValues(problem, false);
     }
 
     private ContentValues getContentValues(Vector vector) {
@@ -337,6 +377,20 @@ class ProblemLab {
         values.put(ProblemDbSchema.VectorTable.Columns.ROW, vector.getRow());
         values.put(ProblemDbSchema.VectorTable.Columns.ENTRY, vector.getEntry());
         return values;
+    }
+
+    private ContentValues getContentWriteLock(Problem problem, ContentValues existingValues) {
+
+        final ContentValues values = (null == existingValues) ? new ContentValues() :
+                existingValues;
+
+        values.put(ProblemDbSchema.ProblemTable.Columns.WRITE_LOCK,
+                problem.isWriteLocked() ? Problem.TRUE : Problem.FALSE);
+        return values;
+    }
+
+    private ContentValues getContentWriteLock(Problem problem) {
+        return getContentWriteLock(problem, null);
     }
 
     public List<Matrix> getMatrices() {
