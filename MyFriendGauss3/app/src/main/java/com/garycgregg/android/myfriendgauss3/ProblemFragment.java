@@ -14,7 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ProblemFragment extends GaussFragment {
+public class ProblemFragment extends GaussFragment<Problem> {
 
     // The problem ID argument
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
@@ -23,14 +23,20 @@ public class ProblemFragment extends GaussFragment {
     // A tag for logging statements
     private static final String TAG = ProblemFragment.class.getSimpleName();
 
+    // A factory for answer fragments
+    private final NumbersFragmentFactory answerFragmentFactory = new AnswerFragmentFactory();
+
     // A container for pane characteristics
     private final SparseArray<PaneCharacteristics> characteristicsArray = new SparseArray<>();
 
     // A factory for control fragments
     private final ControlFragmentFactory controlFragmentFactory = new ControlFragmentFactory();
 
-    // A factory for numbers fragments
-    private final NumbersFragmentFactory numbersFragmentFactory = new NumbersFragmentFactory();
+    // A factory for matrix fragments
+    private final NumbersFragmentFactory matrixFragmentFactory = new MatrixFragmentFactory();
+
+    // A factory for vector fragments
+    private final NumbersFragmentFactory vectorFragmentFactory = new VectorFragmentFactory();
 
     // The problem associated with this instance
     private Problem problem;
@@ -79,8 +85,8 @@ public class ProblemFragment extends GaussFragment {
          * Try to find an existing fragment for the given ID. Is there no such existing
          * fragment?
          */
-        FragmentManager manager = getChildFragmentManager();
-        Fragment fragment = manager.findFragmentById(paneId);
+        final FragmentManager manager = getChildFragmentManager();
+        final Fragment fragment = manager.findFragmentById(paneId);
         if (null == fragment) {
 
             // There is no such existing fragment. Create one using the given factory.
@@ -100,11 +106,12 @@ public class ProblemFragment extends GaussFragment {
     }
 
     /**
-     * Adds a numbers fragment to the fragment manager for a given ID.
+     * Configures a numbers fragment factory with characteristics for a given pane ID.
      *
-     * @param paneId The ID for which to add a fragment
+     * @param factory The numbers fragment factory
+     * @param paneId  The pane ID to use for configuration
      */
-    private void addNumbersFragment(int paneId) {
+    private PaneCharacteristics configure(NumbersFragmentFactory factory, int paneId) {
 
         /*
          * We need pane characteristics for the given ID. Try to find any published
@@ -117,18 +124,19 @@ public class ProblemFragment extends GaussFragment {
              * There are existing pane characteristics for the given ID. Set the label and
              * background color in the fragment factory from the pane characteristics.
              */
-            numbersFragmentFactory.setLabel(paneCharacteristics.getLabel());
-            numbersFragmentFactory.setBackgroundColor(paneCharacteristics.getColorResource());
+            factory.setLabel(paneCharacteristics.getLabel());
+            factory.setBackgroundColor(paneCharacteristics.getColorResource());
 
             /*
              * Set the enabled status and the matrix status in the fragment factory from the
-             * pane characteristics. As needed, used the factory to create a new fragment for
-             * the fragment manager.
+             * pane characteristics.
              */
-            numbersFragmentFactory.setEnabled(paneCharacteristics.isEnabled());
-            numbersFragmentFactory.setMatrix(paneCharacteristics.isMatrix());
-            addFragment(paneId, numbersFragmentFactory);
+            factory.setEnabled(paneCharacteristics.isEnabled());
+            factory.setMatrix(paneCharacteristics.isMatrix());
         }
+
+        // Return the pane characteristics.
+        return paneCharacteristics;
     }
 
     @Override
@@ -161,6 +169,11 @@ public class ProblemFragment extends GaussFragment {
         // Set the characteristics for the vector pane.
         characteristicsArray.put(R.id.vector_pane, new PaneCharacteristics("Vector\nEntries",
                 resources.getColor(R.color.tableEntryVector), true, false));
+
+        // Try to configure the numbers fragment factories.
+        configure(answerFragmentFactory, R.id.answer_pane);
+        configure(matrixFragmentFactory, R.id.matrix_pane);
+        configure(vectorFragmentFactory, R.id.vector_pane);
     }
 
     @Override
@@ -180,19 +193,21 @@ public class ProblemFragment extends GaussFragment {
         final View view = inflater.inflate(R.layout.fragment_problem, container, false);
         problem = getProblemLab().getProblem(problemId);
 
-        /*
-         * Add the control pane fragment. Set the size of the numbers fragment factory using the
-         * problem dimensions.
-         */
+        // Add the control pane fragment. Get the dimensions of the problem.
         addFragment(R.id.control_pane, controlFragmentFactory);
-        numbersFragmentFactory.setSize((null == problem) ? 1 : problem.getDimensions());
+        final int dimensions = (null == problem) ? 1 : problem.getDimensions();
 
-        // Add the answer and vector pane fragments.
-        addNumbersFragment(R.id.matrix_pane);
-        addNumbersFragment(R.id.answer_pane);
+        // Set the size of the problem in the matrix fragment factory. Add the matrix pane.
+        matrixFragmentFactory.setSize(dimensions);
+        addFragment(R.id.matrix_pane, matrixFragmentFactory);
 
-        // Add the vector pane fragment and return the problem fragment.
-        addNumbersFragment(R.id.vector_pane);
+        // Set the size of the problem in the answer fragment factory. Add the answer pane.
+        answerFragmentFactory.setSize(dimensions);
+        addFragment(R.id.answer_pane, answerFragmentFactory);
+
+        // Set the size of the problem in the vector fragment factory. Add the vector pane.
+        vectorFragmentFactory.setSize(dimensions);
+        addFragment(R.id.vector_pane, vectorFragmentFactory);
         return view;
     }
 
@@ -296,24 +311,50 @@ public class ProblemFragment extends GaussFragment {
          * @param problemId The problem ID associated with the fragment
          * @return A newly created fragment
          */
-        GaussFragment createFragment(long problemId);
+        Fragment createFragment(long problemId);
+    }
+
+    private static class AnswerFragmentFactory extends NumbersFragmentFactory
+            implements FragmentFactory {
+
+        @Override
+        public Fragment createFragment(long problemId) {
+
+            // Create a new answer fragment. Customize the fragment, and return it.
+            final NumbersFragment<Answer> fragment = new AnswerFragment();
+            customize(fragment, problemId);
+            return fragment;
+        }
     }
 
     private static class ControlFragmentFactory implements FragmentFactory {
 
         @Override
-        public GaussFragment createFragment(long problemId) {
+        public Fragment createFragment(long problemId) {
 
             /*
              * Create a card fragment and customize it with the problem ID. Return the fragment.
              */
-            final ContentFragment fragment = new ControlFragment();
+            final ContentFragment<Problem> fragment = new ControlFragment();
             ContentFragment.customizeInstance(fragment, problemId);
             return fragment;
         }
     }
 
-    private static class NumbersFragmentFactory implements FragmentFactory {
+    private static class MatrixFragmentFactory extends NumbersFragmentFactory
+            implements FragmentFactory {
+
+        @Override
+        public Fragment createFragment(long problemId) {
+
+            // Create a new matrix fragment. Customize the fragment, and return it.
+            final NumbersFragment<Matrix> fragment = new MatrixFragment();
+            customize(fragment, problemId);
+            return fragment;
+        }
+    }
+
+    private abstract static class NumbersFragmentFactory implements FragmentFactory {
 
         // The background color of factory output
         private int backgroundColor;
@@ -330,21 +371,28 @@ public class ProblemFragment extends GaussFragment {
         // The size of factory output
         private int size;
 
-        @Override
-        public GaussFragment createFragment(long problemId) {
+        /**
+         * Customizes a NumbersFragment.
+         *
+         * @param fragment  The fragment to customize
+         * @param problemId The problem ID to set in the fragment
+         */
+        protected void customize(NumbersFragment<?> fragment, long problemId) {
 
             // Get the inversion of the matrix flag. Get the size of factory output.
             final boolean isNotMatrix = !isMatrix();
             final int size = getSize();
 
-            // Create a new numbers fragment.
-            final ContentFragment fragment = NumbersFragment.createInstance(getLabel(),
+            /*
+             * Customize the given fragment with a label, background color, enabled setting,
+             * size, and matrix flag.
+             */
+            NumbersFragment.customizeInstance(fragment, getLabel(),
                     getBackgroundColor(), isEnabled(),
                     size, isNotMatrix ? 1 : size, isNotMatrix);
 
-            // Customize the number fragment with the problem ID, and return the fragment.
+            // Customize the number fragment with the problem ID.
             ContentFragment.customizeInstance(fragment, problemId);
-            return fragment;
         }
 
         /**
@@ -503,6 +551,19 @@ public class ProblemFragment extends GaussFragment {
          */
         boolean isMatrix() {
             return matrix;
+        }
+    }
+
+    private static class VectorFragmentFactory extends NumbersFragmentFactory
+            implements FragmentFactory {
+
+        @Override
+        public Fragment createFragment(long problemId) {
+
+            // Create a new vector fragment. Customize the fragment, and return it.
+            final NumbersFragment<Vector> fragment = new VectorFragment();
+            customize(fragment, problemId);
+            return fragment;
         }
     }
 }

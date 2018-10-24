@@ -20,10 +20,10 @@ public abstract class ContentFragment<T> extends GaussFragment<T> {
     /**
      * Customizes an instance of a ContentFragment with the required argument(s).
      *
-     * @param fragment  An existing ContentFragment, if any
+     * @param fragment  An existing ContentFragment
      * @param problemId The problem ID to be associated with the instance
      */
-    public static void customizeInstance(ContentFragment fragment, long problemId) {
+    public static void customizeInstance(ContentFragment<?> fragment, long problemId) {
 
         // Get the existing arguments, if any.
         Bundle arguments = fragment.getArguments();

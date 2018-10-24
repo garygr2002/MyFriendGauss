@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -15,7 +14,7 @@ import android.widget.TextView;
 
 import java.util.Locale;
 
-public class NumbersFragment extends ContentFragment<Object> {
+public abstract class NumbersFragment<T> extends ContentFragment<T> {
 
     // The prefix for instance arguments
     private static final String PREFIX_STRING = NumbersFragment.class.getName();
@@ -48,22 +47,28 @@ public class NumbersFragment extends ContentFragment<Object> {
     private Locale locale;
 
     /**
+     * Customizes an instance of a NumbersFragment with the required argument(s).
      *
-     * Creates an instance of a NumbersFragment with the required argument(s).
-     *
-     * @param label The label argument
-     * @param backgroundColor The background color argument
-     * @param enabled The fragment enabled argument
-     * @param rows The number of rows argument
-     * @param columns The number of columns argument
+     * @param fragment         An existing NumbersFragment
+     * @param label            The label argument
+     * @param backgroundColor  The background color argument
+     * @param enabled          The fragment enabled argument
+     * @param rows             The number of rows argument
+     * @param columns          The number of columns argument
      * @param singleColumnHint True if the fragment will have a single column, false otherwise
      * @return A new card fragment
      */
-    public static ContentFragment createInstance(String label, int backgroundColor, boolean enabled,
-                                                 int rows, int columns, boolean singleColumnHint) {
+    public static ContentFragment customizeInstance(NumbersFragment fragment, String label,
+                                                    int backgroundColor, boolean enabled, int rows,
+                                                    int columns, boolean singleColumnHint) {
 
-        final Bundle arguments = new Bundle();
-        arguments.putString(LABEL_ARGUMENT, label);
+        // Get the existing arguments, if any.
+        Bundle arguments = fragment.getArguments();
+        if (null == arguments) {
+
+            // Create a new, empty arguments object if there is none already.
+            arguments = new Bundle();
+        }
 
         arguments.putInt(BACKGROUND_COLOR_ARGUMENT, backgroundColor);
         arguments.putInt(ROWS_ARGUMENT, rows);
@@ -72,7 +77,6 @@ public class NumbersFragment extends ContentFragment<Object> {
         arguments.putBoolean(ENABLED_ARGUMENT, enabled);
         arguments.putBoolean(HINT_FORMAT_ARGUMENT, singleColumnHint);
 
-        final ContentFragment fragment = new NumbersFragment();
         fragment.setArguments(arguments);
         return fragment;
     }
@@ -132,23 +136,5 @@ public class NumbersFragment extends ContentFragment<Object> {
 
         super.onCreate(savedInstanceState);
         locale = getResources().getConfiguration().locale;
-    }
-
-    @Override
-    protected void receiveContent(@NonNull Object[] content) {
-
-        // TODO: Fix this.
-    }
-
-    @Override
-    protected void requestContent() {
-
-        // TODO: Fix this.
-    }
-
-    @Override
-    public void synchronizeChanges() {
-
-        // TODO: Fix this.
     }
 }
