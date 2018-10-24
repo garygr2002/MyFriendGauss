@@ -169,4 +169,10 @@ public class ProblemListFragment extends GaussFragment {
             startActivity(ProblemPagerActivity.newIntent(getActivity(), position));
         }
     }
+
+    @Override
+    public void synchronizeChanges() {
+
+        // Nothing to do here.
+    }
 }

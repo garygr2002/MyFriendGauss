@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -14,7 +15,7 @@ import android.widget.TextView;
 
 import java.util.Locale;
 
-public class NumbersFragment extends CardFragment {
+public class NumbersFragment extends ContentFragment<Object> {
 
     // The prefix for instance arguments
     private static final String PREFIX_STRING = NumbersFragment.class.getName();
@@ -58,8 +59,8 @@ public class NumbersFragment extends CardFragment {
      * @param singleColumnHint True if the fragment will have a single column, false otherwise
      * @return A new card fragment
      */
-    public static CardFragment createInstance(String label, int backgroundColor, boolean enabled,
-                                          int rows, int columns, boolean singleColumnHint) {
+    public static ContentFragment createInstance(String label, int backgroundColor, boolean enabled,
+                                                 int rows, int columns, boolean singleColumnHint) {
 
         final Bundle arguments = new Bundle();
         arguments.putString(LABEL_ARGUMENT, label);
@@ -71,13 +72,13 @@ public class NumbersFragment extends CardFragment {
         arguments.putBoolean(ENABLED_ARGUMENT, enabled);
         arguments.putBoolean(HINT_FORMAT_ARGUMENT, singleColumnHint);
 
-        final CardFragment fragment = new NumbersFragment();
+        final ContentFragment fragment = new NumbersFragment();
         fragment.setArguments(arguments);
         return fragment;
     }
 
     @Override
-    protected void createContent(LayoutInflater inflater, ViewGroup container) {
+    protected void createControls(LayoutInflater inflater, ViewGroup container) {
 
         final Context context = getActivity();
         final Bundle arguments = getArguments();
@@ -131,5 +132,23 @@ public class NumbersFragment extends CardFragment {
 
         super.onCreate(savedInstanceState);
         locale = getResources().getConfiguration().locale;
+    }
+
+    @Override
+    protected void receiveContent(@NonNull Object[] content) {
+
+        // TODO: Fix this.
+    }
+
+    @Override
+    protected void requestContent() {
+
+        // TODO: Fix this.
+    }
+
+    @Override
+    public void synchronizeChanges() {
+
+        // TODO: Fix this.
     }
 }

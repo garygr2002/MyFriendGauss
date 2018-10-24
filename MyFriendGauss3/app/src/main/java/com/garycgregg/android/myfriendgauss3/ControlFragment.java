@@ -1,11 +1,23 @@
 package com.garycgregg.android.myfriendgauss3;
 
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-public class ControlFragment extends CardFragment {
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class ControlFragment extends ContentFragment<Problem> {
+
+    // The list of changes, in change order
+    private List<Problem> changeList;
+
+    // The set of unique changes
+    private Set<Problem> changeSet;
 
     // The problem associated with this instance
     private Problem problem;
@@ -14,35 +26,24 @@ public class ControlFragment extends CardFragment {
     private EditText problemNameEditText;
 
     @Override
-    protected void createContent(LayoutInflater inflater, ViewGroup container) {
-
-        // Inflate our content, and find the edit control for the problem name.
-        final View view = inflater.inflate(R.layout.content_control, container, true);
-        problemNameEditText = view.findViewById(R.id.problem_name);
+    protected void createControls(LayoutInflater inflater, ViewGroup container) {
 
         /*
-         * Get the problem ID and the associated problem. Is there no problem associated with the
-         * problem ID?
+         * Inflate our content and find the edit control for the problem name. Request content
+         * for the problem name control.
          */
-        final long problemId = getProblemId();
-        problem = getProblemLab().getProblem(problemId);
-        if (null == problem) {
-
-            /*
-             * There is no problem with the associated problem ID. Create a new problem, and set
-             * the problem ID. Note: It will not be possible to update this problem in the
-             * database, as no record exists.
-             */
-            problem = new Problem();
-            problem.setProblemId(problemId);
-        }
-
-        // Set the text of the edit control with the problem name.
-        problemNameEditText.setText(problem.getName());
+        final View view = inflater.inflate(R.layout.content_control, container, true);
+        problemNameEditText = view.findViewById(R.id.problem_name);
+        requestContent();
     }
 
     @Override
     public void onDestroyView() {
+
+        // Release the change collections.
+        releaseCollections();
+        changeSet = null;
+        changeList = null;
 
         // Clear the problem object and call through to the superclass method.
         problem = null;
@@ -54,30 +55,79 @@ public class ControlFragment extends CardFragment {
 
         // Call through to the superclass method, and update the problem name.
         super.onPause();
-        updateName();
+        synchronizeChanges();
     }
 
-    /**
-     * Updates the problem name in the problem lab. TODO: Change this functionality to update the
-     * name in the problem object every time any change occurs in the edit control. Then update
-     * The database either due to a pause event, or a command from an external caller.
-     */
-    private void updateName() {
+    @Override
+    protected void receiveContent(@NonNull Problem[] content) {
 
-        /*
-         * Get the name current set in the edit text. Get the name from the problem object. Do
-         * these names not match?
-         */
-        final String setName = problemNameEditText.getText().toString();
-        final String existingName = problem.getName();
-        if ((null == existingName) || (!setName.equals(problem.getName()))) {
+        // Get the first problem if there is at least one.
+        final int firstIndex = 0;
+        if (firstIndex < content.length) {
+
+            // Okay, there is at least one.
+            problem = content[firstIndex];
+        }
+
+        // There is not at least one problem.
+        else {
 
             /*
-             * The names set in the edit text and problem object do not match. Update the
-             * problem object to match the edit text, and update the database.
+             * Create a new problem. Set the new problem's name and ID. Note: This problem will
+             * incur an error if an attempt is made to update it to the database.
              */
-            problem.setName(setName);
-            getProblemLab().updateName(problem);
+            problem = new Problem();
+            problem.setName("");
+            problem.setProblemId(getProblemId());
         }
+
+        // Create a new change list and change set.
+        setChangeList(changeList = new ArrayList<>());
+        setChangeSet(changeSet = new HashSet<>());
+
+        /*
+         * Set the text of the edit control with the problem name. Give the problem name a
+         * text watcher.
+         */
+        problemNameEditText.setText(problem.getName());
+        problemNameEditText.addTextChangedListener(new GaussTextWatcher<Problem>(problem) {
+
+            @Override
+            protected boolean isChanged(String candidate) {
+                return !candidate.equals(getContent().getName());
+            }
+
+            @Override
+            protected void setChange(String change) {
+
+                // Set the name in the content, and add the content to the change list.
+                final Problem content = getContent();
+                content.setName(change);
+                addChange(content);
+            }
+        });
+    }
+
+    @Override
+    protected void requestContent() {
+
+        // Get the problem indicated by the ID, and directly receive the result.
+        final Problem[] content = {getProblemLab().getProblem(getProblemId())};
+        receiveContent(content);
+    }
+
+    @Override
+    public void synchronizeChanges() {
+
+        // Get the problem lab, and cycle for each change.
+        final ProblemLab problemLab = getProblemLab();
+        for (Problem problem : changeList) {
+
+            // Update the name for the first/next problem.
+            problemLab.updateName(problem);
+        }
+
+        // Clear the changes.
+        clearChanges();
     }
 }

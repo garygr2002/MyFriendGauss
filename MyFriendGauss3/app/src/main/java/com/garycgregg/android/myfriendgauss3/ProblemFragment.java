@@ -57,31 +57,29 @@ public class ProblemFragment extends GaussFragment {
     }
 
     /**
-     * Uses a fragment factory to add a fragment manager for a given ID.
+     * Uses a fragment factory to add a fragment for a given ID.
      *
-     * @param manager The fragment manager
      * @param paneId  The ID for which to add a fragment
      * @param factory A factory for generating a fragment
      */
-    private void addFragment(FragmentManager manager, int paneId, FragmentFactory factory) {
-        addFragment(manager, paneId, factory, false);
+    private void addFragment(int paneId, FragmentFactory factory) {
+        addFragment(paneId, factory, false);
     }
 
     /**
-     * Uses a fragment factory to add a fragment manager for a given ID.
+     * Uses a fragment factory to add a fragment for a given ID.
      *
-     * @param manager The fragment manager
      * @param paneId  The ID for which to add a fragment
      * @param factory A factory for generating a fragment
      * @param replace True to replace the indicated pane if it exists, false otherwise
      */
-    private void addFragment(FragmentManager manager, int paneId, FragmentFactory factory,
-                             boolean replace) {
+    private void addFragment(int paneId, FragmentFactory factory, boolean replace) {
 
         /*
          * Try to find an existing fragment for the given ID. Is there no such existing
          * fragment?
          */
+        FragmentManager manager = getChildFragmentManager();
         Fragment fragment = manager.findFragmentById(paneId);
         if (null == fragment) {
 
@@ -104,10 +102,9 @@ public class ProblemFragment extends GaussFragment {
     /**
      * Adds a numbers fragment to the fragment manager for a given ID.
      *
-     * @param manager The fragment manager
-     * @param paneId  The ID for which to add a fragment
+     * @param paneId The ID for which to add a fragment
      */
-    private void addNumbersFragment(FragmentManager manager, int paneId) {
+    private void addNumbersFragment(int paneId) {
 
         /*
          * We need pane characteristics for the given ID. Try to find any published
@@ -130,7 +127,7 @@ public class ProblemFragment extends GaussFragment {
              */
             numbersFragmentFactory.setEnabled(paneCharacteristics.isEnabled());
             numbersFragmentFactory.setMatrix(paneCharacteristics.isMatrix());
-            addFragment(manager, paneId, numbersFragmentFactory);
+            addFragment(paneId, numbersFragmentFactory);
         }
     }
 
@@ -183,17 +180,19 @@ public class ProblemFragment extends GaussFragment {
         final View view = inflater.inflate(R.layout.fragment_problem, container, false);
         problem = getProblemLab().getProblem(problemId);
 
-        // Get the child fragment manager, and add the control pane fragment.
-        final FragmentManager manager = getChildFragmentManager();
-        addFragment(manager, R.id.control_pane, controlFragmentFactory);
-
-        // Add the matrix pane fragment.
+        /*
+         * Add the control pane fragment. Set the size of the numbers fragment factory using the
+         * problem dimensions.
+         */
+        addFragment(R.id.control_pane, controlFragmentFactory);
         numbersFragmentFactory.setSize((null == problem) ? 1 : problem.getDimensions());
-        addNumbersFragment(manager, R.id.matrix_pane);
 
-        // Add the answer and vector pane fragments. Return the problem fragment.
-        addNumbersFragment(manager, R.id.answer_pane);
-        addNumbersFragment(manager, R.id.vector_pane);
+        // Add the answer and vector pane fragments.
+        addNumbersFragment(R.id.matrix_pane);
+        addNumbersFragment(R.id.answer_pane);
+
+        // Add the vector pane fragment and return the problem fragment.
+        addNumbersFragment(R.id.vector_pane);
         return view;
     }
 
@@ -274,6 +273,18 @@ public class ProblemFragment extends GaussFragment {
         outState.putLong(PROBLEM_ID_ARGUMENT, problemId);
     }
 
+    @Override
+    public void synchronizeChanges() {
+
+        // Get the child fragment manager and synchronize the control pane.
+        final FragmentManager manager = getChildFragmentManager();
+        ((GaussFragment) manager.findFragmentById(R.id.control_pane)).synchronizeChanges();
+
+        // Synchronize the matrix and vector panes.
+        ((GaussFragment) manager.findFragmentById(R.id.matrix_pane)).synchronizeChanges();
+        ((GaussFragment) manager.findFragmentById(R.id.vector_pane)).synchronizeChanges();
+    }
+
     /**
      * Contains an interface for a fragment factory.
      */
@@ -296,8 +307,8 @@ public class ProblemFragment extends GaussFragment {
             /*
              * Create a card fragment and customize it with the problem ID. Return the fragment.
              */
-            final CardFragment fragment = new ControlFragment();
-            CardFragment.customizeInstance(fragment, problemId);
+            final ContentFragment fragment = new ControlFragment();
+            ContentFragment.customizeInstance(fragment, problemId);
             return fragment;
         }
     }
@@ -327,12 +338,12 @@ public class ProblemFragment extends GaussFragment {
             final int size = getSize();
 
             // Create a new numbers fragment.
-            final CardFragment fragment = NumbersFragment.createInstance(getLabel(),
+            final ContentFragment fragment = NumbersFragment.createInstance(getLabel(),
                     getBackgroundColor(), isEnabled(),
                     size, isNotMatrix ? 1 : size, isNotMatrix);
 
             // Customize the number fragment with the problem ID, and return the fragment.
-            CardFragment.customizeInstance(fragment, problemId);
+            ContentFragment.customizeInstance(fragment, problemId);
             return fragment;
         }
 
@@ -444,7 +455,7 @@ public class ProblemFragment extends GaussFragment {
         /**
          * Creates the pane characteristics object.
          *
-         * @param label         The lable of the pane
+         * @param label         The label of the pane
          * @param colorResource The color resources of the pane
          * @param enabled       The enabled state of the pane
          * @param matrix        The matrix flag of the pane
@@ -486,7 +497,7 @@ public class ProblemFragment extends GaussFragment {
         }
 
         /**
-         * Gest the matrix flag of the pane.
+         * Gets the matrix flag of the pane.
          *
          * @return The matrix flag of the pane
          */
