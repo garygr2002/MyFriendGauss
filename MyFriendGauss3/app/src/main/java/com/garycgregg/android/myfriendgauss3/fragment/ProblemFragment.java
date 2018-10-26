@@ -23,9 +23,12 @@ import com.garycgregg.android.myfriendgauss3.content.Vector;
 
 public class ProblemFragment extends GaussFragment {
 
+    // The prefix for instance arguments
+    private static final String PREFIX_STRING = ProblemFragment.class.getName();
+
     // The problem ID argument
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
-            ProblemFragment.class.getName(), "problem_id");
+            PREFIX_STRING, "problem_id");
 
     // A tag for logging statements
     private static final String TAG = ProblemFragment.class.getSimpleName();

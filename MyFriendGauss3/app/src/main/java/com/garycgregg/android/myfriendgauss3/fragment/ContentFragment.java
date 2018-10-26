@@ -17,11 +17,7 @@ import java.util.Set;
 public abstract class ContentFragment<T> extends GaussFragment {
 
     // The prefix for instance arguments
-    private static final String PREFIX_STRING = NumbersFragment.class.getName();
-
-    // The content set argument
-    private static final String CONTENT_SET_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
-            PREFIX_STRING, "content_set");
+    private static final String PREFIX_STRING = ContentFragment.class.getName();
 
     // The problem ID argument
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
@@ -35,9 +31,6 @@ public abstract class ContentFragment<T> extends GaussFragment {
 
     // The list of content objects
     private List<T> contentList;
-
-    // True if content has been set, false otherwise
-    private boolean contentSet;
 
     // The problem ID associated with this instance
     private long problemId = ProblemLab.NULL_ID;
@@ -97,22 +90,6 @@ public abstract class ContentFragment<T> extends GaussFragment {
     }
 
     /**
-     * Checks for fragment content.
-     */
-    protected void checkForContent() {
-
-        // Request content if there currently is not any.
-        if (null == getContentList()) {
-            requestContent();
-        }
-
-        // Set content if it currently exists.
-        else {
-            setContent();
-        }
-    }
-
-    /**
      * Clears the changes.
      */
     protected void clearChanges() {
@@ -120,6 +97,13 @@ public abstract class ContentFragment<T> extends GaussFragment {
         // Clear both the change list and change set.
         clearCollection(changeList);
         clearCollection(changeSet);
+    }
+
+    /**
+     * Clears the content list.
+     */
+    protected void clearContentList() {
+        clearCollection(contentList);
     }
 
     /**
@@ -155,28 +139,16 @@ public abstract class ContentFragment<T> extends GaussFragment {
         return problemId;
     }
 
-    /**
-     * Determines if content has been set.
-     *
-     * @return True if content has been set, false otherwise
-     */
-    protected boolean isContentSet() {
-        return contentSet;
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
         /*
          * Call through to the superclass method. Use the saved instance state for arguments if it
-         * is not null. Otherwise use the instance supplied arguments.
+         * is not null. Otherwise use the instance supplied arguments.  Set the problem ID.
          */
         super.onCreate(savedInstanceState);
         final Bundle arguments = (null == savedInstanceState) ? getArguments() :
                 savedInstanceState;
-
-        // Set the content set flag and the problem ID.
-        setContentSet(arguments.getBoolean(CONTENT_SET_ARGUMENT, false));
         setProblemId(arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID));
     }
 
@@ -197,8 +169,7 @@ public abstract class ContentFragment<T> extends GaussFragment {
     @Override
     public void onDestroy() {
 
-        // Clear the content set flag and the problem ID. Call through to the superclass method.
-        setContentSet(false);
+        // Clear the problem ID, and call through to the superclass method.
         setProblemId(ProblemLab.NULL_ID);
         super.onDestroy();
     }
@@ -206,28 +177,31 @@ public abstract class ContentFragment<T> extends GaussFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
-        // Call through to the superclass method. Save the content set flag and the problem ID.
+        // Call through to the superclass method, and save the problem ID.
         super.onSaveInstanceState(outState);
-        outState.putBoolean(CONTENT_SET_ARGUMENT, isContentSet());
         outState.putLong(PROBLEM_ID_ARGUMENT, getProblemId());
+    }
+
+    /**
+     * Releases the collections.
+     */
+    protected void release() {
+
+        // Release the change collections. Clear the content list before setting it to null.
+        releaseChanges();
+        clearContentList();
+        setContentList(null);
     }
 
     /**
      * Releases the change collections.
      */
-    protected void release() {
+    protected void releaseChanges() {
 
-        // Clear the changes before making the change set and the change list null.
+        // Clear the change collections before setting them to null.
         clearChanges();
         setChangeList(null);
         setChangeSet(null);
-    }
-
-    /**
-     * Requests content. Note: Call this superclass method after requesting content.
-     */
-    protected void requestContent() {
-        setContentSet(false);
     }
 
     /**
@@ -249,28 +223,12 @@ public abstract class ContentFragment<T> extends GaussFragment {
     }
 
     /**
-     * Sets content. Note: Call this superclass method after setting content.
-     */
-    protected void setContent() {
-        setContentSet(true);
-    }
-
-    /**
      * Sets the content list.
      *
      * @param contentList The content list
      */
     protected void setContentList(List<T> contentList) {
         this.contentList = contentList;
-    }
-
-    /**
-     * Sets whether content has been set.
-     *
-     * @param contentSet True if content has been set, false otherwise
-     */
-    private void setContentSet(boolean contentSet) {
-        this.contentSet = contentSet;
     }
 
     /**
