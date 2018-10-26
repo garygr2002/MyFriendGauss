@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss3;
+package com.garycgregg.android.myfriendgauss3.database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,18 +7,17 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Pair;
 
-import com.garycgregg.android.myfriendgauss3.database.AnswerCursorWrapper;
-import com.garycgregg.android.myfriendgauss3.database.MatrixCursorWrapper;
-import com.garycgregg.android.myfriendgauss3.database.ProblemCursorWrapper;
-import com.garycgregg.android.myfriendgauss3.database.ProblemDatabaseHelper;
-import com.garycgregg.android.myfriendgauss3.database.ProblemDbSchema;
-import com.garycgregg.android.myfriendgauss3.database.VectorCursorWrapper;
+import com.garycgregg.android.myfriendgauss3.content.Answer;
+import com.garycgregg.android.myfriendgauss3.content.BaseGaussEntry;
+import com.garycgregg.android.myfriendgauss3.content.Matrix;
+import com.garycgregg.android.myfriendgauss3.content.Problem;
+import com.garycgregg.android.myfriendgauss3.content.Vector;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-class ProblemLab {
+public class ProblemLab {
 
     public static final int MAX_DIMENSIONS = 15;
     public static final long NULL_ID = 0L;
@@ -112,31 +111,6 @@ class ProblemLab {
         }
     }
 
-    public static Double[] buildAnswers(int dimensions, List<Answer> entries) {
-
-        final Double[] answers = new Double[dimensions];
-        build(answers, entries);
-        return answers;
-    }
-
-    public static Double[][] buildMatrices(int dimensions, List<Matrix> entries) {
-
-        final Double[][] matrix = new Double[dimensions][dimensions];
-        for (Matrix entry : entries) {
-
-            build(matrix[entry.getColumn()], entry);
-        }
-
-        return matrix;
-    }
-
-    public static Double[] buildVectors(int dimensions, List<Vector> entries) {
-
-        final Double[] vectors = new Double[dimensions];
-        build(vectors, entries);
-        return vectors;
-    }
-
     public void add(Answer answer) {
         database.insertWithOnConflict(ProblemDbSchema.AnswerTable.name, null,
                 getContentValues(answer), conflictAlgorithm);
@@ -150,6 +124,11 @@ class ProblemLab {
     public long add(Problem problem) {
         return database.insert(ProblemDbSchema.ProblemTable.name, null,
                 getContentValues(problem, true));
+    }
+
+    public long add(Vector vector) {
+        return database.insertWithOnConflict(ProblemDbSchema.VectorTable.name, null,
+                getContentValues(vector), conflictAlgorithm);
     }
 
     /**
@@ -236,10 +215,10 @@ class ProblemLab {
         return returnValue;
     }
 
-    private <T> void getAll(List<T> list, WrapperManager<T> wrapperManager) {
+    private <T> void getAll(List<T> list, WrapperManager<T> wrapperManager, Long problemId) {
 
         list.clear();
-        final CursorWrapper wrapper = wrapperManager.getWrapper(null);
+        final CursorWrapper wrapper = wrapperManager.getWrapper(problemId);
         try {
 
             wrapper.moveToFirst();
@@ -253,14 +232,10 @@ class ProblemLab {
         }
     }
 
-    public Answer getAnswer(int problemId) {
-        return get(answerWrapperManager, problemId);
-    }
-
-    public List<Answer> getAnswers() {
+    public List<Answer> getAnswers(long problemId) {
 
         final List<Answer> answers = new ArrayList<>();
-        getAll(answers, answerWrapperManager);
+        getAll(answers, answerWrapperManager, problemId);
         return answers;
     }
 
@@ -276,11 +251,6 @@ class ProblemLab {
         }
 
         return values;
-    }
-
-    private ContentValues getContentCreated(Problem problem) {
-        return getContentCreated(problem,
-                null);
     }
 
     private ContentValues getContentDimensions(Problem problem, ContentValues existingValues) {
@@ -393,15 +363,11 @@ class ProblemLab {
         return getContentWriteLock(problem, null);
     }
 
-    public List<Matrix> getMatrices() {
+    public List<Matrix> getMatrices(long problemId) {
 
         final List<Matrix> matrices = new ArrayList<>();
-        getAll(matrices, matrixWrapperManager);
+        getAll(matrices, matrixWrapperManager, problemId);
         return matrices;
-    }
-
-    public Matrix getMatrix(int problemId) {
-        return get(matrixWrapperManager, problemId);
     }
 
     public Problem getProblem(long problemId) {
@@ -422,18 +388,14 @@ class ProblemLab {
     public List<Problem> getProblems() {
 
         final List<Problem> problems = new ArrayList<>();
-        getAll(problems, problemWrapperManager);
+        getAll(problems, problemWrapperManager, null);
         return problems;
     }
 
-    public Vector getVector(int problemId) {
-        return get(vectorWrapperManager, problemId);
-    }
-
-    public List<Vector> getVectors() {
+    public List<Vector> getVectors(long problemId) {
 
         final List<Vector> vectors = new ArrayList<>();
-        getAll(vectors, vectorWrapperManager);
+        getAll(vectors, vectorWrapperManager, problemId);
         return vectors;
     }
 
@@ -487,6 +449,20 @@ class ProblemLab {
 
         return database.update(ProblemDbSchema.ProblemTable.name,
                 getContentName(problem),
+                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
+    }
+
+    public int updateSolved(Problem problem) {
+
+        return database.update(ProblemDbSchema.ProblemTable.name,
+                getContentSolved(problem),
+                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
+    }
+
+    public int updateWriteLock(Problem problem) {
+
+        return database.update(ProblemDbSchema.ProblemTable.name,
+                getContentWriteLock(problem),
                 problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
     }
 

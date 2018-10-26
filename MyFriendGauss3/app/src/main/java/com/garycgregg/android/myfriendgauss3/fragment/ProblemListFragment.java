@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss3;
+package com.garycgregg.android.myfriendgauss3.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,6 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.garycgregg.android.myfriendgauss3.activity.ProblemPagerActivity;
+import com.garycgregg.android.myfriendgauss3.R;
+import com.garycgregg.android.myfriendgauss3.content.Problem;
 
 import java.util.List;
 
@@ -168,11 +172,5 @@ public class ProblemListFragment extends GaussFragment {
         public void onClick(View view) {
             startActivity(ProblemPagerActivity.newIntent(getActivity(), position));
         }
-    }
-
-    @Override
-    public void synchronizeChanges() {
-
-        // Nothing to do here.
     }
 }

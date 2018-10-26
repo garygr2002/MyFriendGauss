@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class ProblemDatabaseHelper extends SQLiteOpenHelper {
+class ProblemDatabaseHelper extends SQLiteOpenHelper {
 
     // SQL for creating the Answer table
     private static final String CREATE_ANSWER_TABLE = String.format("create table %s(\n" +

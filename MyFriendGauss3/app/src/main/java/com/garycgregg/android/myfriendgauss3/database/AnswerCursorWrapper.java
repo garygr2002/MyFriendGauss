@@ -3,7 +3,7 @@ package com.garycgregg.android.myfriendgauss3.database;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 
-import com.garycgregg.android.myfriendgauss3.Answer;
+import com.garycgregg.android.myfriendgauss3.content.Answer;
 
 import static com.garycgregg.android.myfriendgauss3.database.ProblemDbSchema.*;
 

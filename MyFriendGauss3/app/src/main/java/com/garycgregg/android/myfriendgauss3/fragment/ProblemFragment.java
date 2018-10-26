@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss3;
+package com.garycgregg.android.myfriendgauss3.fragment;
 
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -14,7 +14,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ProblemFragment extends GaussFragment<Problem> {
+import com.garycgregg.android.myfriendgauss3.R;
+import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
+import com.garycgregg.android.myfriendgauss3.content.Answer;
+import com.garycgregg.android.myfriendgauss3.content.Matrix;
+import com.garycgregg.android.myfriendgauss3.content.Problem;
+import com.garycgregg.android.myfriendgauss3.content.Vector;
+
+public class ProblemFragment extends GaussFragment {
 
     // The problem ID argument
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
@@ -288,16 +295,17 @@ public class ProblemFragment extends GaussFragment<Problem> {
         outState.putLong(PROBLEM_ID_ARGUMENT, problemId);
     }
 
-    @Override
     public void synchronizeChanges() {
 
-        // Get the child fragment manager and synchronize the control pane.
-        final FragmentManager manager = getChildFragmentManager();
-        ((GaussFragment) manager.findFragmentById(R.id.control_pane)).synchronizeChanges();
+        // TODO: Synchronize child fragments.
 
+        // Get the child fragment manager and synchronize the control pane.
+        // final FragmentManager manager = getChildFragmentManager();
+        // ((GaussFragment) manager.findFragmentById(R.id.control_pane)).synchronizeChanges();
+        //
         // Synchronize the matrix and vector panes.
-        ((GaussFragment) manager.findFragmentById(R.id.matrix_pane)).synchronizeChanges();
-        ((GaussFragment) manager.findFragmentById(R.id.vector_pane)).synchronizeChanges();
+        // ((GaussFragment) manager.findFragmentById(R.id.matrix_pane)).synchronizeChanges();
+        // ((GaussFragment) manager.findFragmentById(R.id.vector_pane)).synchronizeChanges();
     }
 
     /**

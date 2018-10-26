@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss3;
+package com.garycgregg.android.myfriendgauss3.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,9 +9,15 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
+import com.garycgregg.android.myfriendgauss3.R;
+import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
+import com.garycgregg.android.myfriendgauss3.content.Problem;
+import com.garycgregg.android.myfriendgauss3.database.ProblemLabSource;
+import com.garycgregg.android.myfriendgauss3.fragment.ProblemFragment;
+
 import java.util.List;
 
-public class ProblemPagerActivity extends AppCompatActivity implements  ProblemLabSource {
+public class ProblemPagerActivity extends AppCompatActivity implements ProblemLabSource {
 
     private static final String FORMAT_STRING = "%s.%s_argument";
     private static final String PREFIX = ProblemPagerActivity.class.getName();

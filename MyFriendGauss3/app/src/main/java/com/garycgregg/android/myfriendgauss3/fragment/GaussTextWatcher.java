@@ -1,4 +1,4 @@
-package com.garycgregg.android.myfriendgauss3;
+package com.garycgregg.android.myfriendgauss3.fragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;

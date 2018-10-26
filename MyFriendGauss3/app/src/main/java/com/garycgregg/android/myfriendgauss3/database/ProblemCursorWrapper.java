@@ -3,7 +3,7 @@ package com.garycgregg.android.myfriendgauss3.database;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 
-import com.garycgregg.android.myfriendgauss3.Problem;
+import com.garycgregg.android.myfriendgauss3.content.Problem;
 
 import java.util.Date;
 

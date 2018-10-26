@@ -1,6 +1,6 @@
-package com.garycgregg.android.myfriendgauss3;
+package com.garycgregg.android.myfriendgauss3.database;
 
-interface ProblemLabSource {
+public interface ProblemLabSource {
 
     /**
      * Gets a problem lab.
