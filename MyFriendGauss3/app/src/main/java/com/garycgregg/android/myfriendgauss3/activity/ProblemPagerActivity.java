@@ -58,7 +58,8 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemLa
 
             @Override
             public Fragment getItem(int position) {
-                return ProblemFragment.createInstance(problemList.get(position).getProblemId());
+                return ProblemFragment.createInstance(problemList.get(position).getProblemId(),
+                        position);
             }
         });
 

@@ -23,8 +23,15 @@ import com.garycgregg.android.myfriendgauss3.content.Vector;
 
 public class ProblemFragment extends GaussFragment {
 
+    // An illegal position
+    private static final int ILLEGAL_POSITION = ~0;
+
     // The prefix for instance arguments
     private static final String PREFIX_STRING = ProblemFragment.class.getName();
+
+    // The position argument
+    private static final String POSITION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            PREFIX_STRING, "position");
 
     // The problem ID argument
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
@@ -48,6 +55,9 @@ public class ProblemFragment extends GaussFragment {
     // A factory for vector fragments
     private final NumbersFragmentFactory vectorFragmentFactory = new VectorFragmentFactory();
 
+    // The position of this instance
+    private int position;
+
     // The problem associated with this instance
     private Problem problem;
 
@@ -57,14 +67,16 @@ public class ProblemFragment extends GaussFragment {
     /**
      * Creates an instance of a ProblemFragment with the required argument(s).
      *
-     * @param problemId The problem ID associated with the new instance
+     * @param problemId The problem ID associated with this instance
+     * @param position The position of this instance
      * @return A new Gauss fragment
      */
-    public static GaussFragment createInstance(long problemId) {
+    public static GaussFragment createInstance(long problemId, int position) {
 
-        // Create the arguments bundle and add the problem ID.
+        // Create the arguments bundle. Add the problem ID and position.
         final Bundle arguments = new Bundle();
         arguments.putLong(PROBLEM_ID_ARGUMENT, problemId);
+        arguments.putInt(POSITION_ARGUMENT, position);
 
         // Create a new problem fragment and set the arguments. Return the fragment.
         final GaussFragment fragment = new ProblemFragment();
@@ -161,10 +173,13 @@ public class ProblemFragment extends GaussFragment {
 
         /*
          * Use the saved instance state for arguments if it is not null. Otherwise use the instance
-         * supplied arguments. Set the problem ID.
+         * supplied arguments.
          */
         final Bundle arguments = (null == savedInstanceState) ? getArguments() :
                 savedInstanceState;
+
+        // Set the position and the problem ID.
+        position = arguments.getInt(POSITION_ARGUMENT, ILLEGAL_POSITION);
         problemId = arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID);
 
         // Get the activity's resources, and set the characteristics for the matrix pane.
@@ -293,22 +308,10 @@ public class ProblemFragment extends GaussFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
-        // Call through to the superclass method, and save the problem ID.
+        // Call through to the superclass method. Save the problem ID and position.
         super.onSaveInstanceState(outState);
         outState.putLong(PROBLEM_ID_ARGUMENT, problemId);
-    }
-
-    public void synchronizeChanges() {
-
-        // TODO: Synchronize child fragments.
-
-        // Get the child fragment manager and synchronize the control pane.
-        // final FragmentManager manager = getChildFragmentManager();
-        // ((GaussFragment) manager.findFragmentById(R.id.control_pane)).synchronizeChanges();
-        //
-        // Synchronize the matrix and vector panes.
-        // ((GaussFragment) manager.findFragmentById(R.id.matrix_pane)).synchronizeChanges();
-        // ((GaussFragment) manager.findFragmentById(R.id.vector_pane)).synchronizeChanges();
+        outState.putInt(POSITION_ARGUMENT, position);
     }
 
     /**
