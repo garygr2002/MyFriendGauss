@@ -29,6 +29,10 @@ public class ProblemFragment extends GaussFragment {
     // The prefix for instance arguments
     private static final String PREFIX_STRING = ProblemFragment.class.getName();
 
+    // The content updated flag
+    private static final String CONTENT_UPDATED = String.format(ARGUMENT_FORMAT_STRING,
+            PREFIX_STRING, "content_updated");
+
     // The position argument
     private static final String POSITION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "position");
@@ -55,6 +59,9 @@ public class ProblemFragment extends GaussFragment {
     // A factory for vector fragments
     private final NumbersFragmentFactory vectorFragmentFactory = new VectorFragmentFactory();
 
+    // True if content has been updated, false otherwise
+    private boolean contentUpdated;
+
     // The position of this instance
     private int position;
 
@@ -68,7 +75,7 @@ public class ProblemFragment extends GaussFragment {
      * Creates an instance of a ProblemFragment with the required argument(s).
      *
      * @param problemId The problem ID associated with this instance
-     * @param position The position of this instance
+     * @param position  The position of this instance
      * @return A new Gauss fragment
      */
     public static GaussFragment createInstance(long problemId, int position) {
@@ -161,6 +168,15 @@ public class ProblemFragment extends GaussFragment {
         return paneCharacteristics;
     }
 
+    /**
+     * Determine if this fragment has a content update.
+     *
+     * @return True if content has been updated, false otherwise
+     */
+    public boolean isContentUpdated() {
+        return contentUpdated;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
@@ -178,7 +194,8 @@ public class ProblemFragment extends GaussFragment {
         final Bundle arguments = (null == savedInstanceState) ? getArguments() :
                 savedInstanceState;
 
-        // Set the position and the problem ID.
+        // Set the content updated flag. Set the position and the problem ID.
+        contentUpdated = arguments.getBoolean(CONTENT_UPDATED, false);
         position = arguments.getInt(POSITION_ARGUMENT, ILLEGAL_POSITION);
         problemId = arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID);
 
@@ -239,12 +256,13 @@ public class ProblemFragment extends GaussFragment {
     @Override
     public void onDestroy() {
 
-        /*
-         * Clear the characteristics array and the problem ID. Call through to the superclass
-         * method.
-         */
+        // Clear the characteristics array and the problem ID.
         characteristicsArray.clear();
         problemId = ProblemLab.NULL_ID;
+
+        // Reset the position and the content updated flag. Call through to the superclass method.
+        position = ILLEGAL_POSITION;
+        contentUpdated = false;
         super.onDestroy();
     }
 
@@ -308,10 +326,22 @@ public class ProblemFragment extends GaussFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
-        // Call through to the superclass method. Save the problem ID and position.
+        // Call through to the superclass method. Save the problem ID.
         super.onSaveInstanceState(outState);
         outState.putLong(PROBLEM_ID_ARGUMENT, problemId);
+
+        // Save the position and content updated flag.
         outState.putInt(POSITION_ARGUMENT, position);
+        outState.putBoolean(CONTENT_UPDATED, contentUpdated);
+    }
+
+    /**
+     * Sets the content updated flag.
+     *
+     * @param contentUpdated True if content has been updated, false otherwise
+     */
+    private void setContentUpdated(boolean contentUpdated) {
+        this.contentUpdated = contentUpdated;
     }
 
     /**
