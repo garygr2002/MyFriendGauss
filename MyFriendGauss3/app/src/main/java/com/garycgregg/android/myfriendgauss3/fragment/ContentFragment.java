@@ -1,7 +1,9 @@
 package com.garycgregg.android.myfriendgauss3.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,10 +18,17 @@ import java.util.Set;
 
 public abstract class ContentFragment<T> extends GaussFragment {
 
+    // True if a fragment is enabled by default, false otherwise
+    private static final boolean DEFAULT_ENABLED_STATE = true;
+
     // The prefix for instance arguments
     private static final String PREFIX_STRING = ContentFragment.class.getName();
 
-    // The problem ID argument
+    // The fragment enabled argument key
+    private static final String ENABLED_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            PREFIX_STRING, "enabled");
+
+    // The problem ID argument key
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "problem_id");
 
@@ -31,6 +40,9 @@ public abstract class ContentFragment<T> extends GaussFragment {
 
     // The set of unique changes
     private Set<T> changeSet;
+
+    // True if the fragment is enabled, false otherwise
+    private boolean enabled = DEFAULT_ENABLED_STATE;
 
     // The problem ID associated with this instance
     private long problemId = ProblemLab.NULL_ID;
@@ -50,12 +62,11 @@ public abstract class ContentFragment<T> extends GaussFragment {
     }
 
     /**
-     * Customizes an instance of a ContentFragment with the required argument(s).
-     *
-     * @param fragment  An existing ContentFragment
-     * @param problemId The problem ID to be associated with the instance
+     * Gets the arguments from a fragment.
+     * @param fragment A fragment
+     * @return The arguments from the fragment
      */
-    protected static void customizeInstance(ContentFragment<?> fragment, long problemId) {
+    protected static Bundle getArguments(@NonNull Fragment fragment) {
 
         // Get the existing arguments, if any.
         Bundle arguments = fragment.getArguments();
@@ -65,8 +76,24 @@ public abstract class ContentFragment<T> extends GaussFragment {
             fragment.setArguments(arguments = new Bundle());
         }
 
-        // Add the problem ID to the arguments.
+        // Return the arguments.
+        return arguments;
+    }
+
+    /**
+     * Customizes an instance of a ContentFragment with the required argument(s).
+     *
+     * @param fragment  An existing ContentFragment
+     * @param problemId The problem ID to be associated with the instance
+     * @param enabled   The fragment enabled argument
+     */
+    protected static void customizeInstance(@NonNull ContentFragment<?> fragment, long problemId,
+                                            boolean enabled) {
+
+        // Get the fragment arguments. Add the problem ID and enabled flag arguments.
+        final Bundle arguments = getArguments(fragment);
         arguments.putLong(PROBLEM_ID_ARGUMENT, problemId);
+        arguments.putBoolean(ENABLED_ARGUMENT, enabled);
     }
 
     /**
@@ -130,13 +157,25 @@ public abstract class ContentFragment<T> extends GaussFragment {
         return problemId;
     }
 
+    /**
+     * Determines if the fragment is enabled.
+     *
+     * @return True if the fragment is enabled, false otherwise
+     */
+    protected boolean isEnabled() {
+        return enabled;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
-        // Call the superclass method. Set the problem ID from the arguments.
+        // Call the superclass method. Get the instance arguments.
         super.onCreate(savedInstanceState);
         final Bundle arguments = getArguments();
+
+        // Set the problem ID and enabled state arguments.
         setProblemId(arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID));
+        setEnabled(arguments.getBoolean(ENABLED_ARGUMENT, DEFAULT_ENABLED_STATE));
     }
 
     @Nullable
@@ -156,7 +195,8 @@ public abstract class ContentFragment<T> extends GaussFragment {
     @Override
     public void onDestroy() {
 
-        // Clear the problem ID, and call through to the superclass method.
+        // Clear the problem ID, and reset the enabled state flag. Call the superclass method.
+        setEnabled(DEFAULT_ENABLED_STATE);
         setProblemId(ProblemLab.NULL_ID);
         super.onDestroy();
     }
@@ -196,6 +236,15 @@ public abstract class ContentFragment<T> extends GaussFragment {
      */
     protected void setChangeSet(Set<T> changeSet) {
         this.changeSet = changeSet;
+    }
+
+    /**
+     * Sets the enabled state of the fragment.
+     *
+     * @param enabled True if the fragment is enabled, false otherwise
+     */
+    private void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     /**

@@ -45,7 +45,7 @@ public class ProblemCursorWrapper extends CursorWrapper {
          * Set the 'write locked' field if the 'write locked' field in the record is anything other
          * than numeric FALSE. Return the Problem object.
          */
-        problem.setWriteLocked(Problem.FALSE ==
+        problem.setWriteLocked(Problem.FALSE !=
                 getInt(getColumnIndex(ProblemTable.Columns.WRITE_LOCK)));
         return problem;
     }

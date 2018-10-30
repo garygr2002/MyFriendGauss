@@ -18,7 +18,7 @@ import com.garycgregg.android.myfriendgauss3.database.ProblemLabSource;
 
 public abstract class GaussFragment extends Fragment implements ProblemLabSource {
 
-    // The format of an instance argument
+    // The format of an instance argument key
     protected static final String ARGUMENT_FORMAT_STRING = "%s.%s_argument";
 
     // A tag for logging statements

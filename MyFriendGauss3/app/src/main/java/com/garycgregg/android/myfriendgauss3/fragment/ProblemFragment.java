@@ -29,11 +29,11 @@ public class ProblemFragment extends GaussFragment {
     // The prefix for instance arguments
     private static final String PREFIX_STRING = ProblemFragment.class.getName();
 
-    // The position argument
+    // The position argument key
     private static final String POSITION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "position");
 
-    // The problem ID argument
+    // The problem ID argument key
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "problem_id");
 
@@ -72,8 +72,19 @@ public class ProblemFragment extends GaussFragment {
      */
     public ProblemFragment() {
 
-        // Configure the immutable features of the content panes.
-        configure();
+        // Configure the characteristics. Configure the immutable features of the entry panes.
+        configureCharacteristics();
+        configureEntryPaneFactoriesImmutable();
+    }
+
+    /**
+     * Configures a fragment factory.
+     *
+     * @param factory The fragment factory
+     * @param enabled True if the fragment is enabled, false otherwise
+     */
+    private static void configureFactory(FragmentFactory factory, boolean enabled) {
+        factory.setEnabled(enabled);
     }
 
     /**
@@ -144,12 +155,44 @@ public class ProblemFragment extends GaussFragment {
     }
 
     /**
+     * Configures the characteristics of the entry panes.
+     */
+    private void configureCharacteristics() {
+
+        /*
+         * Declare and initialize the default color for the entry pane fragments. Set the
+         * characteristics of the matrix pane.
+         */
+        final int defaultColor = Color.WHITE;
+        characteristicsArray.put(R.id.matrix_pane, new PaneCharacteristics("Matrix\nEntries",
+                true, true));
+
+        // Set the characteristics for the answer pane.
+        characteristicsArray.put(R.id.answer_pane, new PaneCharacteristics("Answers\n",
+                false, false));
+
+        // Set the characteristics for the vector pane.
+        characteristicsArray.put(R.id.vector_pane, new PaneCharacteristics("Vector\nEntries",
+                true, false));
+    }
+
+    /**
+     * Configures the characteristics of the control pane factory.
+     */
+    private void configureControlPaneFactory() {
+
+        // Enable or disable the control fragment factory, and set its problem.
+        configureFactory(controlFragmentFactory, !isProblemWriteLocked());
+        controlFragmentFactory.setProblem(problem);
+    }
+
+    /**
      * Configures a numbers fragment factory with characteristics for a given pane ID.
      *
      * @param factory The numbers fragment factory
      * @param paneId  The pane ID to use for configuration
      */
-    private void configure(NumbersFragmentFactory factory, int paneId) {
+    private void configureEntryPane(NumbersFragmentFactory factory, int paneId) {
 
         /*
          * We need pane characteristics for the given ID. Try to find any published
@@ -170,33 +213,31 @@ public class ProblemFragment extends GaussFragment {
     }
 
     /**
-     * Configures the fragment factories.
+     * Configures the immutable characteristics of the entry pane factories.
      */
-    private void configure() {
+    private void configureEntryPaneFactoriesImmutable() {
 
-        // Set the characteristics for the matrix pane.
-        final int defaultColor = Color.WHITE;
-        characteristicsArray.put(R.id.matrix_pane, new PaneCharacteristics("Matrix\nEntries",
-                true, true));
+        /*
+         * All answer fragments are always disabled. Configure other immutable characteristics of
+         * the answer fragment factory.
+         */
+        configureFactory(answerFragmentFactory, false);
+        configureEntryPane(answerFragmentFactory, R.id.answer_pane);
 
-        // Set the characteristics for the answer pane.
-        characteristicsArray.put(R.id.answer_pane, new PaneCharacteristics("Answers\n",
-                false, false));
-
-        // Set the characteristics for the vector pane.
-        characteristicsArray.put(R.id.vector_pane, new PaneCharacteristics("Vector\nEntries",
-                true, false));
-
-        // Try to configure the numbers fragment factories.
-        configure(answerFragmentFactory, R.id.answer_pane);
-        configure(matrixFragmentFactory, R.id.matrix_pane);
-        configure(vectorFragmentFactory, R.id.vector_pane);
+        // Configure the immutable characteristics of the matrix and vector fragment factories.
+        configureEntryPane(matrixFragmentFactory, R.id.matrix_pane);
+        configureEntryPane(vectorFragmentFactory, R.id.vector_pane);
     }
 
     /**
-     * Configures the color of the various number content panes.
+     * Configures the mutable characteristics of the entry pane factories.
      */
-    private void configureColor() {
+    private void configureEntryPaneFactoriesMutable() {
+
+        // Enable or disable the matrix and vector fragment factories.
+        final boolean enabled = !(isProblemSolved() || isProblemWriteLocked());
+        configureFactory(matrixFragmentFactory, enabled);
+        configureFactory(vectorFragmentFactory, enabled);
 
         // Get the resources. Set the background color of the answer pane.
         final Resources resources = getResources();
@@ -205,6 +246,14 @@ public class ProblemFragment extends GaussFragment {
         // Set the background colors of the matrix and vector panes.
         matrixFragmentFactory.setBackgroundColor(resources.getColor(R.color.tableEntryMatrix));
         vectorFragmentFactory.setBackgroundColor(resources.getColor(R.color.tableEntryVector));
+
+        // Get the dimensions of the problem. Set that size in the answer fragment factory.
+        final int dimensions = problem.getDimensions();
+        answerFragmentFactory.setSize(dimensions);
+
+        // Set the problem size in the matrix and vector fragment factories.
+        matrixFragmentFactory.setSize(dimensions);
+        vectorFragmentFactory.setSize(dimensions);
     }
 
     @Override
@@ -212,24 +261,43 @@ public class ProblemFragment extends GaussFragment {
         return TAG;
     }
 
+    /**
+     * Determines if the problem is solved.
+     *
+     * @return True if the problem is solved, false otherwise
+     */
+    private boolean isProblemSolved() {
+        return (null != problem) && problem.isSolved();
+    }
+
+    /**
+     * Determines if the problem is write locked.
+     *
+     * @return True if the problem is write locked, false otherwise
+     */
+    private boolean isProblemWriteLocked() {
+        return (null != problem) && problem.isWriteLocked();
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
-        /*
-         * Call the superclass method, and indicate that this fragment has an options menu.
-         * Configure the color of the content panes.
-         */
+        // Call the superclass method, and indicate that the fragment has an options menu.
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        configureColor();
 
-        // Get the fragment arguments. Set the position.
+        // Get the fragment arguments, and set the position.
         final Bundle arguments = getArguments();
         position = arguments.getInt(POSITION_ARGUMENT, ILLEGAL_POSITION);
 
         // Set the problem ID and the problem.
         problemId = arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID);
         problem = contentProducer.getContent(problemId);
+
+        // Configure the mutable characteristics of the fragment factories.
+        output(String.format("Problem with ID '%d' has been locked.", problemId));
+        configureControlPaneFactory();
+        configureEntryPaneFactoriesMutable();
     }
 
     @Override
@@ -245,29 +313,13 @@ public class ProblemFragment extends GaussFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        // Inflate the problem fragment, and get the problem associated with the problem ID.
+        // Inflate the problem fragment. Add the control and answer fragments.
         final View view = inflater.inflate(R.layout.fragment_problem, container, false);
-        configureColor();
-
-        // Set the editable state of the matrix and vector fragment factories.
-        final boolean enable = !problem.isWriteLocked() && (null == problem.getSolved());
-        matrixFragmentFactory.setEnabled(enable);
-        vectorFragmentFactory.setEnabled(enable);
-
-        // Add the control pane fragment. Get the dimensions of the problem.
         addFragment(R.id.control_pane, controlFragmentFactory);
-        final int dimensions = problem.getDimensions();
-
-        // Set the size of the problem in the matrix fragment factory. Add the matrix pane.
-        matrixFragmentFactory.setSize(dimensions);
-        addFragment(R.id.matrix_pane, matrixFragmentFactory);
-
-        // Set the size of the problem in the answer fragment factory. Add the answer pane.
-        answerFragmentFactory.setSize(dimensions);
         addFragment(R.id.answer_pane, answerFragmentFactory);
 
-        // Set the size of the problem in the vector fragment factory. Add the vector pane.
-        vectorFragmentFactory.setSize(dimensions);
+        // Add the matrix and vector fragments. Return the problem fragment view.
+        addFragment(R.id.matrix_pane, matrixFragmentFactory);
         addFragment(R.id.vector_pane, vectorFragmentFactory);
         return view;
     }
@@ -275,7 +327,8 @@ public class ProblemFragment extends GaussFragment {
     @Override
     public void onDestroy() {
 
-        // Reset the problem and problem ID.
+        // Unlock the problem. Reset the problem and problem ID.
+        unlockProblem();
         problem = null;
         problemId = ProblemLab.NULL_ID;
 
@@ -334,21 +387,30 @@ public class ProblemFragment extends GaussFragment {
     }
 
     /**
-     * Contains an interface for a fragment factory.
+     * Unlocks the problem.
      */
-    private interface FragmentFactory {
+    private void unlockProblem() {
 
-        /**
-         * Creates a fragment.
-         *
-         * @param problemId The problem ID associated with the fragment
-         * @return A newly created fragment
+        /*
+         * Is the problem not write locked? This is the lock state of the problem before this
+         * fragment instance accessed it. The problem instance may not show a lock, but this
+         * fragment *has* locked it on access, so now we have to resynchronize the database
+         * state.
          */
-        Fragment createFragment(long problemId);
+        if (!problem.isWriteLocked()) {
+
+            // The problem is not write locked. Is the problem lab not not null?
+            final ProblemLab problemLab = getProblemLab();
+            if (null != problemLab) {
+
+                // The problem lab is not null. Unlock the problem.
+                problemLab.updateWriteLock(problem);
+                output(String.format("Problem with ID '%d' has been unlocked.", problemId));
+            }
+        }
     }
 
-    private static class AnswerFragmentFactory extends NumbersFragmentFactory
-            implements FragmentFactory {
+    private static class AnswerFragmentFactory extends NumbersFragmentFactory {
 
         @Override
         public Fragment createFragment(long problemId) {
@@ -357,16 +419,71 @@ public class ProblemFragment extends GaussFragment {
         }
     }
 
-    private static class ControlFragmentFactory implements FragmentFactory {
+    private static class ControlFragmentFactory extends FragmentFactory {
+
+        // The problem
+        private Problem problem;
 
         @Override
         public Fragment createFragment(long problemId) {
-            return ControlFragment.createInstance(problemId);
+            return ControlFragment.createInstance(problemId, isEnabled(), getProblem());
+        }
+
+        /**
+         * Gets the problem.
+         *
+         * @return The problem
+         */
+        Problem getProblem() {
+            return problem;
+        }
+
+        /**
+         * Sets the problem.
+         *
+         * @param problem The problem
+         */
+        void setProblem(Problem problem) {
+            this.problem = problem;
         }
     }
 
-    private static class MatrixFragmentFactory extends NumbersFragmentFactory
-            implements FragmentFactory {
+    /**
+     * Contains an interface for a fragment factory.
+     */
+    private abstract static class FragmentFactory {
+
+        // The enabled state of factory output
+        private boolean enabled;
+
+        /**
+         * Creates a fragment.
+         *
+         * @param problemId The problem ID associated with the fragment
+         * @return A newly created fragment
+         */
+        abstract Fragment createFragment(long problemId);
+
+        /**
+         * Gets the enabled state of the factory output.
+         *
+         * @return The enabled state of the factory output
+         */
+        boolean isEnabled() {
+            return enabled;
+        }
+
+        /**
+         * Sets the enabled state of the factory output.
+         *
+         * @param enabled The enabled state of the factory output
+         */
+        void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+    }
+
+    private static class MatrixFragmentFactory extends NumbersFragmentFactory {
 
         @Override
         public Fragment createFragment(long problemId) {
@@ -378,13 +495,10 @@ public class ProblemFragment extends GaussFragment {
         }
     }
 
-    private abstract static class NumbersFragmentFactory implements FragmentFactory {
+    private abstract static class NumbersFragmentFactory extends FragmentFactory {
 
         // The background color of factory output
         private int backgroundColor;
-
-        // The enabled state of factory output
-        private boolean enabled;
 
         // The label of factory output
         private String label;
@@ -414,9 +528,6 @@ public class ProblemFragment extends GaussFragment {
             NumbersFragment.customizeInstance(fragment, problemId, getLabel(),
                     getBackgroundColor(), isEnabled(),
                     size, isNotMatrix ? 1 : size, isNotMatrix);
-
-            // Customize the number fragment with the problem ID.
-            ContentFragment.customizeInstance(fragment, problemId);
         }
 
         /**
@@ -447,15 +558,6 @@ public class ProblemFragment extends GaussFragment {
         }
 
         /**
-         * Gets the enabled state of the factory output.
-         *
-         * @return The enabled state of the factory output
-         */
-        boolean isEnabled() {
-            return enabled;
-        }
-
-        /**
          * Gets the matrix flag of the factory output.
          *
          * @return The matrix flag of the factory output
@@ -471,15 +573,6 @@ public class ProblemFragment extends GaussFragment {
          */
         void setBackgroundColor(int backgroundColor) {
             this.backgroundColor = backgroundColor;
-        }
-
-        /**
-         * Sets the enabled state of the factory output.
-         *
-         * @param enabled The enabled state of the factory output
-         */
-        void setEnabled(boolean enabled) {
-            this.enabled = enabled;
         }
 
         /**
@@ -565,8 +658,7 @@ public class ProblemFragment extends GaussFragment {
     }
 
 
-    private static class VectorFragmentFactory extends NumbersFragmentFactory
-            implements FragmentFactory {
+    private static class VectorFragmentFactory extends NumbersFragmentFactory {
 
         @Override
         public Fragment createFragment(long problemId) {

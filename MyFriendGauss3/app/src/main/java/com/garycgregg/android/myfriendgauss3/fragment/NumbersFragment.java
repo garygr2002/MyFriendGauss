@@ -27,27 +27,23 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     // The prefix for instance arguments
     private static final String PREFIX_STRING = NumbersFragment.class.getName();
 
-    // The background color argument
+    // The background color argument key
     private static final String BACKGROUND_COLOR_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "background_color");
 
-    // The number of columns argument
+    // The number of columns argument key
     private static final String COLUMNS_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "columns");
 
-    // The fragment enabled argument
-    private static final String ENABLED_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
-            PREFIX_STRING, "enabled");
-
-    // The format for the hint in each control
+    // The key for the format for the hint in each control
     private static final String HINT_FORMAT_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "hint_format");
 
-    // The label argument
+    // The label argument key
     private static final String LABEL_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "label");
 
-    // The number of rows argument
+    // The number of rows argument key
     private static final String ROWS_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "rows");
 
@@ -100,37 +96,28 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     /**
      * Customizes an instance of a NumbersFragment with the required argument(s).
      *
-     * @param fragment         An existing ContentFragment
+     * @param fragment         An existing NumbersFragment
      * @param problemId        The problem ID to be associated with the instance
      * @param label            The label argument
      * @param backgroundColor  The background color argument
-     * @param enabled          The fragment enabled argument
      * @param rows             The number of rows argument
      * @param columns          The number of columns argument
      * @param singleColumnHint True if the fragment will have a single column, false otherwise
      */
-    public static void customizeInstance(ContentFragment<?> fragment, long problemId,
+    public static void customizeInstance(NumbersFragment<?> fragment, long problemId,
                                          String label, int backgroundColor,
                                          boolean enabled, int rows, int columns,
                                          boolean singleColumnHint) {
 
-        // Get the existing arguments, if any.
-        Bundle arguments = fragment.getArguments();
-        if (null == arguments) {
+        // Customize the fragment for content arguments. Get the fragment arguments.
+        ContentFragment.customizeInstance(fragment, problemId, enabled);
+        final Bundle arguments = getArguments(fragment);
 
-            // Create a new, empty arguments object if there is none already.
-            fragment.setArguments(arguments = new Bundle());
-        }
-
-        // Customize the fragment for control arguments, and add the label.
-        ControlFragment.customizeInstance(fragment, problemId);
+        // Add the label and background color arguments.
         arguments.putString(LABEL_ARGUMENT, label);
-
-        // Add the background color and the enabled flag.
         arguments.putInt(BACKGROUND_COLOR_ARGUMENT, backgroundColor);
-        arguments.putBoolean(ENABLED_ARGUMENT, enabled);
 
-        // Add the rows and the columns. Add the hint format.
+        // Add the rows, columns and hint format arguments.
         arguments.putInt(ROWS_ARGUMENT, rows);
         arguments.putInt(COLUMNS_ARGUMENT, columns);
         arguments.putBoolean(HINT_FORMAT_ARGUMENT, singleColumnHint);
@@ -162,7 +149,7 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
         // Retrieve the background color and enabled flag.
         final int backgroundColor = arguments.getInt(BACKGROUND_COLOR_ARGUMENT,
                 resources.getColor(R.color.tableEntryDefault));
-        final boolean enabled = arguments.getBoolean(ENABLED_ARGUMENT, true);
+        final boolean enabled = isEnabled();
 
         // Get the number of rows.
         final int defaultValue = 1;
@@ -302,7 +289,7 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     /**
      * Sets content of an edit control.
      *
-     * @param editText The edit control
+     * @param editText  The edit control
      * @param controlId The ID of the edit control
      */
     protected abstract void setContent(EditText editText, int controlId);
@@ -346,7 +333,7 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
         public SparseArray<U> populateArray(SparseArray<U> contentIndex, U[] content) {
 
             // Cycle for each content item.
-            for (U item: content) {
+            for (U item : content) {
 
                 // Place the item in the sparse array with an appropriate index.
                 contentIndex.put(produceId(item), item);

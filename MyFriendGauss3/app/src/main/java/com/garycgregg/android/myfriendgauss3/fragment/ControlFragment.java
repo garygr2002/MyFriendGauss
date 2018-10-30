@@ -9,11 +9,19 @@ import android.widget.EditText;
 
 import com.garycgregg.android.myfriendgauss3.R;
 import com.garycgregg.android.myfriendgauss3.content.Problem;
+import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
 public class ControlFragment extends ContentFragment<Problem> {
+
+    // The prefix for instance arguments
+    private static final String PREFIX_STRING = ControlFragment.class.getName();
+
+    // The problem argument key
+    private static final String PROBLEM_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            PREFIX_STRING, "problem");
 
     // The tag for our logging
     private static final String TAG = ControlFragment.class.getSimpleName();
@@ -31,17 +39,38 @@ public class ControlFragment extends ContentFragment<Problem> {
      * Creates an instance of a ControlFragment with the required argument(s).
      *
      * @param problemId The problem ID to be associated with the instance
+     * @param enabled   The fragment enabled argument
+     * @param problem   The problem associated with the instance
      * @return An instance of a ControlFragment
      */
-    public static ControlFragment createInstance(long problemId) {
+    public static ControlFragment createInstance(long problemId, boolean enabled,
+                                                 Problem problem) {
 
         /*
-         * Create an instance of a ControlFragment, and customize it with the problem ID.
-         * Return the fragment.
+         * Create an instance of a ControlFragment, and customize it with parameters required
+         * of a ContentFragment. Is the problem not null?
          */
         final ControlFragment fragment = new ControlFragment();
-        ContentFragment.customizeInstance(fragment, problemId);
+        ContentFragment.customizeInstance(fragment, problemId, enabled);
+        if (null != problem) {
+
+            // The problem is not null. Get the arguments from the fragment, and add the problem.
+            fragment.getArguments().putParcelable(PROBLEM_ARGUMENT, problem);
+        }
+
+        // Return the fragment.
         return fragment;
+    }
+
+    /**
+     * Creates an instance of a ControlFragment with the required argument(s).
+     *
+     * @param problemId The problem ID to be associated with the instance
+     * @param enabled   The fragment enabled argument
+     * @return An instance of a ControlFragment
+     */
+    public static ControlFragment createInstance(long problemId, boolean enabled) {
+        return createInstance(problemId, enabled, null);
     }
 
     @Override
@@ -55,6 +84,11 @@ public class ControlFragment extends ContentFragment<Problem> {
          */
         final View view = inflater.inflate(R.layout.content_control, container, true);
         problemNameEditText = view.findViewById(R.id.problem_name);
+
+        // Make the edit control clickable or focusable if it is enabled.
+        final boolean enabled = isEnabled();
+        problemNameEditText.setClickable(enabled);
+        problemNameEditText.setFocusable(enabled);
 
         /*
          * Set the text of the edit control with the problem name. Give the problem name a text
@@ -87,9 +121,17 @@ public class ControlFragment extends ContentFragment<Problem> {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
-        // Call the superclass method, and get the problem.
+        /*
+         * Call the superclass method. Try to get the problem as an argument. Was there no
+         * problem argument?
+         */
         super.onCreate(savedInstanceState);
-        problem = contentProducer.getContent(getProblemId());
+        problem = getArguments().getParcelable(PROBLEM_ARGUMENT);
+        if (null == problem) {
+
+            // There was no problem argument. Create a dummy problem.
+            problem = contentProducer.onNotFound(null, ProblemLab.NULL_ID);
+        }
 
         // Set the change list and the change set.
         setChangeList(new ArrayList<Problem>());
