@@ -7,5 +7,5 @@
     <string name="problem_name">Problem Name</string>
     <string name="solve_problem">Solve</string>
     <string name="table_item_hint">table item hint</string>
-    <string name="tale_title_hint">table title hint</string>
+    <string name="table_title_hint">table title hint</string>
 </resources>

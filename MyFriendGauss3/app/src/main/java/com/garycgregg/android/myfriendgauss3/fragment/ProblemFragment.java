@@ -1,6 +1,7 @@
 package com.garycgregg.android.myfriendgauss3.fragment;
 
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,11 +16,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.garycgregg.android.myfriendgauss3.R;
-import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
-import com.garycgregg.android.myfriendgauss3.content.Answer;
-import com.garycgregg.android.myfriendgauss3.content.Matrix;
 import com.garycgregg.android.myfriendgauss3.content.Problem;
-import com.garycgregg.android.myfriendgauss3.content.Vector;
+import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
+
+import java.util.List;
 
 public class ProblemFragment extends GaussFragment {
 
@@ -28,10 +28,6 @@ public class ProblemFragment extends GaussFragment {
 
     // The prefix for instance arguments
     private static final String PREFIX_STRING = ProblemFragment.class.getName();
-
-    // The content updated flag
-    private static final String CONTENT_UPDATED = String.format(ARGUMENT_FORMAT_STRING,
-            PREFIX_STRING, "content_updated");
 
     // The position argument
     private static final String POSITION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
@@ -50,6 +46,9 @@ public class ProblemFragment extends GaussFragment {
     // A container for pane characteristics
     private final SparseArray<PaneCharacteristics> characteristicsArray = new SparseArray<>();
 
+    // Our content producer
+    private final ProblemContentProducer contentProducer = new ProblemContentProducer();
+
     // A factory for control fragments
     private final ControlFragmentFactory controlFragmentFactory = new ControlFragmentFactory();
 
@@ -59,36 +58,67 @@ public class ProblemFragment extends GaussFragment {
     // A factory for vector fragments
     private final NumbersFragmentFactory vectorFragmentFactory = new VectorFragmentFactory();
 
-    // True if content has been updated, false otherwise
-    private boolean contentUpdated;
-
     // The position of this instance
-    private int position;
+    private int position = ILLEGAL_POSITION;
 
-    // The problem associated with this instance
+    // The problem
     private Problem problem;
 
     // The problem ID associated with this instance
-    private long problemId;
+    private long problemId = ProblemLab.NULL_ID;
+
+    /**
+     * Constructs the problem fragment.
+     */
+    public ProblemFragment() {
+
+        // Configure the immutable features of the content panes.
+        configure();
+    }
 
     /**
      * Creates an instance of a ProblemFragment with the required argument(s).
      *
-     * @param problemId The problem ID associated with this instance
+     * @param problemId The problem ID to be associated with the instance
      * @param position  The position of this instance
-     * @return A new Gauss fragment
+     * @return An instance of a ProblemFragment
      */
-    public static GaussFragment createInstance(long problemId, int position) {
+    public static ProblemFragment createInstance(long problemId, int position) {
 
-        // Create the arguments bundle. Add the problem ID and position.
+        // Create an instance of a ProblemFragment, and give it some arguments.
+        final ProblemFragment fragment = new ProblemFragment();
         final Bundle arguments = new Bundle();
+        fragment.setArguments(arguments);
+
+        // Set the problem ID and the position in the arguments, and return the fragment.
         arguments.putLong(PROBLEM_ID_ARGUMENT, problemId);
         arguments.putInt(POSITION_ARGUMENT, position);
-
-        // Create a new problem fragment and set the arguments. Return the fragment.
-        final GaussFragment fragment = new ProblemFragment();
-        fragment.setArguments(arguments);
         return fragment;
+    }
+
+    /**
+     * Gets the first element from a list, if any.
+     *
+     * @param list The list to examine
+     * @param <T>  The type of element to return
+     * @return The first element from the list, if any
+     */
+    private static <T> T getFirst(List<? extends T> list) {
+
+        /*
+         * Declare and initialize the return value, and the value of the first index. Does the list
+         * have at least one element?
+         */
+        T returnValue = null;
+        final int firstIndex = 0;
+        if ((null != list) && (firstIndex < list.size())) {
+
+            // The list has at least one element. Get the first.
+            returnValue = list.get(firstIndex);
+        }
+
+        // Return the element, or null.
+        return returnValue;
     }
 
     /**
@@ -98,17 +128,6 @@ public class ProblemFragment extends GaussFragment {
      * @param factory A factory for generating a fragment
      */
     private void addFragment(int paneId, FragmentFactory factory) {
-        addFragment(paneId, factory, false);
-    }
-
-    /**
-     * Uses a fragment factory to add a fragment for a given ID.
-     *
-     * @param paneId  The ID for which to add a fragment
-     * @param factory A factory for generating a fragment
-     * @param replace True to replace the indicated pane if it exists, false otherwise
-     */
-    private void addFragment(int paneId, FragmentFactory factory, boolean replace) {
 
         /*
          * Try to find an existing fragment for the given ID. Is there no such existing
@@ -120,17 +139,7 @@ public class ProblemFragment extends GaussFragment {
 
             // There is no such existing fragment. Create one using the given factory.
             manager.beginTransaction().add(paneId,
-                    factory.createFragment((null == problem) ? ProblemLab.NULL_ID :
-                            problem.getProblemId())).commit();
-        } else if (replace) {
-
-            /*
-             * There is an existing fragment with this pane ID, but the caller wants
-             * it replaced.
-             */
-            manager.beginTransaction().replace(paneId,
-                    factory.createFragment((null == problem) ? ProblemLab.NULL_ID :
-                            problem.getProblemId())).commit();
+                    factory.createFragment(problemId)).commit();
         }
     }
 
@@ -140,7 +149,7 @@ public class ProblemFragment extends GaussFragment {
      * @param factory The numbers fragment factory
      * @param paneId  The pane ID to use for configuration
      */
-    private PaneCharacteristics configure(NumbersFragmentFactory factory, int paneId) {
+    private void configure(NumbersFragmentFactory factory, int paneId) {
 
         /*
          * We need pane characteristics for the given ID. Try to find any published
@@ -150,67 +159,33 @@ public class ProblemFragment extends GaussFragment {
         if (null != paneCharacteristics) {
 
             /*
-             * There are existing pane characteristics for the given ID. Set the label and
-             * background color in the fragment factory from the pane characteristics.
+             * There are existing pane characteristics for the given ID. Set the label,
+             * enabled status and matrix status in the fragment factory from the pane
+             * characteristics.
              */
             factory.setLabel(paneCharacteristics.getLabel());
-            factory.setBackgroundColor(paneCharacteristics.getColorResource());
-
-            /*
-             * Set the enabled status and the matrix status in the fragment factory from the
-             * pane characteristics.
-             */
             factory.setEnabled(paneCharacteristics.isEnabled());
             factory.setMatrix(paneCharacteristics.isMatrix());
         }
-
-        // Return the pane characteristics.
-        return paneCharacteristics;
     }
 
     /**
-     * Determine if this fragment has a content update.
-     *
-     * @return True if content has been updated, false otherwise
+     * Configures the fragment factories.
      */
-    public boolean isContentUpdated() {
-        return contentUpdated;
-    }
+    private void configure() {
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-
-        /*
-         * Call through to the superclass method, and indicate that this fragment has an options
-         * menu.
-         */
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-
-        /*
-         * Use the saved instance state for arguments if it is not null. Otherwise use the instance
-         * supplied arguments.
-         */
-        final Bundle arguments = (null == savedInstanceState) ? getArguments() :
-                savedInstanceState;
-
-        // Set the content updated flag. Set the position and the problem ID.
-        contentUpdated = arguments.getBoolean(CONTENT_UPDATED, false);
-        position = arguments.getInt(POSITION_ARGUMENT, ILLEGAL_POSITION);
-        problemId = arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID);
-
-        // Get the activity's resources, and set the characteristics for the matrix pane.
-        final Resources resources = getActivity().getResources();
+        // Set the characteristics for the matrix pane.
+        final int defaultColor = Color.WHITE;
         characteristicsArray.put(R.id.matrix_pane, new PaneCharacteristics("Matrix\nEntries",
-                resources.getColor(R.color.tableEntryMatrix), true, true));
+                true, true));
 
-        // Set the characteristics for for the answer.
+        // Set the characteristics for the answer pane.
         characteristicsArray.put(R.id.answer_pane, new PaneCharacteristics("Answers\n",
-                resources.getColor(R.color.tableEntryAnswer), false, false));
+                false, false));
 
         // Set the characteristics for the vector pane.
         characteristicsArray.put(R.id.vector_pane, new PaneCharacteristics("Vector\nEntries",
-                resources.getColor(R.color.tableEntryVector), true, false));
+                true, false));
 
         // Try to configure the numbers fragment factories.
         configure(answerFragmentFactory, R.id.answer_pane);
@@ -218,10 +193,49 @@ public class ProblemFragment extends GaussFragment {
         configure(vectorFragmentFactory, R.id.vector_pane);
     }
 
+    /**
+     * Configures the color of the various number content panes.
+     */
+    private void configureColor() {
+
+        // Get the resources. Set the background color of the answer pane.
+        final Resources resources = getResources();
+        answerFragmentFactory.setBackgroundColor(resources.getColor(R.color.tableEntryAnswer));
+
+        // Set the background colors of the matrix and vector panes.
+        matrixFragmentFactory.setBackgroundColor(resources.getColor(R.color.tableEntryMatrix));
+        vectorFragmentFactory.setBackgroundColor(resources.getColor(R.color.tableEntryVector));
+    }
+
+    @Override
+    protected String getLogTag() {
+        return TAG;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+
+        /*
+         * Call the superclass method, and indicate that this fragment has an options menu.
+         * Configure the color of the content panes.
+         */
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+        configureColor();
+
+        // Get the fragment arguments. Set the position.
+        final Bundle arguments = getArguments();
+        position = arguments.getInt(POSITION_ARGUMENT, ILLEGAL_POSITION);
+
+        // Set the problem ID and the problem.
+        problemId = arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID);
+        problem = contentProducer.getContent(problemId);
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
-        // Call through to the superclass method, and inflate the options menu.
+        // Call the superclass method, and inflate the options menu.
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_problem, menu);
     }
@@ -233,11 +247,16 @@ public class ProblemFragment extends GaussFragment {
 
         // Inflate the problem fragment, and get the problem associated with the problem ID.
         final View view = inflater.inflate(R.layout.fragment_problem, container, false);
-        problem = getProblemLab().getProblem(problemId);
+        configureColor();
+
+        // Set the editable state of the matrix and vector fragment factories.
+        final boolean enable = !problem.isWriteLocked() && (null == problem.getSolved());
+        matrixFragmentFactory.setEnabled(enable);
+        vectorFragmentFactory.setEnabled(enable);
 
         // Add the control pane fragment. Get the dimensions of the problem.
         addFragment(R.id.control_pane, controlFragmentFactory);
-        final int dimensions = (null == problem) ? 1 : problem.getDimensions();
+        final int dimensions = problem.getDimensions();
 
         // Set the size of the problem in the matrix fragment factory. Add the matrix pane.
         matrixFragmentFactory.setSize(dimensions);
@@ -256,22 +275,13 @@ public class ProblemFragment extends GaussFragment {
     @Override
     public void onDestroy() {
 
-        // Clear the characteristics array and the problem ID.
-        characteristicsArray.clear();
+        // Reset the problem and problem ID.
+        problem = null;
         problemId = ProblemLab.NULL_ID;
 
-        // Reset the position and the content updated flag. Call through to the superclass method.
+        // Reset the position. Call the superclass method.
         position = ILLEGAL_POSITION;
-        contentUpdated = false;
         super.onDestroy();
-    }
-
-    @Override
-    public void onDestroyView() {
-
-        // Set the problem to null and call through to the superclass method.
-        problem = null;
-        super.onDestroyView();
     }
 
     @Override
@@ -317,31 +327,10 @@ public class ProblemFragment extends GaussFragment {
     }
 
     @Override
-    public void onPrepareOptionsMenu(Menu menu) {
+    public void onPause() {
 
-        // TODO: This is an experiment.
-        menu.findItem(R.id.solve_problem).setEnabled(false);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-
-        // Call through to the superclass method. Save the problem ID.
-        super.onSaveInstanceState(outState);
-        outState.putLong(PROBLEM_ID_ARGUMENT, problemId);
-
-        // Save the position and content updated flag.
-        outState.putInt(POSITION_ARGUMENT, position);
-        outState.putBoolean(CONTENT_UPDATED, contentUpdated);
-    }
-
-    /**
-     * Sets the content updated flag.
-     *
-     * @param contentUpdated True if content has been updated, false otherwise
-     */
-    private void setContentUpdated(boolean contentUpdated) {
-        this.contentUpdated = contentUpdated;
+        // TODO: Put the changes in the database.
+        super.onPause();
     }
 
     /**
@@ -363,11 +352,8 @@ public class ProblemFragment extends GaussFragment {
 
         @Override
         public Fragment createFragment(long problemId) {
-
-            // Create a new answer fragment. Customize the fragment, and return it.
-            final NumbersFragment<Answer> fragment = new AnswerFragment();
-            customize(fragment, problemId);
-            return fragment;
+            return AnswerFragment.createInstance(problemId, getLabel(), getBackgroundColor(),
+                    getSize());
         }
     }
 
@@ -375,13 +361,7 @@ public class ProblemFragment extends GaussFragment {
 
         @Override
         public Fragment createFragment(long problemId) {
-
-            /*
-             * Create a card fragment and customize it with the problem ID. Return the fragment.
-             */
-            final ContentFragment<Problem> fragment = new ControlFragment();
-            ContentFragment.customizeInstance(fragment, problemId);
-            return fragment;
+            return ControlFragment.createInstance(problemId);
         }
     }
 
@@ -391,10 +371,10 @@ public class ProblemFragment extends GaussFragment {
         @Override
         public Fragment createFragment(long problemId) {
 
-            // Create a new matrix fragment. Customize the fragment, and return it.
-            final NumbersFragment<Matrix> fragment = new MatrixFragment();
-            customize(fragment, problemId);
-            return fragment;
+            // Use the size for both the number of rows and the number of columns.
+            final int size = getSize();
+            return MatrixFragment.createInstance(problemId, getLabel(), getBackgroundColor(),
+                    isEnabled(), size, size);
         }
     }
 
@@ -421,17 +401,17 @@ public class ProblemFragment extends GaussFragment {
          * @param fragment  The fragment to customize
          * @param problemId The problem ID to set in the fragment
          */
-        protected void customize(NumbersFragment<?> fragment, long problemId) {
+        protected void customize(NumbersFragment fragment, long problemId) {
 
             // Get the inversion of the matrix flag. Get the size of factory output.
             final boolean isNotMatrix = !isMatrix();
             final int size = getSize();
 
             /*
-             * Customize the given fragment with a label, background color, enabled setting,
-             * size, and matrix flag.
+             * Customize the given fragment with a label, problem ID, background color, enabled
+             * setting, size, and matrix flag.
              */
-            NumbersFragment.customizeInstance(fragment, getLabel(),
+            NumbersFragment.customizeInstance(fragment, problemId, getLabel(),
                     getBackgroundColor(), isEnabled(),
                     size, isNotMatrix ? 1 : size, isNotMatrix);
 
@@ -532,9 +512,6 @@ public class ProblemFragment extends GaussFragment {
 
     private static class PaneCharacteristics {
 
-        // The color resources of the pane
-        private final int colorResource;
-
         // The enabled state of the pane
         private final boolean enabled;
 
@@ -547,27 +524,16 @@ public class ProblemFragment extends GaussFragment {
         /**
          * Creates the pane characteristics object.
          *
-         * @param label         The label of the pane
-         * @param colorResource The color resources of the pane
-         * @param enabled       The enabled state of the pane
-         * @param matrix        The matrix flag of the pane
+         * @param label   The label of the pane
+         * @param enabled The enabled state of the pane
+         * @param matrix  The matrix flag of the pane
          */
-        PaneCharacteristics(String label, int colorResource, boolean enabled, boolean matrix) {
+        PaneCharacteristics(String label, boolean enabled, boolean matrix) {
 
             // Set all the characteristics.
             this.label = label;
-            this.colorResource = colorResource;
             this.enabled = enabled;
             this.matrix = matrix;
-        }
-
-        /**
-         * Gets the color resources of the pane.
-         *
-         * @return The color resources of the pane
-         */
-        int getColorResource() {
-            return colorResource;
         }
 
         /**
@@ -598,16 +564,14 @@ public class ProblemFragment extends GaussFragment {
         }
     }
 
+
     private static class VectorFragmentFactory extends NumbersFragmentFactory
             implements FragmentFactory {
 
         @Override
         public Fragment createFragment(long problemId) {
-
-            // Create a new vector fragment. Customize the fragment, and return it.
-            final NumbersFragment<Vector> fragment = new VectorFragment();
-            customize(fragment, problemId);
-            return fragment;
+            return VectorFragment.createInstance(problemId, getLabel(), getBackgroundColor(),
+                    isEnabled(), getSize());
         }
     }
 }

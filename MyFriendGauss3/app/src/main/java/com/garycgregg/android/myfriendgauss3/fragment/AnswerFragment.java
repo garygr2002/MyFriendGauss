@@ -1,24 +1,154 @@
 package com.garycgregg.android.myfriendgauss3.fragment;
 
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.util.SparseArray;
+import android.widget.EditText;
+
 import com.garycgregg.android.myfriendgauss3.content.Answer;
+import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 public class AnswerFragment extends NumbersFragment<Answer> {
 
-    @Override
-    public Answer[] exportChanges() {
+    // The tag for our logging
+    private static final String TAG = AnswerFragment.class.getSimpleName();
 
-        // TODO: Change this.
-        return new Answer[0];
+    // Our content producer
+    private final ContentProducer<Answer[]> contentProducer = new ContentProducer<Answer[]>() {
+
+        @Override
+        public Answer[] onNotFound(ProblemLab problemLab, long problemId) {
+            return Answer.CREATOR.newArray(0);
+        }
+
+        @Override
+        public Answer[] produceContent(ProblemLab problemLab, long problemId) {
+
+            // Get answers for the given problem ID. Create an array to hold them.
+            final List<Answer> answerList = problemLab.getAnswers(problemId);
+            final Answer[] answers = Answer.CREATOR.newArray(answerList.size());
+
+            // Copy the list entries to the array, and return the array.
+            answerList.toArray(answers);
+            return answers;
+        }
+    };
+
+    // Our index producer
+    private final IndexProducer<Answer> indexProducer = new IndexProducer<Answer>() {
+
+        @Override
+        public int produceId(Answer contentItem) {
+            return calculateId(contentItem.getRow(), 0);
+        }
+    };
+
+    // The answers
+    private Answer[] answers;
+
+    /**
+     * Customizes an instance of an AnswerFragment with the required argument(s).
+     *
+     * @param problemId       The problem ID to be associated with the instance
+     * @param label           The label argument
+     * @param backgroundColor The background color argument
+     * @param rows            The number of rows argument
+     * @return A properly configured AnswerFragment
+     */
+    public static AnswerFragment createInstance(long problemId, String label, int backgroundColor,
+                                                int rows) {
+
+        /*
+         * Create an instance of an AnswerFragment, and customize it with parameters required
+         * of a NumbersFragment. Return the fragment.
+         */
+        final AnswerFragment fragment = new AnswerFragment();
+        NumbersFragment.customizeInstance(fragment, problemId, label, backgroundColor,
+                false, rows, 1, true);
+        return fragment;
     }
 
     @Override
-    public void onDestroyView() {
+    protected void addWatcher(final EditText editText, int row, int column) {
 
-        /*
-         * Release the change collections and call through to the super class method. TODO: More
-         * class specific work.
-         */
-        release();
-        super.onDestroyView();
+        // Get the content index. Calculate the control ID from the row and the column.
+        final SparseArray<Answer> contentIndex = getContentIndex();
+        final int controlId = calculateId(row, column);
+
+        // Is there no existing content with the calculated control ID?
+        Answer answer = contentIndex.get(controlId);
+        if (null == answer) {
+
+            // There is no existing content. Create it, then set the problem ID.
+            answer = new Answer();
+            answer.setProblemId(getProblemId());
+
+            // Set the row number, and add the content to the content index.
+            answer.setRow(row);
+            contentIndex.put(controlId, answer);
+        }
+
+        // Give the control a number text changed listener.
+        editText.addTextChangedListener(new NumberTextWatcher<Answer>(answer) {
+
+            @Override
+            protected void setChange(String change) {
+
+                /*
+                 * Get the content object, set its entry, and add the content object to the change
+                 * list.
+                 */
+                final Answer answer = getContent();
+                answer.setEntry(Double.parseDouble(change));
+                addChange(answer);
+            }
+        });
+    }
+
+    @Override
+    protected String getLogTag() {
+        return TAG;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+
+        // Call the superclass method, and get the answers. Create and set a content index.
+        super.onCreate(savedInstanceState);
+        answers = contentProducer.getContent(getProblemId());
+        setContentIndex(indexProducer.populateArray(new SparseArray<Answer>(), answers));
+
+        // Set the change list and the change set.
+        setChangeList(new ArrayList<Answer>());
+        setChangeSet(new HashSet<Answer>());
+    }
+
+    @Override
+    public void onDestroy() {
+
+        // Release the changes, and set the content index to null.
+        releaseChanges();
+        setContentIndex(null);
+
+        // Set the answers to null, and call the superclass method.
+        answers = null;
+        super.onDestroy();
+    }
+
+    @Override
+    protected void setContent(EditText editText, int controlId) {
+
+        // Get the content index. Is there content for this control?
+        final SparseArray<Answer> contentIndex = getContentIndex();
+        final Answer answer = contentIndex.get(controlId);
+        if (null != answer) {
+
+            // There is content for this control. Set it.
+            editText.setText(Double.toString(answer.getEntry()));
+        }
     }
 }

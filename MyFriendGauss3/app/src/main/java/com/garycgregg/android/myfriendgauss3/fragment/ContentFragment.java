@@ -23,14 +23,14 @@ public abstract class ContentFragment<T> extends GaussFragment {
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "problem_id");
 
+    // A tag for logging statements
+    private static final String TAG = ContentFragment.class.getSimpleName();
+
     // The list of changes, in change order
     private List<T> changeList;
 
     // The set of unique changes
     private Set<T> changeSet;
-
-    // The list of content objects
-    private List<T> contentList;
 
     // The problem ID associated with this instance
     private long problemId = ProblemLab.NULL_ID;
@@ -55,19 +55,18 @@ public abstract class ContentFragment<T> extends GaussFragment {
      * @param fragment  An existing ContentFragment
      * @param problemId The problem ID to be associated with the instance
      */
-    public static void customizeInstance(ContentFragment<?> fragment, long problemId) {
+    protected static void customizeInstance(ContentFragment<?> fragment, long problemId) {
 
         // Get the existing arguments, if any.
         Bundle arguments = fragment.getArguments();
         if (null == arguments) {
 
             // Create a new, empty arguments object if there is none already.
-            arguments = new Bundle();
+            fragment.setArguments(arguments = new Bundle());
         }
 
-        // Add the problem ID, and set or reset the arguments in the fragment instance.
+        // Add the problem ID to the arguments.
         arguments.putLong(PROBLEM_ID_ARGUMENT, problemId);
-        fragment.setArguments(arguments);
     }
 
     /**
@@ -100,34 +99,26 @@ public abstract class ContentFragment<T> extends GaussFragment {
     }
 
     /**
-     * Clears the content list.
-     */
-    protected void clearContentList() {
-        clearCollection(contentList);
-    }
-
-    /**
-     * Creates subclass content.
+     * Creates the content.
      *
      * @param inflater  An inflater for layouts
-     * @param container A container for the subclass content
+     * @param container A container for the content
      */
-    protected abstract void createControls(LayoutInflater inflater, ViewGroup container);
+    protected abstract void createContent(LayoutInflater inflater, ViewGroup container);
 
     /**
-     * Exports changes in the fragment to the caller.
+     * Gets the change list.
      *
-     * @return An array of changes
+     * @return The change list
      */
-    public abstract T[] exportChanges();
+    @Nullable
+    public List<T> getChangeList() {
+        return changeList;
+    }
 
-    /**
-     * Gets the content list.
-     *
-     * @return The content list
-     */
-    protected List<T> getContentList() {
-        return contentList;
+    @Override
+    protected String getLogTag() {
+        return TAG;
     }
 
     /**
@@ -142,13 +133,9 @@ public abstract class ContentFragment<T> extends GaussFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
-        /*
-         * Call through to the superclass method. Use the saved instance state for arguments if it
-         * is not null. Otherwise use the instance supplied arguments.  Set the problem ID.
-         */
+        // Call the superclass method. Set the problem ID from the arguments.
         super.onCreate(savedInstanceState);
-        final Bundle arguments = (null == savedInstanceState) ? getArguments() :
-                savedInstanceState;
+        final Bundle arguments = getArguments();
         setProblemId(arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID));
     }
 
@@ -161,8 +148,8 @@ public abstract class ContentFragment<T> extends GaussFragment {
         final CardView view = (CardView) inflater.inflate(R.layout.fragment_card, container,
                 false);
 
-        // Create the subclass content. Return the card view.
-        createControls(inflater, (ViewGroup) view.findViewById(R.id.card_content));
+        // Create the subclass contentCollection. Return the card view.
+        createContent(inflater, (ViewGroup) view.findViewById(R.id.card_content));
         return view;
     }
 
@@ -180,17 +167,6 @@ public abstract class ContentFragment<T> extends GaussFragment {
         // Call through to the superclass method, and save the problem ID.
         super.onSaveInstanceState(outState);
         outState.putLong(PROBLEM_ID_ARGUMENT, getProblemId());
-    }
-
-    /**
-     * Releases the collections.
-     */
-    protected void release() {
-
-        // Release the change collections. Clear the content list before setting it to null.
-        releaseChanges();
-        clearContentList();
-        setContentList(null);
     }
 
     /**
@@ -220,15 +196,6 @@ public abstract class ContentFragment<T> extends GaussFragment {
      */
     protected void setChangeSet(Set<T> changeSet) {
         this.changeSet = changeSet;
-    }
-
-    /**
-     * Sets the content list.
-     *
-     * @param contentList The content list
-     */
-    protected void setContentList(List<T> contentList) {
-        this.contentList = contentList;
     }
 
     /**

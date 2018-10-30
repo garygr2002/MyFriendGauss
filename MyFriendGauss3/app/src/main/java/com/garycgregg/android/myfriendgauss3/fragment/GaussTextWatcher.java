@@ -13,7 +13,7 @@ abstract class GaussTextWatcher<T> implements TextWatcher {
      *
      * @param content The content of the watcher
      */
-    GaussTextWatcher(T content) {
+    public GaussTextWatcher(T content) {
         this.content = content;
     }
 
@@ -38,12 +38,21 @@ abstract class GaussTextWatcher<T> implements TextWatcher {
     }
 
     /**
-     * Determines if a content change occurred.
+     * Gets the comparison string from the content.
+     *
+     * @return The comparison string from the content
+     */
+    protected abstract String getContentString();
+
+    /**
+     * Determines if a change has occurred in the content.
      *
      * @param candidate The candidate change
-     * @return True if there was a content change, false otherwise
+     * @return True if content has been changed, false otherwise
      */
-    protected abstract boolean isChanged(String candidate);
+    protected boolean isChanged(String candidate) {
+        return !candidate.equals(getContentString());
+    }
 
     @Override
     public void onTextChanged(CharSequence charSequence, int start, int before, int count) {

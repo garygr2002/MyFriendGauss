@@ -146,6 +146,25 @@ public class ProblemLab {
             problem.setWriteLocked(false);
             add(problem);
         }
+
+        final Matrix matrix = new Matrix();
+        matrix.setProblemId(2);
+
+        final Vector vector = new Vector();
+        vector.setProblemId(2);
+        for(int i = 0; i < 3; ++i) {
+
+            matrix.setRow(i);
+            for (int j = 0; j < 3; ++j) {
+
+                matrix.setColumn(j);
+                matrix.setEntry(i + j);
+                add(matrix);
+            }
+
+            vector.setRow(i);
+            add(vector);
+        }
     }
 
     public int delete(Answer answer) {

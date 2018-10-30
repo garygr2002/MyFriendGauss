@@ -23,7 +23,9 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemLa
     private static final String PREFIX = ProblemPagerActivity.class.getName();
     private static final String POSITION_ARGUMENT = String.format(FORMAT_STRING, PREFIX,
             "position");
-
+    private static final String TAG = ProblemPagerActivity.class.getSimpleName();
+    private static final String UPDATE_IN_PROGRESS = String.format(FORMAT_STRING, PREFIX,
+            "update_in_progress");
     private ProblemLab problemLab;
     private List<Problem> problemList;
 
@@ -51,17 +53,18 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemLa
         final ViewPager viewPager = findViewById(R.id.problem_view_pager);
         viewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
 
-            @Override
-            public int getCount() {
-                return problemList.size();
-            }
+                    @Override
+                    public int getCount() {
+                        return problemList.size();
+                    }
 
-            @Override
-            public Fragment getItem(int position) {
-                return ProblemFragment.createInstance(problemList.get(position).getProblemId(),
-                        position);
-            }
-        });
+                    @Override
+                    public Fragment getItem(int position) {
+                        return ProblemFragment.createInstance(problemList.get(position).getProblemId(),
+                                position);
+                    }
+
+                });
 
         viewPager.setCurrentItem(getIntent().getIntExtra(POSITION_ARGUMENT, 0));
     }

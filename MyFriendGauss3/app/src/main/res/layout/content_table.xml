@@ -8,7 +8,7 @@
         android:id="@+id/table_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/tale_title_hint"
+        android:hint="@string/table_title_hint"
         android:textColor="@color/tableLabels"
         android:textSize="12sp" />
 
