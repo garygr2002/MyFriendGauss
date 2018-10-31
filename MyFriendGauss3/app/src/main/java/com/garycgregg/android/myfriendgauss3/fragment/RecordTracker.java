@@ -5,7 +5,7 @@ import android.util.SparseArray;
 class RecordTracker<T> {
 
     // An array of containers (see container definition, below)
-    private final SparseArray<Container<T>> array = new SparseArray<>();
+    private final SparseArray<Container<T>> array;
 
     // The container action to clear each record in the array
     private final ContainerAction<T> clearAction = new ContainerAction<T>() {
@@ -18,6 +18,15 @@ class RecordTracker<T> {
             container.setState(State.NOT_CHANGED);
         }
     };
+
+    /**
+     * Constructs the record tracker.
+     *
+     * @param initialCapacity The initial record capacity of the tracker
+     */
+    public RecordTracker(int initialCapacity) {
+        array = new SparseArray<>(initialCapacity);
+    }
 
     /**
      * Clears changes in the array.
