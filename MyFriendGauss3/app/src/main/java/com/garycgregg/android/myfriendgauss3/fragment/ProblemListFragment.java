@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.garycgregg.android.myfriendgauss3.activity.ProblemPagerActivity;
 import com.garycgregg.android.myfriendgauss3.R;
 import com.garycgregg.android.myfriendgauss3.content.Problem;
+import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 import java.util.List;
 
@@ -54,11 +55,13 @@ public class ProblemListFragment extends GaussFragment {
      */
     private void updateUI() {
 
-        // Get a list of all the problems. Is there not already an adapter?
-        final List<Problem> problemList = getProblemLab().getProblems();
-        if (null == adapter) {
+        // Get a list of all the problems.
+        final ProblemLab problemLab = getProblemLab();
+        final List<Problem> problemList = (null == problemLab) ? null :
+                getProblemLab().getProblems();
 
-            // There is not already an adapter. Create one and set it in the problem recycler view.
+        // Create a new adapter and and set it in the problem recycler view if the adapter is null.
+        if (null == adapter) {
             problemRecyclerView.setAdapter(adapter = new ProblemAdapter(problemList));
         }
 
