@@ -19,14 +19,47 @@ import java.util.List;
 
 public class ProblemLab {
 
+    // The maximum number of problem dimensions
     public static final int MAX_DIMENSIONS = 15;
+
+    // The null problem ID
     public static final long NULL_ID = 0L;
 
-    private static final int conflictAlgorithm = SQLiteDatabase.CONFLICT_REPLACE;
-    private static final String whereFormat = "%s = ?";
-    private static final String problemWhereClause = String.format(whereFormat,
+    // Our conflict record conflict algorithm
+    private static final int CONFLICT_ALGORITHM = SQLiteDatabase.CONFLICT_REPLACE;
+
+    // 'Where' format clause format problem ID and row
+    private static final String ID_AND_ROW_FORMAT = "%s = ? and %s = ?";
+
+    // 'Where' format clause format for problem ID and row
+    private static final String ANSWER_WHERE_CLAUSE = String.format(ID_AND_ROW_FORMAT,
+            ProblemDbSchema.AnswerTable.Columns.PROBLEM_ID,
+            ProblemDbSchema.AnswerTable.Columns.ROW);
+
+    // 'Where' format clause for problem ID only
+    private static final String ID_ONLY_FORMAT = "%s = ?";
+
+    // 'Where' format clause format for problem ID, row and column
+    private static final String ID_ROW_AND_COLUMN_FORMAT = "%s = ? and %s = ? and %s = ?";
+
+    // The Matrix table 'where' clause
+    private static final String MATRIX_WHERE_CLAUSE = String.format(ID_ROW_AND_COLUMN_FORMAT,
+            ProblemDbSchema.MatrixTable.Columns.PROBLEM_ID,
+            ProblemDbSchema.MatrixTable.Columns.ROW,
+            ProblemDbSchema.MatrixTable.Columns.COLUMN);
+
+    // The Problem table 'where' clause
+    private static final String PROBLEM_WHERE_CLAUSE = String.format(ID_ONLY_FORMAT,
             ProblemDbSchema.ProblemTable.Columns.PROBLEM_ID);
+
+    // The Vector table 'where' clause
+    private static final String VECTOR_WHERE_CLAUSE = String.format(ID_AND_ROW_FORMAT,
+            ProblemDbSchema.VectorTable.Columns.PROBLEM_ID,
+            ProblemDbSchema.VectorTable.Columns.ROW);
+
+    // Our SQLite database
     private final SQLiteDatabase database;
+
     private final WrapperManager<Answer> answerWrapperManager = new WrapperManager<Answer>() {
 
         @Override
@@ -42,6 +75,7 @@ public class ProblemLab {
             return queryAnswers(arguments.first, arguments.second);
         }
     };
+
     private final WrapperManager<Matrix> matrixWrapperManager = new WrapperManager<Matrix>() {
 
         @Override
@@ -57,6 +91,7 @@ public class ProblemLab {
             return queryMatrices(arguments.first, arguments.second);
         }
     };
+
     private final WrapperManager<Problem> problemWrapperManager = new WrapperManager<Problem>() {
 
         @Override
@@ -72,6 +107,7 @@ public class ProblemLab {
             return queryProblems(arguments.first, arguments.second);
         }
     };
+
     private final WrapperManager<Vector> vectorWrapperManager = new WrapperManager<Vector>() {
 
         @Override
@@ -111,24 +147,24 @@ public class ProblemLab {
         }
     }
 
-    public void add(Answer answer) {
+    public void addOrReplace(Answer answer) {
         database.insertWithOnConflict(ProblemDbSchema.AnswerTable.name, null,
-                getContentValues(answer), conflictAlgorithm);
+                getContentValues(answer), CONFLICT_ALGORITHM);
     }
 
-    public void add(Matrix matrix) {
+    public void addOrReplace(Matrix matrix) {
         database.insertWithOnConflict(ProblemDbSchema.MatrixTable.name, null,
-                getContentValues(matrix), conflictAlgorithm);
+                getContentValues(matrix), CONFLICT_ALGORITHM);
     }
 
-    public long add(Problem problem) {
+    public long addOrReplace(Problem problem) {
         return database.insert(ProblemDbSchema.ProblemTable.name, null,
                 getContentValues(problem, true));
     }
 
-    public long add(Vector vector) {
+    public long addOrReplace(Vector vector) {
         return database.insertWithOnConflict(ProblemDbSchema.VectorTable.name, null,
-                getContentValues(vector), conflictAlgorithm);
+                getContentValues(vector), CONFLICT_ALGORITHM);
     }
 
     /**
@@ -144,7 +180,7 @@ public class ProblemLab {
 
             problem.setDimensions((i % 10) + 1);
             problem.setWriteLocked(false);
-            add(problem);
+            addOrReplace(problem);
         }
 
         final Matrix matrix = new Matrix();
@@ -152,44 +188,37 @@ public class ProblemLab {
 
         final Vector vector = new Vector();
         vector.setProblemId(2);
-        for(int i = 0; i < 3; ++i) {
+        for (int i = 0; i < 3; ++i) {
 
             matrix.setRow(i);
             for (int j = 0; j < 3; ++j) {
 
                 matrix.setColumn(j);
                 matrix.setEntry(i + j);
-                add(matrix);
+                addOrReplace(matrix);
             }
 
             vector.setRow(i);
-            add(vector);
+            addOrReplace(vector);
         }
     }
 
     public int delete(Answer answer) {
-        return database.delete(ProblemDbSchema.AnswerTable.name, String.format("%s = ? and %s = ?",
-                ProblemDbSchema.AnswerTable.Columns.PROBLEM_ID,
-                ProblemDbSchema.AnswerTable.Columns.ROW),
+        return database.delete(ProblemDbSchema.AnswerTable.name, ANSWER_WHERE_CLAUSE,
                 new String[]{Long.toString(answer.getProblemId()),
                         Integer.toString(answer.getRow())});
     }
 
     public int delete(Matrix matrix) {
         return database.delete(ProblemDbSchema.MatrixTable.name,
-                String.format("%s = ? and %s = ? and %s = ?",
-                        ProblemDbSchema.MatrixTable.Columns.PROBLEM_ID,
-                        ProblemDbSchema.MatrixTable.Columns.ROW,
-                        ProblemDbSchema.MatrixTable.Columns.COLUMN),
+                MATRIX_WHERE_CLAUSE,
                 new String[]{Long.toString(matrix.getProblemId()),
                         Integer.toString(matrix.getRow()),
                         Integer.toString(matrix.getColumn())});
     }
 
     public int delete(Vector vector) {
-        return database.delete(ProblemDbSchema.VectorTable.name, String.format("%s = ? and %s = ?",
-                ProblemDbSchema.VectorTable.Columns.PROBLEM_ID,
-                ProblemDbSchema.VectorTable.Columns.ROW),
+        return database.delete(ProblemDbSchema.VectorTable.name, VECTOR_WHERE_CLAUSE,
                 new String[]{Long.toString(vector.getProblemId()),
                         Integer.toString(vector.getRow())});
     }
@@ -205,7 +234,7 @@ public class ProblemLab {
         } else {
 
             whereArgs = new String[]{Long.toString(problemId)};
-            whereClause = problemWhereClause;
+            whereClause = PROBLEM_WHERE_CLAUSE;
         }
 
         return database.delete(ProblemDbSchema.ProblemTable.name, whereClause, whereArgs);
@@ -454,35 +483,60 @@ public class ProblemLab {
 
         return database.update(ProblemDbSchema.ProblemTable.name,
                 getContentValues(problem),
-                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
+                PROBLEM_WHERE_CLAUSE, new String[]{Long.toString(problem.getProblemId())});
+    }
+
+    public int update(Answer answer) {
+
+        return database.update(ProblemDbSchema.AnswerTable.name,
+                getContentValues(answer),
+                ANSWER_WHERE_CLAUSE, new String[]{Long.toString(answer.getProblemId()),
+                        Integer.toString(answer.getRow())});
+    }
+
+    public int update(Matrix matrix) {
+
+        return database.update(ProblemDbSchema.MatrixTable.name,
+                getContentValues(matrix),
+                MATRIX_WHERE_CLAUSE, new String[]{Long.toString(matrix.getProblemId()),
+                        Integer.toString(matrix.getRow()),
+                        Integer.toString(matrix.getColumn())});
+    }
+
+    public int update(Vector vector) {
+
+        return database.update(ProblemDbSchema.VectorTable.name,
+                getContentValues(vector),
+                ANSWER_WHERE_CLAUSE, new String[]{Long.toString(vector.getProblemId()),
+                        Integer.toString(vector.getRow())});
     }
 
     public int updateDimensions(Problem problem) {
 
         return database.update(ProblemDbSchema.ProblemTable.name,
                 getContentDimensions(problem),
-                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
+                PROBLEM_WHERE_CLAUSE, new String[]{Long.toString(problem.getProblemId())});
     }
 
     public int updateName(Problem problem) {
 
         return database.update(ProblemDbSchema.ProblemTable.name,
                 getContentName(problem),
-                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
+                PROBLEM_WHERE_CLAUSE, new String[]{Long.toString(problem.getProblemId())});
     }
 
     public int updateSolved(Problem problem) {
 
         return database.update(ProblemDbSchema.ProblemTable.name,
                 getContentSolved(problem),
-                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
+                PROBLEM_WHERE_CLAUSE, new String[]{Long.toString(problem.getProblemId())});
     }
 
     public int updateWriteLock(Problem problem) {
 
         return database.update(ProblemDbSchema.ProblemTable.name,
                 getContentWriteLock(problem),
-                problemWhereClause, new String[]{Long.toString(problem.getProblemId())});
+                PROBLEM_WHERE_CLAUSE, new String[]{Long.toString(problem.getProblemId())});
     }
 
     private abstract class WrapperManager<T> {
@@ -494,7 +548,7 @@ public class ProblemLab {
             if (null != problemId) {
 
                 whereArgs = new String[]{Long.toString(problemId)};
-                whereClause = String.format(whereFormat, fieldName);
+                whereClause = String.format(ID_ONLY_FORMAT, fieldName);
             }
 
             return new Pair<>(whereClause, whereArgs);

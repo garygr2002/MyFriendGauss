@@ -23,12 +23,12 @@ public class MatrixCursorWrapper extends CursorWrapper {
      */
     public Matrix getMatrix() {
 
-        // Create the Matrix object. Add the problem ID and the row.
+        // Create the Matrix object. Set the problem ID and the row.
         final Matrix matrix = new Matrix();
         matrix.setProblemId(getLong(getColumnIndex(MatrixTable.Columns.PROBLEM_ID)));
         matrix.setRow(getInt(getColumnIndex(MatrixTable.Columns.ROW)));
 
-        // Add the column and entry. Return the Matrix object.
+        // Set the column and entry. Return the Matrix object.
         matrix.setColumn(getInt(getColumnIndex(MatrixTable.Columns.COLUMN)));
         matrix.setEntry(getDouble(getColumnIndex(MatrixTable.Columns.ENTRY)));
         return matrix;

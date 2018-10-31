@@ -20,6 +20,6 @@ public class VectorSynchronizationTask extends SynchronizationTask<Vector> {
 
     @Override
     protected void synchronize(@NonNull Vector item) {
-        getProblemLab().add(item);
+        getProblemLab().addOrReplace(item);
     }
 }

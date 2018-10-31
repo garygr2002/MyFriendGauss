@@ -3,6 +3,7 @@ package com.garycgregg.android.myfriendgauss3.fragment;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,7 +17,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.garycgregg.android.myfriendgauss3.R;
+import com.garycgregg.android.myfriendgauss3.content.Matrix;
 import com.garycgregg.android.myfriendgauss3.content.Problem;
+import com.garycgregg.android.myfriendgauss3.content.Vector;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 import java.util.List;
@@ -67,6 +70,9 @@ public class ProblemFragment extends GaussFragment {
     // The problem ID associated with this instance
     private long problemId = ProblemLab.NULL_ID;
 
+    // The vector fragment
+    private VectorFragment vectorFragment;
+
     /**
      * Constructs the problem fragment.
      */
@@ -88,6 +94,29 @@ public class ProblemFragment extends GaussFragment {
     }
 
     /**
+     * Copies the state of a problem from a source to a destination. Only updates the fields that
+     * this class does not explicitly modify.
+     *
+     * @param destination The destination problem
+     * @param source      The source problem
+     */
+    private static void copyProblemState(@NonNull Problem destination,
+                                         @NonNull Problem source) {
+
+        /*
+         * Note: This class works with problem dimensions and the write lock. It considers invalid
+         * any changes made to these fields from another source (namely, from the control
+         * fragment).
+         */
+        destination.setProblemId(source.getProblemId());
+        destination.setName(source.getName());
+
+        // Copy the solved and created dates.
+        destination.setSolved(source.getSolved());
+        destination.setCreated(source.getCreated());
+    }
+
+    /**
      * Creates an instance of a ProblemFragment with the required argument(s).
      *
      * @param problemId The problem ID to be associated with the instance
@@ -105,6 +134,25 @@ public class ProblemFragment extends GaussFragment {
         arguments.putLong(PROBLEM_ID_ARGUMENT, problemId);
         arguments.putInt(POSITION_ARGUMENT, position);
         return fragment;
+    }
+
+    /**
+     * Gets the change list from a ContentFragment. Note: Clears the change list in the fragment
+     * after retrieving it. The changed content is then the responsibility of the caller!
+     *
+     * @param fragment A ContentFragment
+     * @param <T>      The type of the contained change list
+     * @return The change list from the content fragment.
+     */
+    private static <T> List<T> getChanges(@NonNull ContentFragment<T> fragment) {
+
+        /*
+         * Get the change list from the fragment. Clear the list in the fragment, and return the
+         * list.
+         */
+        final List<T> changeList = fragment.getChangeList();
+        fragment.clearChanges();
+        return changeList;
     }
 
     /**
@@ -149,8 +197,21 @@ public class ProblemFragment extends GaussFragment {
         if (null == fragment) {
 
             // There is no such existing fragment. Create one using the given factory.
-            manager.beginTransaction().add(paneId,
-                    factory.createFragment(problemId)).commit();
+            manager.beginTransaction().add(paneId, factory.createFragment(problemId)).commit();
+        }
+    }
+
+    /**
+     * Checks to make sure the problem is not locked, and throws a runtime exception if it is.
+     */
+    private void checkProblemNotLocked() {
+
+        // Is the problem write locked? It should not be.
+        if ((null != problem) && problem.isWriteLocked()) {
+
+            // The problem is write locked. Throw an illegal state exception.
+            throw new IllegalStateException("Attempting to make a problem change " +
+                    "although the problem has been locked by someone else!");
         }
     }
 
@@ -313,12 +374,18 @@ public class ProblemFragment extends GaussFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        // Inflate the problem fragment. Add the control and answer fragments.
+        /*
+         * Inflate the problem fragment. Add the control and answer fragments to the problem
+         * fragment.
+         */
         final View view = inflater.inflate(R.layout.fragment_problem, container, false);
         addFragment(R.id.control_pane, controlFragmentFactory);
         addFragment(R.id.answer_pane, answerFragmentFactory);
 
-        // Add the matrix and vector fragments. Return the problem fragment view.
+        /*
+         * Add the matrix and vector fragments to the problem fragment. Return the problem
+         * fragment.
+         */
         addFragment(R.id.matrix_pane, matrixFragmentFactory);
         addFragment(R.id.vector_pane, vectorFragmentFactory);
         return view;
@@ -382,8 +449,59 @@ public class ProblemFragment extends GaussFragment {
     @Override
     public void onPause() {
 
-        // TODO: Put the changes in the database.
+        // Put the changes in the database, and call the superclass method.
+        synchronize();
         super.onPause();
+    }
+
+    /**
+     * Synchronizes fragment content with the database.
+     */
+    public void synchronize() {
+
+        output("synchronize()");
+
+        // Get the problem lab. Is the problem lab not null?
+        final ProblemLab problemLab = getProblemLab();
+        if (null != problemLab) {
+
+            /*
+             * The problem lab is not null. Get the fragment manager. Get the first changed
+             * problem from the control fragment. Is the changed problem, if any, not null?
+             */
+            final FragmentManager manager = getChildFragmentManager();
+            final Problem problemFromControl = getFirst(
+                    getChanges((ControlFragment) manager.findFragmentById(R.id.control_pane)));
+            if (null != problemFromControl) {
+
+                /*
+                 * The problem from the control fragment is not null. Copy the problem state to
+                 * our own problem copy. Check to make sure that the problem state is unlocked
+                 * before updating the database.
+                 */
+                copyProblemState(problem, problemFromControl);
+                checkProblemNotLocked();
+                problemLab.update(problem);
+            }
+
+            // Get the matrix change list, and cycle for each changed matrix entry.
+            final List<Matrix> matrixList =
+                    getChanges((MatrixFragment) manager.findFragmentById(R.id.matrix_pane));
+            for (Matrix matrix : matrixList) {
+
+                // Add or replace the entry in the database.
+                problemLab.addOrReplace(matrix);
+            }
+
+            // Get the vector change list, and cycle for each changed vector entry.
+            final List<Vector> vectorList =
+                    getChanges((VectorFragment) manager.findFragmentById(R.id.vector_pane));
+            for (Vector vector : vectorList) {
+
+                // Add or replace the entry in the database.
+                problemLab.addOrReplace(vector);
+            }
+        }
     }
 
     /**

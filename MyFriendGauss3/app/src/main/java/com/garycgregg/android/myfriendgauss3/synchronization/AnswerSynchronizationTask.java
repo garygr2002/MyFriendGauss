@@ -20,6 +20,6 @@ public class AnswerSynchronizationTask extends SynchronizationTask<Answer> {
 
     @Override
     protected void synchronize(@NonNull Answer item) {
-        getProblemLab().add(item);
+        getProblemLab().addOrReplace(item);
     }
 }

@@ -79,14 +79,14 @@ public class ControlFragment extends ContentFragment<Problem> {
         output("createContent(LayoutInflater, ViewGroup)");
 
         /*
-         * Inflate our content and find the edit control for the problem name. Find the edit
-         * control for the problem name.
+         * Inflate our content. Find the edit control for the problem name, and get the enabled
+         * flag.
          */
         final View view = inflater.inflate(R.layout.content_control, container, true);
         problemNameEditText = view.findViewById(R.id.problem_name);
+        final boolean enabled = isEnabled();
 
         // Make the edit control clickable or focusable if it is enabled.
-        final boolean enabled = isEnabled();
         problemNameEditText.setClickable(enabled);
         problemNameEditText.setFocusable(enabled);
 
@@ -111,6 +111,17 @@ public class ControlFragment extends ContentFragment<Problem> {
                 addChange(content);
             }
         });
+
+        // Clear the change list.
+        clearChanges();
+    }
+
+    @Override
+    public void clearChanges() {
+
+        // Create a new change list and change set.
+        setChangeList(new ArrayList<Problem>());
+        setChangeSet(new HashSet<Problem>());
     }
 
     @Override
@@ -132,17 +143,12 @@ public class ControlFragment extends ContentFragment<Problem> {
             // There was no problem argument. Create a dummy problem.
             problem = contentProducer.onNotFound(null, ProblemLab.NULL_ID);
         }
-
-        // Set the change list and the change set.
-        setChangeList(new ArrayList<Problem>());
-        setChangeSet(new HashSet<Problem>());
     }
 
     @Override
     public void onDestroy() {
 
-        // Release the changes, and set the problem to null. Call the superclass method.
-        releaseChanges();
+        // Set the problem to null, and call the superclass method.
         problem = null;
         super.onDestroy();
     }
@@ -150,7 +156,8 @@ public class ControlFragment extends ContentFragment<Problem> {
     @Override
     public void onDestroyView() {
 
-        // Release the edit control for the problem name. Call the superclass method.
+        // Release the changes, and set the edit control to null. Call the superclass method.
+        releaseChanges();
         problemNameEditText = null;
         super.onDestroyView();
     }

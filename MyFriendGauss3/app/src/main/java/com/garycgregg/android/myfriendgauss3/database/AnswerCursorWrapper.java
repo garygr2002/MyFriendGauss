@@ -23,11 +23,11 @@ public class AnswerCursorWrapper extends CursorWrapper {
      */
     public Answer getAnswer() {
 
-        // Create the Answer object, and add the problem ID.
+        // Create the Answer object, and set the problem ID.
         final Answer answer = new Answer();
         answer.setProblemId(getLong(getColumnIndex(AnswerTable.Columns.PROBLEM_ID)));
 
-        // Add the row and entry. Return the Answer object.
+        // Set the row and entry. Return the Answer object.
         answer.setRow(getInt(getColumnIndex(AnswerTable.Columns.ROW)));
         answer.setEntry(getDouble(getColumnIndex(AnswerTable.Columns.ENTRY)));
         return answer;

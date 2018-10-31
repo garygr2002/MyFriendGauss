@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import com.garycgregg.android.myfriendgauss3.R;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -48,21 +47,24 @@ public abstract class ContentFragment<T> extends GaussFragment {
     private long problemId = ProblemLab.NULL_ID;
 
     /**
-     * Clears a collection.
+     * Customizes an instance of a ContentFragment with the required argument(s).
      *
-     * @param collection A collection
-     * @param <T>        The type contained in the collection
+     * @param fragment  An existing ContentFragment
+     * @param problemId The problem ID to be associated with the instance
+     * @param enabled   The fragment enabled argument
      */
-    private static <T> void clearCollection(Collection<T> collection) {
+    protected static void customizeInstance(@NonNull ContentFragment<?> fragment, long problemId,
+                                            boolean enabled) {
 
-        // Clear the collection if it is not null.
-        if (null != collection) {
-            collection.clear();
-        }
+        // Get the fragment arguments. Add the problem ID and enabled flag arguments.
+        final Bundle arguments = getArguments(fragment);
+        arguments.putLong(PROBLEM_ID_ARGUMENT, problemId);
+        arguments.putBoolean(ENABLED_ARGUMENT, enabled);
     }
 
     /**
      * Gets the arguments from a fragment.
+     *
      * @param fragment A fragment
      * @return The arguments from the fragment
      */
@@ -78,22 +80,6 @@ public abstract class ContentFragment<T> extends GaussFragment {
 
         // Return the arguments.
         return arguments;
-    }
-
-    /**
-     * Customizes an instance of a ContentFragment with the required argument(s).
-     *
-     * @param fragment  An existing ContentFragment
-     * @param problemId The problem ID to be associated with the instance
-     * @param enabled   The fragment enabled argument
-     */
-    protected static void customizeInstance(@NonNull ContentFragment<?> fragment, long problemId,
-                                            boolean enabled) {
-
-        // Get the fragment arguments. Add the problem ID and enabled flag arguments.
-        final Bundle arguments = getArguments(fragment);
-        arguments.putLong(PROBLEM_ID_ARGUMENT, problemId);
-        arguments.putBoolean(ENABLED_ARGUMENT, enabled);
     }
 
     /**
@@ -118,12 +104,7 @@ public abstract class ContentFragment<T> extends GaussFragment {
     /**
      * Clears the changes.
      */
-    protected void clearChanges() {
-
-        // Clear both the change list and change set.
-        clearCollection(changeList);
-        clearCollection(changeSet);
-    }
+    public abstract void clearChanges();
 
     /**
      * Creates the content.

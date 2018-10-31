@@ -3,6 +3,9 @@ package com.garycgregg.android.myfriendgauss3.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.garycgregg.android.myfriendgauss3.content.Matrix;
@@ -114,6 +117,14 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     }
 
     @Override
+    public void clearChanges() {
+
+        // Create a new change list and change set.
+        setChangeList(new ArrayList<Matrix>());
+        setChangeSet(new HashSet<Matrix>());
+    }
+
+    @Override
     protected String getLogTag() {
         return TAG;
     }
@@ -125,20 +136,23 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
         super.onCreate(savedInstanceState);
         matrixEntries = contentProducer.getContent(getProblemId());
         setContentIndex(indexProducer.populateArray(new SparseArray<Matrix>(), matrixEntries));
+    }
 
-        // Set the change list and the change set.
-        setChangeList(new ArrayList<Matrix>());
-        setChangeSet(new HashSet<Matrix>());
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+
+        // Call the superclass method to get a view. Clear the changes, and return the view.
+        final View view = super.onCreateView(inflater, container, savedInstanceState);
+        clearChanges();
+        return view;
     }
 
     @Override
     public void onDestroy() {
 
-        // Release the changes, and set the content index to null.
-        releaseChanges();
-        setContentIndex(null);
-
-        // Set the matrixEntries to null, and call the superclass method.
+        // Set the matrix entries to null, and call the superclass method.
         matrixEntries = null;
         super.onDestroy();
     }

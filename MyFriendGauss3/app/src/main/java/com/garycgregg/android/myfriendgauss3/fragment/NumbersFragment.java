@@ -272,7 +272,8 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     @Override
     public void onDestroyView() {
 
-        // Set the table layout to null, and call the superclass method.
+        // Release the changes, and set the table layout to null. Call the superclass method.
+        releaseChanges();
         setTableLayout(null);
         super.onDestroyView();
     }

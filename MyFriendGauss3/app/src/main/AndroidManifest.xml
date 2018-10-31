@@ -16,7 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.garycgregg.android.myfriendgauss3.activity.ProblemPagerActivity">
+        <activity android:name="com.garycgregg.android.myfriendgauss3.activity.ProblemPagerActivity"
+            android:windowSoftInputMode="stateHidden">
         </activity>
     </application>
 

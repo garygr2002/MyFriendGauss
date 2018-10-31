@@ -20,6 +20,6 @@ public class MatrixSynchronizationTask extends SynchronizationTask<Matrix> {
 
     @Override
     protected void synchronize(@NonNull Matrix item) {
-        getProblemLab().add(item);
+        getProblemLab().addOrReplace(item);
     }
 }

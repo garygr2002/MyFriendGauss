@@ -55,17 +55,17 @@ abstract class NumberTextWatcher<T extends BaseGaussEntry> extends GaussTextWatc
     @Override
     protected boolean isChanged(String candidate) {
 
-        // Does the superclass think the result changed?
+        // Does the superclass think the result has changed?
         boolean result = super.isChanged(candidate);
         if (result) {
 
             /*
-             * The superclass thinks the result changed. Make sure by checking of the number
-             * representations also changed. Do not let a change occur if the candidate is
-             * not a number.
+             * The superclass thinks the result has changed. Make sure by checking if the number
+             * representations also changed. Do not let a change occur if the candidate is not a
+             * number.
              */
             final Double convertedCandidate = convert(candidate);
-            result = (null != convertedCandidate) && (!convertedCandidate.equals(getEntry()));
+            result = !((null == convertedCandidate) || convertedCandidate.equals(getEntry()));
         }
 
         // Return the result.

@@ -3,6 +3,9 @@ package com.garycgregg.android.myfriendgauss3.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.garycgregg.android.myfriendgauss3.content.Answer;
@@ -16,7 +19,6 @@ public class AnswerFragment extends NumbersFragment<Answer> {
 
     // The tag for our logging
     private static final String TAG = AnswerFragment.class.getSimpleName();
-
     // Our content producer
     private final ContentProducer<Answer[]> contentProducer = new ContentProducer<Answer[]>() {
 
@@ -37,7 +39,6 @@ public class AnswerFragment extends NumbersFragment<Answer> {
             return answers;
         }
     };
-
     // Our index producer
     private final IndexProducer<Answer> indexProducer = new IndexProducer<Answer>() {
 
@@ -46,7 +47,6 @@ public class AnswerFragment extends NumbersFragment<Answer> {
             return calculateId(contentItem.getRow(), 0);
         }
     };
-
     // The answers
     private Answer[] answers;
 
@@ -87,7 +87,7 @@ public class AnswerFragment extends NumbersFragment<Answer> {
             answer = new Answer();
             answer.setProblemId(getProblemId());
 
-            // Set the row number, and add the content to the content index.
+            // Set the row number, and put the content into the content index.
             answer.setRow(row);
             contentIndex.put(controlId, answer);
         }
@@ -110,6 +110,14 @@ public class AnswerFragment extends NumbersFragment<Answer> {
     }
 
     @Override
+    public void clearChanges() {
+
+        // Create a new change list and change set.
+        setChangeList(new ArrayList<Answer>());
+        setChangeSet(new HashSet<Answer>());
+    }
+
+    @Override
     protected String getLogTag() {
         return TAG;
     }
@@ -121,18 +129,21 @@ public class AnswerFragment extends NumbersFragment<Answer> {
         super.onCreate(savedInstanceState);
         answers = contentProducer.getContent(getProblemId());
         setContentIndex(indexProducer.populateArray(new SparseArray<Answer>(), answers));
+    }
 
-        // Set the change list and the change set.
-        setChangeList(new ArrayList<Answer>());
-        setChangeSet(new HashSet<Answer>());
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+
+        // Call the superclass method to get a view. Clear the changes, and return the view.
+        final View view = super.onCreateView(inflater, container, savedInstanceState);
+        clearChanges();
+        return view;
     }
 
     @Override
     public void onDestroy() {
-
-        // Release the changes, and set the content index to null.
-        releaseChanges();
-        setContentIndex(null);
 
         // Set the answers to null, and call the superclass method.
         answers = null;

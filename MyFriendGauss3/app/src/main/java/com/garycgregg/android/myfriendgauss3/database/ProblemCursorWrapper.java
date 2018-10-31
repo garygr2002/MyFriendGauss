@@ -25,11 +25,11 @@ public class ProblemCursorWrapper extends CursorWrapper {
      */
     public Problem getProblem() {
 
-        // Create the Problem object, and add the problem ID.
+        // Create the Problem object, and set the problem ID.
         final Problem problem = new Problem();
         problem.setProblemId(getLong(getColumnIndex(ProblemTable.Columns.PROBLEM_ID)));
 
-        // Add the name and dimensions.
+        // Set the name and dimensions.
         problem.setName(getString(getColumnIndex(ProblemTable.Columns.NAME)));
         problem.setDimensions(getInt(getColumnIndex(ProblemTable.Columns.DIMENSIONS)));
 

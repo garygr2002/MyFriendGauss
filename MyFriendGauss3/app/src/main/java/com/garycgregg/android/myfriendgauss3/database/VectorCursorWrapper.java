@@ -21,12 +21,12 @@ public class VectorCursorWrapper extends CursorWrapper {
      */
     public Vector getVector() {
 
-        // Create the Vector object, and add the problem ID.
+        // Create the Vector object, and set the problem ID.
         final Vector vector = new Vector();
         vector.setProblemId(getLong(getColumnIndex(
                 ProblemDbSchema.VectorTable.Columns.PROBLEM_ID)));
 
-        // Add the row and entry. Return the Vector object.
+        // Set the row and entry. Return the Vector object.
         vector.setRow(getInt(getColumnIndex(ProblemDbSchema.VectorTable.Columns.ROW)));
         vector.setEntry(getDouble(getColumnIndex(ProblemDbSchema.VectorTable.Columns.ENTRY)));
         return vector;

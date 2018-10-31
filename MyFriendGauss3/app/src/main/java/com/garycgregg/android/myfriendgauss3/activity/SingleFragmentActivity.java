@@ -5,13 +5,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.WindowManager;
 
 import com.garycgregg.android.myfriendgauss3.R;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLabSource;
 
-public abstract class SingleFragmentActivity extends AppCompatActivity implements ProblemLabSource {
+public abstract class SingleFragmentActivity extends AppCompatActivity implements
+        ProblemLabSource {
 
     private ProblemLab problemLab;
 
@@ -26,9 +26,6 @@ public abstract class SingleFragmentActivity extends AppCompatActivity implement
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        // See: https://stackoverflow.com/questions/9732761/prevent-the-keyboard-from-displaying-on-activity-start
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-
         problemLab = new ProblemLab(getApplicationContext());
         setContentView(R.layout.activity_single_fragment);
 

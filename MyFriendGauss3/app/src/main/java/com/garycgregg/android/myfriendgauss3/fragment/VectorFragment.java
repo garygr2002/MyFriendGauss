@@ -3,6 +3,9 @@ package com.garycgregg.android.myfriendgauss3.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.SparseArray;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.garycgregg.android.myfriendgauss3.content.Vector;
@@ -88,7 +91,7 @@ public class VectorFragment extends NumbersFragment<Vector> {
             vector = new Vector();
             vector.setProblemId(getProblemId());
 
-            // Set the row number, and add the content to the content index.
+            // Set the row number, and put the content into the content index.
             vector.setRow(row);
             contentIndex.put(controlId, vector);
         }
@@ -111,6 +114,14 @@ public class VectorFragment extends NumbersFragment<Vector> {
     }
 
     @Override
+    public void clearChanges() {
+
+        // Create a new change list and change set.
+        setChangeList(new ArrayList<Vector>());
+        setChangeSet(new HashSet<Vector>());
+    }
+
+    @Override
     protected String getLogTag() {
         return TAG;
     }
@@ -122,18 +133,21 @@ public class VectorFragment extends NumbersFragment<Vector> {
         super.onCreate(savedInstanceState);
         vectors = contentProducer.getContent(getProblemId());
         setContentIndex(indexProducer.populateArray(new SparseArray<Vector>(), vectors));
+    }
 
-        // Set the change list and the change set.
-        setChangeList(new ArrayList<Vector>());
-        setChangeSet(new HashSet<Vector>());
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+
+        // Call the superclass method to get a view. Clear the changes, and return the view.
+        final View view = super.onCreateView(inflater, container, savedInstanceState);
+        clearChanges();
+        return view;
     }
 
     @Override
     public void onDestroy() {
-
-        // Release the changes, and set the content index to null.
-        releaseChanges();
-        setContentIndex(null);
 
         // Set the vectors to null, and call the superclass method.
         vectors = null;
