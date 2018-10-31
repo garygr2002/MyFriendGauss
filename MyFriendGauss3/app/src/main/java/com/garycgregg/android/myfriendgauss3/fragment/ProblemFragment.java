@@ -22,6 +22,7 @@ import com.garycgregg.android.myfriendgauss3.content.Problem;
 import com.garycgregg.android.myfriendgauss3.content.Vector;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProblemFragment extends GaussFragment {
@@ -150,9 +151,11 @@ public class ProblemFragment extends GaussFragment {
          * Get the change list from the fragment. Clear the list in the fragment, and return the
          * list.
          */
-        final List<T> changeList = fragment.getChangeList();
-        fragment.clearChanges();
-        return changeList;
+        // TODO: Fix this.
+        // final List<T> changeList = fragment.getChangeList();
+        // fragment.clearChanges();
+        // return changeList;
+        return new ArrayList<>();
     }
 
     /**

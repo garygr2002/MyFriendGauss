@@ -12,9 +12,6 @@ import android.view.ViewGroup;
 import com.garycgregg.android.myfriendgauss3.R;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
-import java.util.List;
-import java.util.Set;
-
 public abstract class ContentFragment<T> extends GaussFragment {
 
     // True if a fragment is enabled by default, false otherwise
@@ -33,12 +30,6 @@ public abstract class ContentFragment<T> extends GaussFragment {
 
     // A tag for logging statements
     private static final String TAG = ContentFragment.class.getSimpleName();
-
-    // The list of changes, in change order
-    private List<T> changeList;
-
-    // The set of unique changes
-    private Set<T> changeSet;
 
     // True if the fragment is enabled, false otherwise
     private boolean enabled = DEFAULT_ENABLED_STATE;
@@ -83,25 +74,6 @@ public abstract class ContentFragment<T> extends GaussFragment {
     }
 
     /**
-     * Adds a change.
-     *
-     * @param change A change to add
-     */
-    protected void addChange(T change) {
-
-        // Is the change set not null, and does the change set not already contain the change?
-        if (!((null == changeSet) || changeSet.contains(change))) {
-
-            /*
-             * The change set does not already contain the change. Add the change to the change
-             * list and the change set.
-             */
-            changeList.add(change);
-            changeSet.add(change);
-        }
-    }
-
-    /**
      * Clears the changes.
      */
     public abstract void clearChanges();
@@ -113,16 +85,6 @@ public abstract class ContentFragment<T> extends GaussFragment {
      * @param container A container for the content
      */
     protected abstract void createContent(LayoutInflater inflater, ViewGroup container);
-
-    /**
-     * Gets the change list.
-     *
-     * @return The change list
-     */
-    @Nullable
-    public List<T> getChangeList() {
-        return changeList;
-    }
 
     @Override
     protected String getLogTag() {
@@ -195,28 +157,11 @@ public abstract class ContentFragment<T> extends GaussFragment {
      */
     protected void releaseChanges() {
 
+        // TODO: Fix this.
         // Clear the change collections before setting them to null.
-        clearChanges();
-        setChangeList(null);
-        setChangeSet(null);
-    }
-
-    /**
-     * Sets the change list.
-     *
-     * @param changeList The change list.
-     */
-    protected void setChangeList(List<T> changeList) {
-        this.changeList = changeList;
-    }
-
-    /**
-     * Sets the change set.
-     *
-     * @param changeSet The change set
-     */
-    protected void setChangeSet(Set<T> changeSet) {
-        this.changeSet = changeSet;
+        // clearChanges();
+        // setChangeList(null);
+        // setChangeSet(null);
     }
 
     /**

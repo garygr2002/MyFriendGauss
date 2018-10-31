@@ -11,8 +11,6 @@ import android.widget.EditText;
 import com.garycgregg.android.myfriendgauss3.content.Matrix;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class MatrixFragment extends NumbersFragment<Matrix> {
@@ -111,7 +109,8 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
                  */
                 final Matrix matrix = getContent();
                 matrix.setEntry(Double.parseDouble(change));
-                addChange(matrix);
+                // TODO: Fix this.
+                // addChange(matrix);
             }
         });
     }
@@ -119,9 +118,10 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     @Override
     public void clearChanges() {
 
+        // TODO: Fix this.
         // Create a new change list and change set.
-        setChangeList(new ArrayList<Matrix>());
-        setChangeSet(new HashSet<Matrix>());
+        // setChangeList(new ArrayList<Matrix>());
+        // setChangeSet(new HashSet<Matrix>());
     }
 
     @Override

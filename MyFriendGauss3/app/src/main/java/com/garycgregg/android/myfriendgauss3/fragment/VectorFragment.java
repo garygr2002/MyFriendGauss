@@ -11,8 +11,6 @@ import android.widget.EditText;
 import com.garycgregg.android.myfriendgauss3.content.Vector;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class VectorFragment extends NumbersFragment<Vector> {
@@ -108,7 +106,8 @@ public class VectorFragment extends NumbersFragment<Vector> {
                  */
                 final Vector vector = getContent();
                 vector.setEntry(Double.parseDouble(change));
-                addChange(vector);
+                // TODO: Fix this.
+                // addChange(vector);
             }
         });
     }
@@ -117,8 +116,8 @@ public class VectorFragment extends NumbersFragment<Vector> {
     public void clearChanges() {
 
         // Create a new change list and change set.
-        setChangeList(new ArrayList<Vector>());
-        setChangeSet(new HashSet<Vector>());
+        // setChangeList(new ArrayList<Vector>());
+        // setChangeSet(new HashSet<Vector>());
     }
 
     @Override

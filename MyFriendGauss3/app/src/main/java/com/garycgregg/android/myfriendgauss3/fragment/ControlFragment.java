@@ -11,9 +11,6 @@ import com.garycgregg.android.myfriendgauss3.R;
 import com.garycgregg.android.myfriendgauss3.content.Problem;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
 public class ControlFragment extends ContentFragment<Problem> {
 
     // The prefix for instance arguments
@@ -108,7 +105,8 @@ public class ControlFragment extends ContentFragment<Problem> {
                 // Set the name in the content, and add the content to the change list.
                 final Problem content = getContent();
                 content.setName(change);
-                addChange(content);
+                // TODO: Fix this.
+                // addChange(content);
             }
         });
 
@@ -119,9 +117,10 @@ public class ControlFragment extends ContentFragment<Problem> {
     @Override
     public void clearChanges() {
 
+        // TODO: Fix this.
         // Create a new change list and change set.
-        setChangeList(new ArrayList<Problem>());
-        setChangeSet(new HashSet<Problem>());
+        // setChangeList(new ArrayList<Problem>());
+        // setChangeSet(new HashSet<Problem>());
     }
 
     @Override

@@ -11,14 +11,13 @@ import android.widget.EditText;
 import com.garycgregg.android.myfriendgauss3.content.Answer;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class AnswerFragment extends NumbersFragment<Answer> {
 
     // The tag for our logging
     private static final String TAG = AnswerFragment.class.getSimpleName();
+
     // Our content producer
     private final ContentProducer<Answer[]> contentProducer = new ContentProducer<Answer[]>() {
 
@@ -39,6 +38,7 @@ public class AnswerFragment extends NumbersFragment<Answer> {
             return answers;
         }
     };
+
     // Our index producer
     private final IndexProducer<Answer> indexProducer = new IndexProducer<Answer>() {
 
@@ -47,6 +47,7 @@ public class AnswerFragment extends NumbersFragment<Answer> {
             return calculateId(contentItem.getRow(), 0);
         }
     };
+
     // The answers
     private Answer[] answers;
 
@@ -104,7 +105,8 @@ public class AnswerFragment extends NumbersFragment<Answer> {
                  */
                 final Answer answer = getContent();
                 answer.setEntry(Double.parseDouble(change));
-                addChange(answer);
+                // TODO: Fix this.
+                // addChange(answer);
             }
         });
     }
@@ -112,9 +114,10 @@ public class AnswerFragment extends NumbersFragment<Answer> {
     @Override
     public void clearChanges() {
 
+        // TODO: Fix this.
         // Create a new change list and change set.
-        setChangeList(new ArrayList<Answer>());
-        setChangeSet(new HashSet<Answer>());
+        // setChangeList(new ArrayList<Answer>());
+        // setChangeSet(new HashSet<Answer>());
     }
 
     @Override
