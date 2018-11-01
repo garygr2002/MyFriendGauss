@@ -54,12 +54,12 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     /**
      * Customizes an instance of a MatrixFragment with the required argument(s).
      *
-     * @param problemId        The problem ID to be associated with the instance
-     * @param label            The label argument
-     * @param backgroundColor  The background color argument
-     * @param enabled          The fragment enabled argument
-     * @param rows             The number of rows argument
-     * @param columns          The number of columns argument
+     * @param problemId       The problem ID to be associated with the instance
+     * @param label           The label argument
+     * @param backgroundColor The background color argument
+     * @param enabled         The fragment enabled argument
+     * @param rows            The number of rows argument
+     * @param columns         The number of columns argument
      * @return A properly configured MatrixFragment
      */
     public static MatrixFragment createInstance(long problemId,
@@ -80,7 +80,9 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     protected void addWatcher(final EditText editText, int row, int column) {
 
         // Get the content index. Calculate the control ID from the row and the column.
-        final SparseArray<Matrix> contentIndex = getContentIndex();
+        // TODO: Fix this.
+        // final SparseArray<Matrix> contentIndex = getContentIndex();
+        final SparseArray<Matrix> contentIndex = null;
         final int controlId = calculateId(row, column);
 
         // Is there no existing content with the calculated control ID?
@@ -98,7 +100,7 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
         }
 
         // Give the control a number text changed listener.
-        editText.addTextChangedListener(new NumberTextWatcher<Matrix>(matrix) {
+        editText.addTextChangedListener(new NumberTextWatcher<Matrix>(matrix, WHITESPACE_PATTERN) {
 
             @Override
             protected void setChange(String change) {
@@ -116,12 +118,17 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     }
 
     @Override
-    public void clearChanges() {
+    protected boolean change(Matrix record, ProblemLab problemLab) {
 
-        // TODO: Fix this.
-        // Create a new change list and change set.
-        // setChangeList(new ArrayList<Matrix>());
-        // setChangeSet(new HashSet<Matrix>());
+        // TODO: Fill this in.
+        return false;
+    }
+
+    @Override
+    protected boolean delete(Matrix record, ProblemLab problemLab) {
+
+        // TODO: Fill this in.
+        return false;
     }
 
     @Override
@@ -135,7 +142,9 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
         // Call the superclass method, and get the matrixEntries. Create and set a content index.
         super.onCreate(savedInstanceState);
         matrixEntries = contentProducer.getContent(getProblemId());
-        setContentIndex(indexProducer.populateArray(new SparseArray<Matrix>(), matrixEntries));
+
+        // TODO: Fix this.
+        // setContentIndex(indexProducer.populateArray(new SparseArray<Matrix>(), matrixEntries));
     }
 
     @Nullable
@@ -145,7 +154,7 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
 
         // Call the superclass method to get a view. Clear the changes, and return the view.
         final View view = super.onCreateView(inflater, container, savedInstanceState);
-        clearChanges();
+        // clearChanges();
         return view;
     }
 
@@ -161,7 +170,9 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     protected void setContent(EditText editText, int controlId) {
 
         // Get the content index. Is there content for this control?
-        final SparseArray<Matrix> contentIndex = getContentIndex();
+        // TODO: Fix this.
+        // final SparseArray<Matrix> contentIndex = getContentIndex();
+        final SparseArray<Matrix> contentIndex = null;
         final Matrix matrix = contentIndex.get(controlId);
         if (null != matrix) {
 

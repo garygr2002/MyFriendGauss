@@ -78,7 +78,9 @@ public class VectorFragment extends NumbersFragment<Vector> {
     protected void addWatcher(final EditText editText, int row, int column) {
 
         // Get the content index. Calculate the control ID from the row and the column.
-        final SparseArray<Vector> contentIndex = getContentIndex();
+        // TODO: Fix this.
+        // final SparseArray<Vector> contentIndex = getContentIndex();
+        final SparseArray<Vector> contentIndex = null;
         final int controlId = calculateId(row, column);
 
         // Is there no existing content with the calculated control ID?
@@ -95,7 +97,7 @@ public class VectorFragment extends NumbersFragment<Vector> {
         }
 
         // Give the control a number text changed listener.
-        editText.addTextChangedListener(new NumberTextWatcher<Vector>(vector) {
+        editText.addTextChangedListener(new NumberTextWatcher<Vector>(vector, WHITESPACE_PATTERN) {
 
             @Override
             protected void setChange(String change) {
@@ -113,11 +115,17 @@ public class VectorFragment extends NumbersFragment<Vector> {
     }
 
     @Override
-    public void clearChanges() {
+    protected boolean change(Vector record, ProblemLab problemLab) {
 
-        // Create a new change list and change set.
-        // setChangeList(new ArrayList<Vector>());
-        // setChangeSet(new HashSet<Vector>());
+        // TODO: Fill this in.
+        return false;
+    }
+
+    @Override
+    protected boolean delete(Vector record, ProblemLab problemLab) {
+
+        // TODO: Fill this in.
+        return false;
     }
 
     @Override
@@ -131,7 +139,9 @@ public class VectorFragment extends NumbersFragment<Vector> {
         // Call the superclass method, and get the vectors. Create and set a content index.
         super.onCreate(savedInstanceState);
         vectors = contentProducer.getContent(getProblemId());
-        setContentIndex(indexProducer.populateArray(new SparseArray<Vector>(), vectors));
+
+        // TODO: Fix this.
+        // setContentIndex(indexProducer.populateArray(new SparseArray<Vector>(), vectors));
     }
 
     @Nullable
@@ -141,7 +151,7 @@ public class VectorFragment extends NumbersFragment<Vector> {
 
         // Call the superclass method to get a view. Clear the changes, and return the view.
         final View view = super.onCreateView(inflater, container, savedInstanceState);
-        clearChanges();
+        // clearChanges();
         return view;
     }
 
@@ -157,7 +167,9 @@ public class VectorFragment extends NumbersFragment<Vector> {
     protected void setContent(EditText editText, int controlId) {
 
         // Get the content index. Is there content for this control?
-        final SparseArray<Vector> contentIndex = getContentIndex();
+        // TODO: Fix this.
+        // final SparseArray<Vector> contentIndex = getContentIndex();
+        final SparseArray<Vector> contentIndex = null;
         final Vector vector = contentIndex.get(controlId);
         if (null != vector) {
 

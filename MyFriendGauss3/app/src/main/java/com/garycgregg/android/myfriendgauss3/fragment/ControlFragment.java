@@ -71,15 +71,23 @@ public class ControlFragment extends ContentFragment<Problem> {
     }
 
     @Override
+    protected boolean change(Problem record, ProblemLab problemLab) {
+
+        // Update the problem.
+        problemLab.update(record);
+        return true;
+    }
+
+    @Override
     protected void createContent(LayoutInflater inflater, ViewGroup container) {
 
         output("createContent(LayoutInflater, ViewGroup)");
 
-        /*
-         * Inflate our content. Find the edit control for the problem name, and get the enabled
-         * flag.
-         */
+        // Create a record tracker, and inflate our content.
         final View view = inflater.inflate(R.layout.content_control, container, true);
+        setRecordTracker(new RecordTracker<Problem>(1));
+
+        // Find the edit control for the problem name, and get the enabled flag.
         problemNameEditText = view.findViewById(R.id.problem_name);
         final boolean enabled = isEnabled();
 
@@ -102,25 +110,17 @@ public class ControlFragment extends ContentFragment<Problem> {
             @Override
             protected void setChange(String change) {
 
-                // Set the name in the content, and add the content to the change list.
+                // Set the name in the content, and add the content to the record tracker.
                 final Problem content = getContent();
                 content.setName(change);
-                // TODO: Fix this.
-                // addChange(content);
+                getRecordTracker().put(problemNameEditText.getId(), content, true);
             }
         });
-
-        // Clear the change list.
-        clearChanges();
     }
 
     @Override
-    public void clearChanges() {
-
-        // TODO: Fix this.
-        // Create a new change list and change set.
-        // setChangeList(new ArrayList<Problem>());
-        // setChangeSet(new HashSet<Problem>());
+    protected boolean delete(Problem record, ProblemLab problemLab) {
+        return false;
     }
 
     @Override

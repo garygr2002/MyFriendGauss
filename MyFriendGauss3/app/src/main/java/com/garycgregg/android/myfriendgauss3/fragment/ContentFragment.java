@@ -12,7 +12,8 @@ import android.view.ViewGroup;
 import com.garycgregg.android.myfriendgauss3.R;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
-public abstract class ContentFragment<T> extends GaussFragment {
+public abstract class ContentFragment<T> extends GaussFragment
+        implements RecordTracker.RecordAction<T> {
 
     // True if a fragment is enabled by default, false otherwise
     private static final boolean DEFAULT_ENABLED_STATE = true;
@@ -36,6 +37,9 @@ public abstract class ContentFragment<T> extends GaussFragment {
 
     // The problem ID associated with this instance
     private long problemId = ProblemLab.NULL_ID;
+
+    // The record tracker
+    private RecordTracker<T> recordTracker;
 
     /**
      * Customizes an instance of a ContentFragment with the required argument(s).
@@ -74,9 +78,13 @@ public abstract class ContentFragment<T> extends GaussFragment {
     }
 
     /**
-     * Clears the changes.
+     * Change record.
+     *
+     * @param record     The record to change
+     * @param problemLab The problem lab to use
+     * @return True if the action was successfully completed, false otherwise
      */
-    public abstract void clearChanges();
+    protected abstract boolean change(T record, ProblemLab problemLab);
 
     /**
      * Creates the content.
@@ -85,6 +93,15 @@ public abstract class ContentFragment<T> extends GaussFragment {
      * @param container A container for the content
      */
     protected abstract void createContent(LayoutInflater inflater, ViewGroup container);
+
+    /**
+     * Delete a record.
+     *
+     * @param record     The record to delete
+     * @param problemLab The problem lab to use
+     * @return True if the action was successfully completed, false otherwise
+     */
+    protected abstract boolean delete(T record, ProblemLab problemLab);
 
     @Override
     protected String getLogTag() {
@@ -101,12 +118,37 @@ public abstract class ContentFragment<T> extends GaussFragment {
     }
 
     /**
+     * Gets the record tracker.
+     *
+     * @return The record tracker
+     */
+    protected RecordTracker<T> getRecordTracker() {
+        return recordTracker;
+    }
+
+    /**
      * Determines if the fragment is enabled.
      *
      * @return True if the fragment is enabled, false otherwise
      */
     protected boolean isEnabled() {
         return enabled;
+    }
+
+    @Override
+    public boolean onChanged(T record) {
+
+        // Get the problem lab. Is the problem lab not null?
+        final ProblemLab problemLab = getProblemLab();
+        boolean result = (null != problemLab);
+        if (result) {
+
+            // The problem lab is not null. Change the record.
+            result = change(record, problemLab);
+        }
+
+        // Return the result.
+        return result;
     }
 
     @Override
@@ -136,12 +178,40 @@ public abstract class ContentFragment<T> extends GaussFragment {
     }
 
     @Override
+    public boolean onDeleted(T record) {
+
+        // Get the problem lab. Is the problem lab not null?
+        final ProblemLab problemLab = getProblemLab();
+        boolean result = (null != problemLab);
+        if (result) {
+
+            // The problem lab is not null. Delete the record.
+            result = delete(record, problemLab);
+        }
+
+        // Return the result.
+        return result;
+    }
+
+    @Override
     public void onDestroy() {
 
         // Clear the problem ID, and reset the enabled state flag. Call the superclass method.
         setEnabled(DEFAULT_ENABLED_STATE);
         setProblemId(ProblemLab.NULL_ID);
         super.onDestroy();
+    }
+
+    @Override
+    public void onPause() {
+
+        /*
+         * Call the superclass method. Synchronize the changes to the database, and clear the
+         * changes.
+         */
+        super.onPause();
+        recordTracker.performAction(this);
+        recordTracker.clearChanges();
     }
 
     @Override
@@ -157,11 +227,18 @@ public abstract class ContentFragment<T> extends GaussFragment {
      */
     protected void releaseChanges() {
 
-        // TODO: Fix this.
-        // Clear the change collections before setting them to null.
-        // clearChanges();
-        // setChangeList(null);
-        // setChangeSet(null);
+        // Get the record tracker. Is the record tracker not null?
+        final RecordTracker<T> recordTracker = getRecordTracker();
+        if (null != recordTracker) {
+
+            /*
+             * The record tracker is not null. Clear its changes. Clear the tracker, and set the
+             * record tracker to null.
+             */
+            recordTracker.clearChanges();
+            recordTracker.clearTracker();
+            setRecordTracker(null);
+        }
     }
 
     /**
@@ -180,5 +257,14 @@ public abstract class ContentFragment<T> extends GaussFragment {
      */
     private void setProblemId(long problemId) {
         this.problemId = problemId;
+    }
+
+    /**
+     * Sets the record tracker.
+     *
+     * @param recordTracker The record tracker
+     */
+    protected void setRecordTracker(RecordTracker<T> recordTracker) {
+        this.recordTracker = recordTracker;
     }
 }

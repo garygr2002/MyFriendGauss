@@ -21,6 +21,9 @@ import java.util.Locale;
 
 public abstract class NumbersFragment<T> extends ContentFragment<T> {
 
+    // A pattern for whitespace in text
+    protected static final String WHITESPACE_PATTERN = "^\\\\s*$";
+
     // The base control ID
     private static final int BASE_ID = 0;
 
@@ -52,9 +55,6 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
 
     // The number of columns
     private int columns;
-
-    // An index of contents by control ID
-    private SparseArray<T> contentIndex;
 
     // The current locale
     private Locale locale;
@@ -221,15 +221,6 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
         return columns;
     }
 
-    /**
-     * Gets the content index.
-     *
-     * @return The content index
-     */
-    protected SparseArray<T> getContentIndex() {
-        return contentIndex;
-    }
-
     @Override
     protected String getLogTag() {
         return TAG;
@@ -294,15 +285,6 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
      * @param controlId The ID of the edit control
      */
     protected abstract void setContent(EditText editText, int controlId);
-
-    /**
-     * Sets the content index.
-     *
-     * @param contentIndex The content index
-     */
-    protected void setContentIndex(SparseArray<T> contentIndex) {
-        this.contentIndex = contentIndex;
-    }
 
     /**
      * Sets the number of rows.

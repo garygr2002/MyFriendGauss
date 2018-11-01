@@ -38,7 +38,6 @@ public class AnswerFragment extends NumbersFragment<Answer> {
             return answers;
         }
     };
-
     // Our index producer
     private final IndexProducer<Answer> indexProducer = new IndexProducer<Answer>() {
 
@@ -47,7 +46,6 @@ public class AnswerFragment extends NumbersFragment<Answer> {
             return calculateId(contentItem.getRow(), 0);
         }
     };
-
     // The answers
     private Answer[] answers;
 
@@ -77,7 +75,9 @@ public class AnswerFragment extends NumbersFragment<Answer> {
     protected void addWatcher(final EditText editText, int row, int column) {
 
         // Get the content index. Calculate the control ID from the row and the column.
-        final SparseArray<Answer> contentIndex = getContentIndex();
+        // TODO: Fix this.
+        // final SparseArray<Answer> contentIndex = getContentIndex();
+        final SparseArray<Answer> contentIndex = null;
         final int controlId = calculateId(row, column);
 
         // Is there no existing content with the calculated control ID?
@@ -94,7 +94,7 @@ public class AnswerFragment extends NumbersFragment<Answer> {
         }
 
         // Give the control a number text changed listener.
-        editText.addTextChangedListener(new NumberTextWatcher<Answer>(answer) {
+        editText.addTextChangedListener(new NumberTextWatcher<Answer>(answer, WHITESPACE_PATTERN) {
 
             @Override
             protected void setChange(String change) {
@@ -112,12 +112,17 @@ public class AnswerFragment extends NumbersFragment<Answer> {
     }
 
     @Override
-    public void clearChanges() {
+    protected boolean change(Answer record, ProblemLab problemLab) {
 
-        // TODO: Fix this.
-        // Create a new change list and change set.
-        // setChangeList(new ArrayList<Answer>());
-        // setChangeSet(new HashSet<Answer>());
+        // TODO: Fill this in.
+        return false;
+    }
+
+    @Override
+    protected boolean delete(Answer record, ProblemLab problemLab) {
+
+        // TODO: Fill this in.
+        return false;
     }
 
     @Override
@@ -128,10 +133,11 @@ public class AnswerFragment extends NumbersFragment<Answer> {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
-        // Call the superclass method, and get the answers. Create and set a content index.
+        // Call the superclass method, and get the answers.
         super.onCreate(savedInstanceState);
         answers = contentProducer.getContent(getProblemId());
-        setContentIndex(indexProducer.populateArray(new SparseArray<Answer>(), answers));
+        // TODO: Fix this.
+        // setContentIndex(indexProducer.populateArray(new SparseArray<Answer>(), answers));
     }
 
     @Nullable
@@ -141,7 +147,7 @@ public class AnswerFragment extends NumbersFragment<Answer> {
 
         // Call the superclass method to get a view. Clear the changes, and return the view.
         final View view = super.onCreateView(inflater, container, savedInstanceState);
-        clearChanges();
+        // clearChanges();
         return view;
     }
 
@@ -157,8 +163,10 @@ public class AnswerFragment extends NumbersFragment<Answer> {
     protected void setContent(EditText editText, int controlId) {
 
         // Get the content index. Is there content for this control?
-        final SparseArray<Answer> contentIndex = getContentIndex();
-        final Answer answer = contentIndex.get(controlId);
+        // TODO: Fix this.
+        // final SparseArray<Answer> contentIndex = getContentIndex();
+        // final Answer answer = contentIndex.get(controlId);
+        final Answer answer = null;
         if (null != answer) {
 
             // There is content for this control. Set it.

@@ -4,13 +4,20 @@ import com.garycgregg.android.myfriendgauss3.content.BaseGaussEntry;
 
 abstract class NumberTextWatcher<T extends BaseGaussEntry> extends GaussTextWatcher<T> {
 
+    // The number check bypass pattern
+    private final String bypassPattern;
+
     /**
      * Constructs a number text watcher.
      *
-     * @param content The content of the watcher
+     * @param content       The content of the watcher
+     * @param bypassPattern The number check bypass pattern
      */
-    NumberTextWatcher(T content) {
+    NumberTextWatcher(T content, String bypassPattern) {
+
+        // Set the member variables.
         super(content);
+        this.bypassPattern = bypassPattern;
     }
 
     /**
@@ -38,6 +45,15 @@ abstract class NumberTextWatcher<T extends BaseGaussEntry> extends GaussTextWatc
         return result;
     }
 
+    /**
+     * Gets the number check bypass pattern.
+     *
+     * @return The number check bypass pattern
+     */
+    public String getBypassPattern() {
+        return bypassPattern;
+    }
+
     @Override
     protected String getContentString() {
         return Double.toString(getEntry());
@@ -55,14 +71,17 @@ abstract class NumberTextWatcher<T extends BaseGaussEntry> extends GaussTextWatc
     @Override
     protected boolean isChanged(String candidate) {
 
-        // Does the superclass think the result has changed?
+        /*
+         * Does the superclass think the result has changed? If so, does the candidate not match
+         * the bypass pattern?
+         */
         boolean result = super.isChanged(candidate);
-        if (result) {
+        if (result && (!getBypassPattern().matches(candidate))) {
 
             /*
-             * The superclass thinks the result has changed. Make sure by checking if the number
-             * representations also changed. Do not let a change occur if the candidate is not a
-             * number.
+             * The superclass thinks the result has changed *and* the candidate is does not match
+             * the bypass pattern. Make sure there has been a change by checking if the number
+             * representations of the candidate has also changed.
              */
             final Double convertedCandidate = convert(candidate);
             result = !((null == convertedCandidate) || convertedCandidate.equals(getEntry()));
