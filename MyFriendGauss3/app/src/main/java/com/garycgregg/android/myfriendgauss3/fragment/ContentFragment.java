@@ -84,7 +84,7 @@ public abstract class ContentFragment<T> extends GaussFragment
      * @param problemLab The problem lab to use
      * @return True if the action was successfully completed, false otherwise
      */
-    protected abstract boolean change(T record, ProblemLab problemLab);
+    protected abstract boolean change(@NonNull T record, @NonNull ProblemLab problemLab);
 
     /**
      * Creates the content.
@@ -101,7 +101,7 @@ public abstract class ContentFragment<T> extends GaussFragment
      * @param problemLab The problem lab to use
      * @return True if the action was successfully completed, false otherwise
      */
-    protected abstract boolean delete(T record, ProblemLab problemLab);
+    protected abstract boolean delete(@NonNull T record, @NonNull ProblemLab problemLab);
 
     @Override
     protected String getLogTag() {

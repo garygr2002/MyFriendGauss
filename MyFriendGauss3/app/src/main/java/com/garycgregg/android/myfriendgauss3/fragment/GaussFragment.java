@@ -2,6 +2,7 @@ package com.garycgregg.android.myfriendgauss3.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -198,7 +199,7 @@ public abstract class GaussFragment extends Fragment implements ProblemLabSource
          * @param problemId  The problem ID of the requested content
          * @return The requested content
          */
-        public abstract T produceContent(ProblemLab problemLab, long problemId);
+        public abstract T produceContent(@NonNull ProblemLab problemLab, long problemId);
     }
 
     protected class ProblemContentProducer extends ContentProducer<Problem> {
@@ -213,7 +214,7 @@ public abstract class GaussFragment extends Fragment implements ProblemLabSource
         }
 
         @Override
-        public Problem produceContent(ProblemLab problemLab, long problemId) {
+        public Problem produceContent(@NonNull ProblemLab problemLab, long problemId) {
             return problemLab.getProblem(problemId);
         }
     }

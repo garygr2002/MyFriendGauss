@@ -1,5 +1,6 @@
 package com.garycgregg.android.myfriendgauss3.fragment;
 
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
 
@@ -70,5 +71,5 @@ abstract class GaussTextWatcher<T> implements TextWatcher {
      * Sets a content change.
      * @param change The content change
      */
-    protected abstract void setChange(String change);
+    protected abstract void setChange(@NonNull String change);
 }

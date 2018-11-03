@@ -43,6 +43,31 @@ class RecordTracker<T> {
     }
 
     /**
+     * Gets a record in the tracker.
+     *
+     * @param key The key of the record
+     * @return The record if it exists, null otherwise
+     */
+    public T get(int key) {
+
+        /*
+         * Try to find a container with the given key. Return null if we find no such container,
+         * otherwise return the container record.
+         */
+        final Container<T> container = array.get(key);
+        return (null == container) ? null : container.getRecord();
+    }
+
+    /**
+     * Performs actions on each record in the tracker.
+     *
+     * @param action The actions to take (see definition for a <code>RecordAction</code>.
+     */
+    public void performAction(RecordAction<T> action) {
+        performAction(new CallerContainerAction<>(action));
+    }
+
+    /**
      * Performs an action on each container in the array.
      *
      * @param action The action to perform on each container in the array
@@ -63,15 +88,6 @@ class RecordTracker<T> {
     }
 
     /**
-     * Performs actions on each record in the tracker.
-     *
-     * @param action The actions to take (see definition for a <code>RecordAction</code>.
-     */
-    public void performAction(RecordAction<T> action) {
-        performAction(new CallerContainerAction<>(action));
-    }
-
-    /**
      * Puts a record in the tracker.
      *
      * @param key    The key of the record
@@ -79,7 +95,7 @@ class RecordTracker<T> {
      * @param exists True if the record exists, false otherwise
      */
     public void put(int key, T record, boolean exists) {
-        array.put(key, new Container<T>(record, exists));
+        array.put(key, new Container<>(record, exists));
     }
 
     /**

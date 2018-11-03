@@ -1,23 +1,21 @@
 package com.garycgregg.android.myfriendgauss3.fragment;
 
+import android.support.annotation.NonNull;
+
 import com.garycgregg.android.myfriendgauss3.content.BaseGaussEntry;
 
 abstract class NumberTextWatcher<T extends BaseGaussEntry> extends GaussTextWatcher<T> {
 
-    // The number check bypass pattern
-    private final String bypassPattern;
+    // A regular expression for whitespace
+    private static final String WHITESPACE_PATTERN = "^\\s*$";
 
     /**
      * Constructs a number text watcher.
      *
-     * @param content       The content of the watcher
-     * @param bypassPattern The number check bypass pattern
+     * @param content The content of the watcher
      */
-    NumberTextWatcher(T content, String bypassPattern) {
-
-        // Set the member variables.
+    NumberTextWatcher(T content) {
         super(content);
-        this.bypassPattern = bypassPattern;
     }
 
     /**
@@ -46,12 +44,13 @@ abstract class NumberTextWatcher<T extends BaseGaussEntry> extends GaussTextWatc
     }
 
     /**
-     * Gets the number check bypass pattern.
+     * Determines if a string is empty, or contains only whitespace.
      *
-     * @return The number check bypass pattern
+     * @param string Any non-null string
+     * @return True if the string is empty, or contains only whitespace; false otherwise
      */
-    public String getBypassPattern() {
-        return bypassPattern;
+    public static boolean isWhitespace(@NonNull String string) {
+        return string.matches(WHITESPACE_PATTERN);
     }
 
     @Override
@@ -73,14 +72,14 @@ abstract class NumberTextWatcher<T extends BaseGaussEntry> extends GaussTextWatc
 
         /*
          * Does the superclass think the result has changed? If so, does the candidate not match
-         * the bypass pattern?
+         * whitespace?
          */
         boolean result = super.isChanged(candidate);
-        if (result && (!getBypassPattern().matches(candidate))) {
+        if (result && (!isWhitespace(candidate))) {
 
             /*
-             * The superclass thinks the result has changed *and* the candidate is does not match
-             * the bypass pattern. Make sure there has been a change by checking if the number
+             * The superclass thinks the result has changed *and* the candidate does not match
+             * whitespace. Make sure there has been a change by checking if the number
              * representations of the candidate has also changed.
              */
             final Double convertedCandidate = convert(candidate);
@@ -89,5 +88,17 @@ abstract class NumberTextWatcher<T extends BaseGaussEntry> extends GaussTextWatc
 
         // Return the result.
         return result;
+    }
+
+    /**
+     * Sets a double precision content change.
+     *
+     * @param change The double precision content change; null if the change is a deletion
+     */
+    protected abstract void setChange(Double change);
+
+    @Override
+    protected final void setChange(@NonNull String change) {
+        setChange(convert(change));
     }
 }

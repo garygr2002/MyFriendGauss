@@ -1,6 +1,7 @@
 package com.garycgregg.android.myfriendgauss3.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,7 +72,7 @@ public class ControlFragment extends ContentFragment<Problem> {
     }
 
     @Override
-    protected boolean change(Problem record, ProblemLab problemLab) {
+    protected boolean change(@NonNull Problem record, @NonNull ProblemLab problemLab) {
 
         // Update the problem.
         problemLab.update(record);
@@ -83,7 +84,7 @@ public class ControlFragment extends ContentFragment<Problem> {
 
         output("createContent(LayoutInflater, ViewGroup)");
 
-        // Create a record tracker, and inflate our content.
+        // Inflate our content, and set a record tracker.
         final View view = inflater.inflate(R.layout.content_control, container, true);
         setRecordTracker(new RecordTracker<Problem>(1));
 
@@ -108,7 +109,7 @@ public class ControlFragment extends ContentFragment<Problem> {
             }
 
             @Override
-            protected void setChange(String change) {
+            protected void setChange(@NonNull String change) {
 
                 // Set the name in the content, and add the content to the record tracker.
                 final Problem content = getContent();
@@ -119,7 +120,7 @@ public class ControlFragment extends ContentFragment<Problem> {
     }
 
     @Override
-    protected boolean delete(Problem record, ProblemLab problemLab) {
+    protected boolean delete(@NonNull Problem record, @NonNull ProblemLab problemLab) {
         return false;
     }
 

@@ -1,8 +1,8 @@
 package com.garycgregg.android.myfriendgauss3.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +16,7 @@ import java.util.List;
 public class MatrixFragment extends NumbersFragment<Matrix> {
 
     // The tag for our logging
-    private static final String TAG = AnswerFragment.class.getSimpleName();
+    private static final String TAG = MatrixFragment.class.getSimpleName();
 
     // Our content producer
     private final ContentProducer<Matrix[]> contentProducer = new ContentProducer<Matrix[]>() {
@@ -27,7 +27,7 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
         }
 
         @Override
-        public Matrix[] produceContent(ProblemLab problemLab, long problemId) {
+        public Matrix[] produceContent(@NonNull ProblemLab problemLab, long problemId) {
 
             // Get matrix entries for the given problem ID. Create an array to hold them.
             final List<Matrix> matrixList = problemLab.getMatrices(problemId);
@@ -77,58 +77,82 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     }
 
     @Override
-    protected void addWatcher(final EditText editText, int row, int column) {
+    protected void addIfMissing(int row, int column) {
 
-        // Get the content index. Calculate the control ID from the row and the column.
-        // TODO: Fix this.
-        // final SparseArray<Matrix> contentIndex = getContentIndex();
-        final SparseArray<Matrix> contentIndex = null;
+        // Get the record tracker. Calculate the control ID from the row and the column.
+        final RecordTracker<Matrix> recordTracker = getRecordTracker();
         final int controlId = calculateId(row, column);
 
-        // Is there no existing content with the calculated control ID?
-        Matrix matrix = contentIndex.get(controlId);
+        // Is there no existing record with the calculated control ID?
+        Matrix matrix = recordTracker.get(controlId);
         if (null == matrix) {
 
-            // There is no existing content. Create it, then set the problem ID.
+            /*
+             * There is no existing record with the calculated control ID. Create one, and set the
+             * problem ID.
+             */
             matrix = new Matrix();
             matrix.setProblemId(getProblemId());
 
-            // Set the row and column numbers, and add the content to the content index.
+            // Set the row and column numbers, and add the content to the record tracker.
             matrix.setRow(row);
             matrix.setColumn(column);
-            contentIndex.put(controlId, matrix);
+            recordTracker.put(controlId, matrix, false);
         }
-
-        // Give the control a number text changed listener.
-        editText.addTextChangedListener(new NumberTextWatcher<Matrix>(matrix, WHITESPACE_PATTERN) {
-
-            @Override
-            protected void setChange(String change) {
-
-                /*
-                 * Get the content object, set its entry, and add the content object to the change
-                 * list.
-                 */
-                final Matrix matrix = getContent();
-                matrix.setEntry(Double.parseDouble(change));
-                // TODO: Fix this.
-                // addChange(matrix);
-            }
-        });
     }
 
     @Override
-    protected boolean change(Matrix record, ProblemLab problemLab) {
+    protected void addWatcher(final EditText editText, int row, int column) {
 
-        // TODO: Fill this in.
-        return false;
+        // Get the record tracker. Calculate the control ID from the row and the column.
+        final RecordTracker<Matrix> recordTracker = getRecordTracker();
+        final int controlId = calculateId(row, column);
+
+        /*
+         * Find the existing matrix entry for the control ID. It better be there if
+         * addIfMissing(row, column) has been called before this method!
+         */
+        final Matrix matrixEntry = recordTracker.get(controlId);
+        if (null != matrixEntry) {
+
+            // Give the control a number text changed listener.
+            editText.addTextChangedListener(new NumberTextWatcher<Matrix>(matrixEntry) {
+
+                @Override
+                protected void setChange(Double change) {
+
+                    // Was the change not a deletion?
+                    final boolean deleted = (null == change);
+                    if (!deleted) {
+
+                        /*
+                         * The change was not a deletion. Set the entry in the content of the
+                         * control.
+                         */
+                        getContent().setEntry(change);
+                    }
+
+                    // Update the delete status in the record tracker.
+                    recordTracker.set(controlId, deleted);
+                }
+            });
+        }
     }
 
     @Override
-    protected boolean delete(Matrix record, ProblemLab problemLab) {
+    protected boolean change(@NonNull Matrix record, @NonNull ProblemLab problemLab) {
 
-        // TODO: Fill this in.
-        return false;
+        // Add or replace the record, and return true for handling the request.
+        problemLab.addOrReplace(record);
+        return true;
+    }
+
+    @Override
+    protected boolean delete(@NonNull Matrix record, @NonNull ProblemLab problemLab) {
+
+        // Add or replace the record, and return true for handling the request.
+        problemLab.delete(record);
+        return true;
     }
 
     @Override
@@ -139,12 +163,9 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
-        // Call the superclass method, and get the matrixEntries. Create and set a content index.
+        // Call the superclass method, and get the matrixEntries.
         super.onCreate(savedInstanceState);
         matrixEntries = contentProducer.getContent(getProblemId());
-
-        // TODO: Fix this.
-        // setContentIndex(indexProducer.populateArray(new SparseArray<Matrix>(), matrixEntries));
     }
 
     @Nullable
@@ -154,7 +175,7 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
 
         // Call the superclass method to get a view. Clear the changes, and return the view.
         final View view = super.onCreateView(inflater, container, savedInstanceState);
-        // clearChanges();
+        getRecordTracker().clearChanges();
         return view;
     }
 
@@ -167,17 +188,26 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     }
 
     @Override
-    protected void setContent(EditText editText, int controlId) {
+    protected void setContent(EditText editText) {
 
-        // Get the content index. Is there content for this control?
-        // TODO: Fix this.
-        // final SparseArray<Matrix> contentIndex = getContentIndex();
-        final SparseArray<Matrix> contentIndex = null;
-        final Matrix matrix = contentIndex.get(controlId);
+        // Is there content for this control?
+        final Matrix matrix = getRecordTracker().get(editText.getId());
         if (null != matrix) {
 
             // There is content for this control. Set it.
             editText.setText(Double.toString(matrix.getEntry()));
         }
+    }
+
+    @Override
+    protected void setRecordTracker() {
+
+        /*
+         * Create a new record tracker for this fragment. Copy the matrix entries into the tracker.
+         * Set the tracker.
+         */
+        final RecordTracker<Matrix> recordTracker = new RecordTracker<>(getControlCount());
+        copy(recordTracker, matrixEntries, indexProducer);
+        setRecordTracker(recordTracker);
     }
 }

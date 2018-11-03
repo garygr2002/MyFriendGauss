@@ -1,8 +1,8 @@
 package com.garycgregg.android.myfriendgauss3.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +27,7 @@ public class AnswerFragment extends NumbersFragment<Answer> {
         }
 
         @Override
-        public Answer[] produceContent(ProblemLab problemLab, long problemId) {
+        public Answer[] produceContent(@NonNull ProblemLab problemLab, long problemId) {
 
             // Get answers for the given problem ID. Create an array to hold them.
             final List<Answer> answerList = problemLab.getAnswers(problemId);
@@ -38,6 +38,7 @@ public class AnswerFragment extends NumbersFragment<Answer> {
             return answers;
         }
     };
+
     // Our index producer
     private final IndexProducer<Answer> indexProducer = new IndexProducer<Answer>() {
 
@@ -46,6 +47,7 @@ public class AnswerFragment extends NumbersFragment<Answer> {
             return calculateId(contentItem.getRow(), 0);
         }
     };
+
     // The answers
     private Answer[] answers;
 
@@ -72,56 +74,16 @@ public class AnswerFragment extends NumbersFragment<Answer> {
     }
 
     @Override
-    protected void addWatcher(final EditText editText, int row, int column) {
+    protected boolean change(@NonNull Answer record, @NonNull ProblemLab problemLab) {
 
-        // Get the content index. Calculate the control ID from the row and the column.
-        // TODO: Fix this.
-        // final SparseArray<Answer> contentIndex = getContentIndex();
-        final SparseArray<Answer> contentIndex = null;
-        final int controlId = calculateId(row, column);
-
-        // Is there no existing content with the calculated control ID?
-        Answer answer = contentIndex.get(controlId);
-        if (null == answer) {
-
-            // There is no existing content. Create it, then set the problem ID.
-            answer = new Answer();
-            answer.setProblemId(getProblemId());
-
-            // Set the row number, and put the content into the content index.
-            answer.setRow(row);
-            contentIndex.put(controlId, answer);
-        }
-
-        // Give the control a number text changed listener.
-        editText.addTextChangedListener(new NumberTextWatcher<Answer>(answer, WHITESPACE_PATTERN) {
-
-            @Override
-            protected void setChange(String change) {
-
-                /*
-                 * Get the content object, set its entry, and add the content object to the change
-                 * list.
-                 */
-                final Answer answer = getContent();
-                answer.setEntry(Double.parseDouble(change));
-                // TODO: Fix this.
-                // addChange(answer);
-            }
-        });
-    }
-
-    @Override
-    protected boolean change(Answer record, ProblemLab problemLab) {
-
-        // TODO: Fill this in.
+        // This fragment does not change answer entries.
         return false;
     }
 
     @Override
-    protected boolean delete(Answer record, ProblemLab problemLab) {
+    protected boolean delete(@NonNull Answer record, @NonNull ProblemLab problemLab) {
 
-        // TODO: Fill this in.
+        // This fragment does not delete answer entries.
         return false;
     }
 
@@ -136,8 +98,6 @@ public class AnswerFragment extends NumbersFragment<Answer> {
         // Call the superclass method, and get the answers.
         super.onCreate(savedInstanceState);
         answers = contentProducer.getContent(getProblemId());
-        // TODO: Fix this.
-        // setContentIndex(indexProducer.populateArray(new SparseArray<Answer>(), answers));
     }
 
     @Nullable
@@ -147,7 +107,7 @@ public class AnswerFragment extends NumbersFragment<Answer> {
 
         // Call the superclass method to get a view. Clear the changes, and return the view.
         final View view = super.onCreateView(inflater, container, savedInstanceState);
-        // clearChanges();
+        getRecordTracker().clearChanges();
         return view;
     }
 
@@ -160,17 +120,26 @@ public class AnswerFragment extends NumbersFragment<Answer> {
     }
 
     @Override
-    protected void setContent(EditText editText, int controlId) {
+    protected void setContent(EditText editText) {
 
-        // Get the content index. Is there content for this control?
-        // TODO: Fix this.
-        // final SparseArray<Answer> contentIndex = getContentIndex();
-        // final Answer answer = contentIndex.get(controlId);
-        final Answer answer = null;
+        // Is there content for this control?
+        final Answer answer = getRecordTracker().get(editText.getId());
         if (null != answer) {
 
             // There is content for this control. Set it.
             editText.setText(Double.toString(answer.getEntry()));
         }
+    }
+
+    @Override
+    protected void setRecordTracker() {
+
+        /*
+         * Create a new record tracker for this fragment. Copy the answers into the tracker. Set
+         * the tracker.
+         */
+        final RecordTracker<Answer> recordTracker = new RecordTracker<>(getControlCount());
+        copy(recordTracker, answers, indexProducer);
+        setRecordTracker(recordTracker);
     }
 }

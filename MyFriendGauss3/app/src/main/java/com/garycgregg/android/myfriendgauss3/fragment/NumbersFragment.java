@@ -6,8 +6,8 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Pair;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TableLayout;
@@ -20,9 +20,6 @@ import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 import java.util.Locale;
 
 public abstract class NumbersFragment<T> extends ContentFragment<T> {
-
-    // A pattern for whitespace in text
-    protected static final String WHITESPACE_PATTERN = "^\\\\s*$";
 
     // The base control ID
     private static final int BASE_ID = 0;
@@ -53,14 +50,23 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     // The tag for our logging
     private static final String TAG = NumbersFragment.class.getSimpleName();
 
+    // The background color of this pane
+    private int backgroundColor;
+
     // The number of columns
     private int columns;
+
+    // The label for this pane
+    private String label;
 
     // The current locale
     private Locale locale;
 
     // The number or rows
     private int rows;
+
+    // True if the hint string will be a single column, false otherwise
+    private boolean singleColumnHint;
 
     // Our table layout
     private TableLayout tableLayout;
@@ -94,6 +100,24 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     }
 
     /**
+     * Copies existing records from an array to a record tracker. The records are assumed exist
+     * for the purposes of tracking.
+     *
+     * @param recordTracker A record tracker
+     * @param records       The records to copy
+     * @param indexProducer A producer of indices
+     * @param <T>           The type of the record tracker, the array, and the index producer
+     */
+    protected static <T> void copy(RecordTracker<T> recordTracker, T[] records,
+                                   IndexProducer<T> indexProducer) {
+
+        // Cycle for each record, and put it in the record tracker.
+        for (T record : records) {
+            recordTracker.put(indexProducer.produceId(record), record, true);
+        }
+    }
+
+    /**
      * Customizes an instance of a NumbersFragment with the required argument(s).
      *
      * @param fragment         An existing NumbersFragment
@@ -124,92 +148,145 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     }
 
     /**
+     * Performs a view action on each view in a view group.
+     *
+     * @param viewGroup The view group
+     * @param action    The action to perform
+     */
+    private static void performAction(ViewGroup viewGroup, ViewAction action) {
+
+        // Cycle for each child view in the group.
+        final int childCount = viewGroup.getChildCount();
+        for (int i = 0; i < childCount; ++i) {
+
+            // Perform the action on the first/next view.
+            action.performAction(viewGroup.getChildAt(i));
+        }
+    }
+
+    /**
+     * Sets the value in an edit text.
+     *
+     * @param editText  The edit text in which to set a value
+     * @param value     The value to set
+     * @param forceFill Fill the control even if it has other content
+     */
+    private static void setValue(EditText editText, double value, boolean forceFill) {
+
+        /*
+         * Fill the control if the force-fill flag is set, or if the control only contains
+         * whitespace content.
+         */
+        if (forceFill || NumberTextWatcher.isWhitespace(editText.getText().toString())) {
+            editText.setText(Double.toString(value));
+        }
+    }
+
+    /**
+     * Adds an entry to the record tracker if it is missing.
+     *
+     * @param row    The row of the entry to check
+     * @param column The column of the entry to check
+     */
+    protected void addIfMissing(int row, int column) {
+
+        // The default action is to add no missing tracking entries.
+    }
+
+    /**
      * Adds a text watcher to an edit control.
      *
      * @param editText The edit control
      * @param row      The row of the edit control
      * @param column   The column of the edit control
      */
-    protected abstract void addWatcher(EditText editText, int row, int column);
+    protected void addWatcher(EditText editText, int row, int column) {
+
+        // The default action is to add no text watcher.
+    }
+
+    private void createContent(LayoutInflater inflater, TableRow tableRow, int row) {
+
+        // Get the background color and the context.
+        final int backgroundColor = getBackgroundColor();
+        final Context context = getActivity();
+
+        // Get the enabled and single column hint flags.
+        final boolean enabled = isEnabled();
+        final boolean singleColumnHint = isSingleColumnHint();
+
+        // Declare a variable to received an edit text. Get the record tracker.
+        EditText editText;
+        final RecordTracker<?> recordTracker = getRecordTracker();
+
+        final int columns = getColumns();
+        for (int column = 0; column < columns; ++column) {
+
+            // Create a new edit text, and set its background color.
+            editText = (EditText) inflater.inflate(R.layout.content_entry, tableRow,
+                    false);
+            editText.getBackground().setColorFilter(backgroundColor, PorterDuff.Mode.SRC_ATOP);
+
+            // Set its hint.
+            editText.setHint(singleColumnHint ?
+                    String.format(locale, "(%d)", row) :
+                    String.format(locale, "(%d,%d)", row, column));
+
+            /*
+             * Set the ID of the edit text. Make the control clickable or focusable if it is
+             * enabled.
+             */
+            editText.setId(calculateId(row, column));
+            editText.setClickable(enabled);
+            editText.setFocusable(enabled);
+
+            // Set content for the edit text. Add a record tracker entry if it is missing.
+            setContent(editText);
+            addIfMissing(row, column);
+
+            // Add a watcher for the edit text, and add the entry to the table row.
+            addWatcher(editText, row, column);
+            tableRow.addView(editText);
+        }
+    }
 
     @Override
     protected void createContent(LayoutInflater inflater, ViewGroup container) {
 
         output("createContent(LayoutInflater, ViewGroup)");
 
-        // Get the context and the arguments.
-        final Context context = getActivity();
-        final Bundle arguments = getArguments();
-
-        // Get the resources. Retrieve the label argument.
-        final Resources resources = getResources();
-        final String label = arguments.getString(LABEL_ARGUMENT,
-                resources.getString(R.string.table_title_hint));
-
-        // Retrieve the background color and enabled flag.
-        final int backgroundColor = arguments.getInt(BACKGROUND_COLOR_ARGUMENT,
-                resources.getColor(R.color.tableEntryDefault));
-        final boolean enabled = isEnabled();
-
-        // Get the number of rows.
-        final int defaultValue = 1;
-        final int rows = arguments.getInt(ROWS_ARGUMENT, defaultValue);
-        setRows(rows);
-
-        // Get the number of columns.
-        final int columns = arguments.getInt(COLUMNS_ARGUMENT, defaultValue);
-        setColumns(columns);
-
-        // Get the hint format argument.
-        final boolean singleColumnHint = arguments.getBoolean(HINT_FORMAT_ARGUMENT,
-                false);
-
-        // Declare other local variables.
-        int column;
-        EditText editText;
-        TableRow tableRow;
-
-        // Inflate the content. Get the table container, and set its label.
+        // Inflate our content. Set the label for the table.
         inflater.inflate(R.layout.content_table, container, true);
         final TextView tableLabel = container.findViewById(R.id.table_label);
-        tableLabel.setText(label);
+        tableLabel.setText(getLabel());
 
-        // Get the table layout, and cycle for each table row.
+        // Set the table layout and a record tracker.
         final TableLayout tableLayout = container.findViewById(R.id.table_layout);
         setTableLayout(tableLayout);
+        setRecordTracker();
+
+        // Get the context, and declare a variable to receive a table row.
+        final Context context = getActivity();
+        TableRow tableRow;
+
+        // Get the number of rows, and cycle for each.
+        final int rows = getRows();
         for (int row = 0; row < rows; ++row) {
 
-            // Create a new table row. Cycle for each column.
+            // Create a new table row and its content. Add the row to the table layout.
             tableRow = new TableRow(context);
-            for (column = 0; column < columns; ++column) {
-
-                // Create a content entry for the first/next row and column. Set its background.
-                editText = (EditText) inflater.inflate(R.layout.content_entry, tableRow,
-                        false);
-                editText.getBackground().setColorFilter(backgroundColor, PorterDuff.Mode.SRC_ATOP);
-
-                // Set the hint.
-                editText.setHint(singleColumnHint ?
-                        String.format(locale, "(%d)", row) :
-                        String.format(locale, "(%d,%d)", row, column));
-
-                // Set the control ID.
-                final int controlId = calculateId(row, column);
-                editText.setId(controlId);
-
-                // Make the control clickable or focusable if it is enabled.
-                editText.setClickable(enabled);
-                editText.setFocusable(enabled);
-
-                // Add content and a watcher to the content entry. Add the entry to the table row.
-                setContent(editText, controlId);
-                addWatcher(editText, row, column);
-                tableRow.addView(editText);
-            }
-
-            // Add the table row to the table layout.
+            createContent(inflater, tableRow, row);
             tableLayout.addView(tableRow);
         }
+    }
+
+    /**
+     * Gets the background color for this pane.
+     *
+     * @return The background color for this pane
+     */
+    protected int getBackgroundColor() {
+        return backgroundColor;
     }
 
     /**
@@ -219,6 +296,33 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
      */
     protected int getColumns() {
         return columns;
+    }
+
+    /**
+     * Returns the number of controls in the fragment.
+     *
+     * @return The number of controls in the fragment
+     */
+    protected int getControlCount() {
+        return getColumns() * getRows();
+    }
+
+    /**
+     * Gets the label for this pane.
+     *
+     * @return The label for this pane
+     */
+    protected String getLabel() {
+        return label;
+    }
+
+    /**
+     * Gets the current locale.
+     *
+     * @return The current locale
+     */
+    protected Locale getLocale() {
+        return locale;
     }
 
     @Override
@@ -244,19 +348,60 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
         return tableLayout;
     }
 
+    /**
+     * Determines whether the hint string for each control will be single column.
+     *
+     * @return True if the hint string will be a single column, false otherwise
+     */
+    protected boolean isSingleColumnHint() {
+        return singleColumnHint;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
-        // Call the superclass method, and get the current locale.
+        // Call the superclass method, and our resources.
         super.onCreate(savedInstanceState);
-        locale = getResources().getConfiguration().locale;
+        final Resources resources = getResources();
+
+        // Set our local, and get our arguments.
+        setLocale(resources.getConfiguration().locale);
+        final Bundle arguments = getArguments();
+
+        // Retrieve the label argument.
+        setLabel(arguments.getString(LABEL_ARGUMENT,
+                resources.getString(R.string.table_title_hint)));
+
+        // Retrieve the background color.
+        setBackgroundColor(arguments.getInt(BACKGROUND_COLOR_ARGUMENT,
+                resources.getColor(R.color.tableEntryDefault)));
+
+        // Declare the default rows/columns value, and get the number of rows.
+        final int defaultValue = 1;
+        setRows(arguments.getInt(ROWS_ARGUMENT, defaultValue));
+
+        // Get the number of columns, and the single hint format flag.
+        setColumns(arguments.getInt(COLUMNS_ARGUMENT, defaultValue));
+        setSingleColumnHint(arguments.getBoolean(HINT_FORMAT_ARGUMENT, false));
     }
 
     @Override
     public void onDestroy() {
 
-        // Clear the locale before calling superclass method.
-        locale = null;
+        // Clear the single column hint.
+        final int defaultClear = 0;
+        setSingleColumnHint(false);
+
+        // Clear the number of columns and rows.
+        setColumns(defaultClear);
+        setRows(defaultClear);
+
+        // Clear the background color and label.
+        setBackgroundColor(defaultClear);
+        setLabel(null);
+
+        // Clear the locale, and call the superclass method.
+        setLocale(null);
         super.onDestroy();
     }
 
@@ -267,6 +412,15 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
         releaseChanges();
         setTableLayout(null);
         super.onDestroyView();
+    }
+
+    /**
+     * Sets the background color for this pane.
+     *
+     * @param backgroundColor The background color for this pane
+     */
+    private void setBackgroundColor(int backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 
     /**
@@ -281,10 +435,32 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     /**
      * Sets content of an edit control.
      *
-     * @param editText  The edit control
-     * @param controlId The ID of the edit control
+     * @param editText The edit control
      */
-    protected abstract void setContent(EditText editText, int controlId);
+    protected abstract void setContent(EditText editText);
+
+    /**
+     * Sets the label for this pane.
+     *
+     * @param label The label for this pane
+     */
+    private void setLabel(String label) {
+        this.label = label;
+    }
+
+    /**
+     * Sets the current locale.
+     *
+     * @param locale The current locale
+     */
+    private void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
+    /**
+     * Sets the record tracker.
+     */
+    protected abstract void setRecordTracker();
 
     /**
      * Sets the number of rows.
@@ -296,6 +472,15 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     }
 
     /**
+     * Sets the single column hint.
+     *
+     * @param singleColumnHint True if the hint string will be a single column, false otherwise
+     */
+    private void setSingleColumnHint(boolean singleColumnHint) {
+        this.singleColumnHint = singleColumnHint;
+    }
+
+    /**
      * Sets the table layout.
      *
      * @param tableLayout The table layout
@@ -304,27 +489,33 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
         this.tableLayout = tableLayout;
     }
 
-    protected abstract static class IndexProducer<U> {
+    /**
+     * Sets values in the fragment.
+     *
+     * @param value     The value to set
+     * @param forceFill Fill the control even if it has other content
+     */
+    public void setValue(final double value, final boolean forceFill) {
 
-        /**
-         * Populates a sparse array with contents.
-         *
-         * @param contentIndex A sparse array
-         * @param content      The contents
-         * @return The sparse array that the caller passed in
-         */
-        public SparseArray<U> populateArray(SparseArray<U> contentIndex, U[] content) {
+        // Perform this action for each table row.
+        performAction(getTableLayout(), new ViewAction() {
 
-            // Cycle for each content item.
-            for (U item : content) {
+            @Override
+            public void performAction(View view) {
 
-                // Place the item in the sparse array with an appropriate index.
-                contentIndex.put(produceId(item), item);
+                // Perform this action for each edit control.
+                NumbersFragment.performAction((TableRow) view, new ViewAction() {
+
+                    @Override
+                    public void performAction(View view) {
+                        setValue((EditText) view, value, forceFill);
+                    }
+                });
             }
+        });
+    }
 
-            // Return the sparse array.
-            return contentIndex;
-        }
+    protected interface IndexProducer<U> {
 
         /**
          * Produces an index for a given content item.
@@ -332,6 +523,16 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
          * @param contentItem The given content item
          * @return An index for the given content item
          */
-        public abstract int produceId(U contentItem);
+        int produceId(U contentItem);
+    }
+
+    private interface ViewAction {
+
+        /**
+         * Performs an action on a view.
+         *
+         * @param view The view on which to perform an action
+         */
+        void performAction(View view);
     }
 }
