@@ -192,18 +192,25 @@ class RecordTracker<T> {
 
                 case CHANGED:
 
-                    // The current state of the record is changed. Perform a change action.
-                    recordAction.onChanged(container.getRecord());
+                    /*
+                     * The current state of the record is changed. Perform a change action, and
+                     * set the container to indicate an existing record if the change action
+                     * succeeds.
+                     */
+                    container.setExists(recordAction.onChanged(container.getRecord()));
                     break;
 
                 case DELETED:
 
-                    /*
-                     * The current state of the record is deleted. Perform a delete action only if
-                     * the record currently exists.
-                     */
+                    // The current state of the record is deleted. Does the record exist?
                     if (container.isExists()) {
-                        recordAction.onDeleted(container.getRecord());
+
+                        /*
+                         * The current state of the record is deleted, and the record exists.
+                         * Perform a delete action, and set the container to indicate a non-
+                         * existent record if the delete succeeds.
+                         */
+                        container.setExists(!recordAction.onDeleted(container.getRecord()));
                     }
 
                     // Do not fall through!
@@ -217,6 +224,9 @@ class RecordTracker<T> {
                      */
                     break;
             }
+
+            // At the end, reset the container state to not changed.
+            container.setState(State.NOT_CHANGED);
         }
     }
 
