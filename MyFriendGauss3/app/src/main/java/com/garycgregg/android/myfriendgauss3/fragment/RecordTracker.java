@@ -7,13 +7,16 @@ class RecordTracker<T> {
     // An array of containers (see container definition, below)
     private final SparseArray<Container<T>> array;
 
+    // The record capacity of the tracker
+    private final int capacity;
+
     /**
      * Constructs the record tracker.
      *
-     * @param initialCapacity The initial record capacity of the tracker
+     * @param capacity The record capacity of the tracker
      */
-    public RecordTracker(int initialCapacity) {
-        array = new SparseArray<>(initialCapacity);
+    public RecordTracker(int capacity) {
+        array = new SparseArray<>(this.capacity = capacity);
     }
 
     /**
