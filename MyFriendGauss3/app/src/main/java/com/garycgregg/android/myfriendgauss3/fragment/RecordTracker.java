@@ -7,17 +7,8 @@ class RecordTracker<T> {
     // An array of containers (see container definition, below)
     private final SparseArray<Container<T>> array;
 
-    // The container action to clear each record in the array
-    private final ContainerAction<T> clearAction = new ContainerAction<T>() {
-
-        @Override
-        public void perform(Container<T> container) {
-
-            // Set the container state to existing, and its state to not changed.
-            container.setExists(true);
-            container.setState(State.NOT_CHANGED);
-        }
-    };
+    // A variable to hold the count of existing records
+    private int existingRecordCount;
 
     /**
      * Constructs the record tracker.
@@ -26,13 +17,6 @@ class RecordTracker<T> {
      */
     public RecordTracker(int initialCapacity) {
         array = new SparseArray<>(initialCapacity);
-    }
-
-    /**
-     * Clears changes in the array.
-     */
-    public void clearChanges() {
-        performAction(clearAction);
     }
 
     /**

@@ -215,7 +215,7 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
         final boolean enabled = isEnabled();
         final boolean singleColumnHint = isSingleColumnHint();
 
-        // Declare a variable to received an edit text. Get the record tracker.
+        // Declare a variable to receive an edit text. Get the record tracker.
         EditText editText;
         final RecordTracker<?> recordTracker = getRecordTracker();
 

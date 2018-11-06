@@ -3,9 +3,6 @@ package com.garycgregg.android.myfriendgauss3.fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.garycgregg.android.myfriendgauss3.content.Matrix;
@@ -166,17 +163,6 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
         // Call the superclass method, and get the matrixEntries.
         super.onCreate(savedInstanceState);
         matrixEntries = contentProducer.getContent(getProblemId());
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-
-        // Call the superclass method to get a view. Clear the changes, and return the view.
-        final View view = super.onCreateView(inflater, container, savedInstanceState);
-        getRecordTracker().clearChanges();
-        return view;
     }
 
     @Override

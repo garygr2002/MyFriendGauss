@@ -205,13 +205,9 @@ public abstract class ContentFragment<T> extends GaussFragment
     @Override
     public void onPause() {
 
-        /*
-         * Call the superclass method. Synchronize the changes to the database, and clear the
-         * changes.
-         */
+        // Call the superclass method. Synchronize the changes to the database.
         super.onPause();
         recordTracker.performAction(this);
-        recordTracker.clearChanges();
     }
 
     @Override
@@ -231,11 +227,7 @@ public abstract class ContentFragment<T> extends GaussFragment
         final RecordTracker<T> recordTracker = getRecordTracker();
         if (null != recordTracker) {
 
-            /*
-             * The record tracker is not null. Clear its changes. Clear the tracker, and set the
-             * record tracker to null.
-             */
-            recordTracker.clearChanges();
+            // The record tracker is not null. Clear it and set it to null.
             recordTracker.clearTracker();
             setRecordTracker(null);
         }
