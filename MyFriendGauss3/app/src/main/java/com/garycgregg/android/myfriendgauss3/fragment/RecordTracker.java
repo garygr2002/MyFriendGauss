@@ -11,11 +11,11 @@ class RecordTracker<T> {
     // The record capacity of the tracker
     private final int capacity;
 
-    // A count listener
-    private final CountListener listener;
-
     // The count of existing records
     private int count;
+
+    // A count listener
+    private CountListener listener;
 
     /**
      * Constructs the record tracker.
@@ -27,7 +27,7 @@ class RecordTracker<T> {
 
         // Set the member variables.
         array = new SparseArray<>(this.capacity = capacity);
-        this.listener = listener;
+        setListener(listener);
     }
 
     /**
@@ -96,6 +96,15 @@ class RecordTracker<T> {
          */
         final Container<T> container = array.get(key);
         return (null == container) ? null : container.getRecord();
+    }
+
+    /**
+     * Gets the count listener.
+     *
+     * @return The count listener
+     */
+    public CountListener getListener() {
+        return listener;
     }
 
     /**
@@ -241,6 +250,15 @@ class RecordTracker<T> {
 
         // Return whether we found a container, and changed its state.
         return found;
+    }
+
+    /**
+     * Sets the count listener.
+     *
+     * @param listener The count listener
+     */
+    public void setListener(CountListener listener) {
+        this.listener = listener;
     }
 
     // An enumerator indicating the current state of a record
