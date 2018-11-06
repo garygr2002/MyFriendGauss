@@ -207,7 +207,7 @@ public abstract class ContentFragment<T> extends GaussFragment
 
         // Call the superclass method. Synchronize the changes to the database.
         super.onPause();
-        recordTracker.performAction(this);
+        synchronize();
     }
 
     @Override
@@ -258,5 +258,12 @@ public abstract class ContentFragment<T> extends GaussFragment
      */
     protected void setRecordTracker(RecordTracker<T> recordTracker) {
         this.recordTracker = recordTracker;
+    }
+
+    /**
+     * Synchronizes the record tracker to the database.
+     */
+    public void synchronize() {
+        recordTracker.performAction(this);
     }
 }
