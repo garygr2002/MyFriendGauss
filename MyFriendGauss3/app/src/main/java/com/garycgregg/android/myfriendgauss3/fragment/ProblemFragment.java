@@ -17,9 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.garycgregg.android.myfriendgauss3.R;
-import com.garycgregg.android.myfriendgauss3.content.Matrix;
 import com.garycgregg.android.myfriendgauss3.content.Problem;
-import com.garycgregg.android.myfriendgauss3.content.Vector;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 import java.util.ArrayList;
@@ -465,64 +463,6 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         }
 
         return returnValue;
-    }
-
-    @Override
-    public void onPause() {
-
-        // Put the changes in the database, and call the superclass method.
-        synchronize();
-        super.onPause();
-    }
-
-    /**
-     * Synchronizes fragment content with the database.
-     */
-    public void synchronize() {
-
-        output("synchronize()");
-
-        // Get the problem lab. Is the problem lab not null?
-        final ProblemLab problemLab = getProblemLab();
-        if (null != problemLab) {
-
-            /*
-             * The problem lab is not null. Get the fragment manager. Get the first changed
-             * problem from the control fragment. Is the changed problem, if any, not null?
-             */
-            final FragmentManager manager = getChildFragmentManager();
-            final Problem problemFromControl = getFirst(
-                    getChanges((ControlFragment) manager.findFragmentById(R.id.control_pane)));
-            if (null != problemFromControl) {
-
-                /*
-                 * The problem from the control fragment is not null. Copy the problem state to
-                 * our own problem copy. Check to make sure that the problem state is unlocked
-                 * before updating the database.
-                 */
-                copyProblemState(problem, problemFromControl);
-                checkProblemNotLocked();
-                problemLab.update(problem);
-            }
-
-            // Get the matrix change list, and cycle for each changed matrix entry.
-            final List<Matrix> matrixList =
-                    getChanges((MatrixFragment) manager.findFragmentById(R.id.matrix_pane));
-            for (Matrix matrix : matrixList) {
-
-                // Add or replace the entry in the database.
-                problemLab.addOrReplace(matrix);
-            }
-
-            // Get the vector change list, and cycle for each changed vector entry.
-            final List<Vector> vectorList =
-                    getChanges((VectorFragment) manager.findFragmentById(R.id.vector_pane));
-            for (Vector vector : vectorList) {
-
-                // Add or replace the entry in the database.
-                problemLab.addOrReplace(vector);
-            }
-        }
     }
 
     /**
