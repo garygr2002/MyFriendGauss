@@ -7,9 +7,6 @@ class RecordTracker<T> {
     // An array of containers (see container definition, below)
     private final SparseArray<Container<T>> array;
 
-    // A variable to hold the count of existing records
-    private int existingRecordCount;
-
     /**
      * Constructs the record tracker.
      *
