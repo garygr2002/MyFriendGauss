@@ -10,7 +10,8 @@ import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 import java.util.List;
 
-public class VectorFragment extends NumbersFragment<Vector> {
+public class VectorFragment extends NumbersFragment<Vector>
+        implements RecordTracker.CountListener{
 
     // The tag for our logging
     private static final String TAG = VectorFragment.class.getSimpleName();
@@ -171,6 +172,21 @@ public class VectorFragment extends NumbersFragment<Vector> {
     }
 
     @Override
+    public void onEqual() {
+        output("The vector is now full.");
+    }
+
+    @Override
+    public void onGreater() {
+        output("The vector is greater than full; I do not know how I got here.");
+    }
+
+    @Override
+    public void onLess() {
+        output("The vector is less than full.");
+    }
+
+    @Override
     protected void setContent(EditText editText) {
 
         // Is there content for this control?
@@ -189,7 +205,13 @@ public class VectorFragment extends NumbersFragment<Vector> {
          * Create a new record tracker for this fragment. Copy the vectors into the tracker. Set
          * the tracker.
          */
-        final RecordTracker<Vector> recordTracker = new RecordTracker<>(getControlCount());
+
+        // Create a new record tracker for this fragment.
+        final RecordTracker<Vector> recordTracker = new RecordTracker<>(getControlCount(),
+                this);
+
+
+        // Copy the vector into the tracker.
         copy(recordTracker, vectors, indexProducer);
         setRecordTracker(recordTracker);
     }

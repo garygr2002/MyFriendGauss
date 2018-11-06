@@ -1,5 +1,6 @@
 package com.garycgregg.android.myfriendgauss3.fragment;
 
+import android.support.annotation.NonNull;
 import android.util.SparseArray;
 
 class RecordTracker<T> {
@@ -10,13 +11,68 @@ class RecordTracker<T> {
     // The record capacity of the tracker
     private final int capacity;
 
+    // A count listener
+    private final CountListener listener;
+
+    // The count of existing records
+    private int count;
+
+    /**
+     * Constructs the record tracker.
+     *
+     * @param capacity The record capacity of the tracker
+     * @param listener A count listener
+     */
+    public RecordTracker(int capacity, CountListener listener) {
+
+        // Set the member variables.
+        array = new SparseArray<>(this.capacity = capacity);
+        this.listener = listener;
+    }
+
     /**
      * Constructs the record tracker.
      *
      * @param capacity The record capacity of the tracker
      */
     public RecordTracker(int capacity) {
-        array = new SparseArray<>(this.capacity = capacity);
+        this(capacity, null);
+    }
+
+    /**
+     * Checks if a call to a count listener is required.
+     *
+     * @param listener The count listener
+     * @param oldCount The old record count
+     * @param newCount The new record count
+     */
+    private void callListener(@NonNull CountListener listener, int oldCount, int newCount) {
+
+        // Is the new count at capacity?
+        if (capacity == newCount) {
+
+            /*
+             * The new count is at capacity. Call the listener if the old count is not at
+             * capacity.
+             */
+            if (capacity != oldCount) {
+                listener.onEqual();
+            }
+        }
+
+        // The new count is not at capacity. Is the old count at capacity?
+        else if (capacity == oldCount) {
+
+            // Call the listener if the new count is greater than capacity.
+            if (capacity < newCount) {
+                listener.onGreater();
+            }
+
+            // Call the listener if the new count is less than capacity.
+            else {
+                listener.onLess();
+            }
+        }
     }
 
     /**
@@ -36,19 +92,72 @@ class RecordTracker<T> {
 
         /*
          * Try to find a container with the given key. Return null if we find no such container,
-         * otherwise return the container record.
+         * otherwise return the contained record.
          */
         final Container<T> container = array.get(key);
         return (null == container) ? null : container.getRecord();
     }
 
     /**
-     * Performs actions on each record in the tracker.
+     * Maintains the count of existing records.
      *
-     * @param action The actions to take (see definition for a <code>RecordAction</code>.
+     * @param container A container that may be changing state
+     * @param newState  The new state of the container
+     * @return The container that was passed in
      */
-    public void performAction(RecordAction<T> action) {
-        performAction(new CallerContainerAction<>(action));
+    private Container<T> maintainCount(@NonNull Container<T> container, @NonNull State newState) {
+
+        /*
+         * Track the old count. Maintain the count based on whether the record exists in the
+         * database. Set the new state in the container.
+         */
+        final int oldCount = count;
+        maintainCount(container.getState(), newState, container.doesExist());
+        container.setState(newState);
+
+        // Check if a listener call is required.
+        if (null != listener) {
+            callListener(listener, oldCount, count);
+        }
+
+        // Return the container.
+        return container;
+    }
+
+    /**
+     * Maintains the count of existing records.
+     *
+     * @param oldState The old state of a record
+     * @param newState The new state of a record
+     * @param exists   Whether the record currently exists in the database
+     */
+    private void maintainCount(@NonNull State oldState, @NonNull State newState,
+                               boolean exists) {
+
+        /*
+         * Declare and initialize the increment/decrement value, and the target state for which we
+         * are going to check. Is the target state equal to the new state?
+         */
+        final int value = exists ? 1 : -1;
+        final State targetState = exists ? State.DELETED : State.CHANGED;
+        if (targetState.equals(newState)) {
+
+            /*
+             * The target state is equal to the new state. Adjust the count based on the
+             * increment/decrement value if the target state is not equal to the old state.
+             */
+            if (!targetState.equals(oldState)) {
+                count -= value;
+            }
+        }
+
+        /*
+         * The target state is not equal to the new state. Adjust the count based on the
+         * increment/decrement value if the target state is equal to the old state.
+         */
+        else if (targetState.equals(oldState)) {
+            count += value;
+        }
     }
 
     /**
@@ -72,6 +181,15 @@ class RecordTracker<T> {
     }
 
     /**
+     * Performs actions on each record in the tracker.
+     *
+     * @param action The actions to take (see definition for a <code>RecordAction</code>
+     */
+    public void performAction(RecordAction<T> action) {
+        performAction(new CallerContainerAction<>(action));
+    }
+
+    /**
      * Puts a record in the tracker.
      *
      * @param key    The key of the record
@@ -79,7 +197,25 @@ class RecordTracker<T> {
      * @param exists True if the record exists, false otherwise
      */
     public void put(int key, T record, boolean exists) {
-        array.put(key, new Container<>(record, exists));
+
+        // Try to find an existing container. Is there an existing container?
+        Container<T> container = array.get(key);
+        if (null != container) {
+
+            /*
+             * There is an existing container. Keep track of the count of existing records, as
+             * this record is being replaced.
+             */
+            maintainCount(container, State.DELETED);
+        }
+
+        /*
+         * Create a new container. Set its state to deleted so that we will correctly increment
+         * the count when the record transitions to the 'not changed' state.
+         */
+        container = new Container<>(record, exists);
+        container.setState(State.DELETED);
+        array.put(key, maintainCount(container, State.NOT_CHANGED));
     }
 
     /**
@@ -100,7 +236,7 @@ class RecordTracker<T> {
              * We found a container with the given key. Set the state of the container to 'deleted'
              * if the flag so indicates. Otherwise set the state to 'changed.'
              */
-            container.setState(deleted ? State.DELETED : State.CHANGED);
+            maintainCount(container, deleted ? State.DELETED : State.CHANGED);
         }
 
         // Return whether we found a container, and changed its state.
@@ -120,6 +256,24 @@ class RecordTracker<T> {
          * @param container The container on which to perform the action
          */
         void perform(Container<U> container);
+    }
+
+    public interface CountListener {
+
+        /**
+         * Indicates the record count has transitioned to equal capacity.
+         */
+        void onEqual();
+
+        /**
+         * Indicates the record count has transitioned to greater than capacity.
+         */
+        void onGreater();
+
+        /**
+         * Indicates the record count has transitioned to less than capacity.
+         */
+        void onLess();
     }
 
     public interface RecordAction<U> {
@@ -187,7 +341,7 @@ class RecordTracker<T> {
                 case DELETED:
 
                     // The current state of the record is deleted. Does the record exist?
-                    if (container.isExists()) {
+                    if (container.doesExist()) {
 
                         /*
                          * The current state of the record is deleted, and the record exists.
@@ -240,6 +394,15 @@ class RecordTracker<T> {
         }
 
         /**
+         * Determines the existence state of the record.
+         *
+         * @return True if the record is exists, false otherwise
+         */
+        public boolean doesExist() {
+            return exists;
+        }
+
+        /**
          * Gets the contained record.
          *
          * @return The contained record
@@ -258,15 +421,6 @@ class RecordTracker<T> {
         }
 
         /**
-         * Determines the existence state of the record.
-         *
-         * @return True if the record is exists, false otherwise
-         */
-        public boolean isExists() {
-            return exists;
-        }
-
-        /**
          * Sets whether a record exists.
          *
          * @param exists True if a record exists, false otherwise
@@ -280,7 +434,7 @@ class RecordTracker<T> {
          *
          * @param state The current state of the record
          */
-        void setState(State state) {
+        void setState(@NonNull State state) {
             this.state = state;
         }
     }

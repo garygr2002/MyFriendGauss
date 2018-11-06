@@ -10,7 +10,8 @@ import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 import java.util.List;
 
-public class MatrixFragment extends NumbersFragment<Matrix> {
+public class MatrixFragment extends NumbersFragment<Matrix>
+        implements RecordTracker.CountListener {
 
     // The tag for our logging
     private static final String TAG = MatrixFragment.class.getSimpleName();
@@ -174,6 +175,21 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     }
 
     @Override
+    public void onEqual() {
+        output("The matrix is now full.");
+    }
+
+    @Override
+    public void onGreater() {
+        output("The matrix is greater than full; I do not know how I got here.");
+    }
+
+    @Override
+    public void onLess() {
+        output("The matrix is less than full.");
+    }
+
+    @Override
     protected void setContent(EditText editText) {
 
         // Is there content for this control?
@@ -188,11 +204,11 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     @Override
     protected void setRecordTracker() {
 
-        /*
-         * Create a new record tracker for this fragment. Copy the matrix entries into the tracker.
-         * Set the tracker.
-         */
-        final RecordTracker<Matrix> recordTracker = new RecordTracker<>(getControlCount());
+        // Create a new record tracker.
+        final RecordTracker<Matrix> recordTracker = new RecordTracker<>(getControlCount(),
+                this);
+
+        // Copy the matrix entries in the tracker.
         copy(recordTracker, matrixEntries, indexProducer);
         setRecordTracker(recordTracker);
     }
