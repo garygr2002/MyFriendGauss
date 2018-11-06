@@ -79,6 +79,9 @@ class RecordTracker<T> {
      * Clears the tracker.
      */
     public void clearTracker() {
+
+        // Clear the count, then clear the array.
+        count = 0;
         array.clear();
     }
 
@@ -96,6 +99,15 @@ class RecordTracker<T> {
          */
         final Container<T> container = array.get(key);
         return (null == container) ? null : container.getRecord();
+    }
+
+    /**
+     * Gets the count of existing records.
+     *
+     * @return The count of existing records
+     */
+    public int getCount() {
+        return count;
     }
 
     /**
@@ -143,17 +155,30 @@ class RecordTracker<T> {
     private void maintainCount(@NonNull State oldState, @NonNull State newState,
                                boolean exists) {
 
-        /*
-         * Declare and initialize the increment/decrement value, and the target state for which we
-         * are going to check. Is the target state equal to the new state?
-         */
-        final int value = exists ? 1 : -1;
-        final State targetState = exists ? State.DELETED : State.CHANGED;
+        // Declare local variables. Is the 'exists' flag set?
+        int value;
+        State targetState;
+        if (exists) {
+
+            // The 'exists' flag is set. Initialize the local variables thusly.
+            value = 1;
+            targetState = State.DELETED;
+        }
+
+        // The 'exists' flag is clear.
+        else {
+
+            // Initialize the local variables based on the clear 'exists' flag.
+            value = -1;
+            targetState = State.CHANGED;
+        }
+
+        // Does the target state equal the new state?
         if (targetState.equals(newState)) {
 
             /*
-             * The target state is equal to the new state. Adjust the count based on the
-             * increment/decrement value if the target state is not equal to the old state.
+             * The target state equals the new state. Adjust the count based on the
+             * increment/decrement value if the target state equals the old state.
              */
             if (!targetState.equals(oldState)) {
                 count -= value;
@@ -161,8 +186,8 @@ class RecordTracker<T> {
         }
 
         /*
-         * The target state is not equal to the new state. Adjust the count based on the
-         * increment/decrement value if the target state is equal to the old state.
+         * The target state does not equal the new state. Adjust the count based on the
+         * increment/decrement value if the target state equals the old state.
          */
         else if (targetState.equals(oldState)) {
             count += value;
