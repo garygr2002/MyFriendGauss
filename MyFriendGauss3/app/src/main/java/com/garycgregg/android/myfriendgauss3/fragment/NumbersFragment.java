@@ -257,6 +257,22 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
         // The default action is to add no text watcher.
     }
 
+    /**
+     * Determines if the numbers fragment contains missing entries.
+     *
+     * @return True if the numbers fragment contains missing entries, false otherwise
+     */
+    public boolean areEntriesMissing() {
+        return getRecordTracker().areEntriesMissing();
+    }
+
+    /**
+     * Creates content for a single table row.
+     *
+     * @param inflater The inflater to use for each control
+     * @param tableRow The table row to receive the controls
+     * @param row      The number of the row
+     */
     private void createContent(LayoutInflater inflater, TableRow tableRow, int row) {
 
         // Get the background color and the context.
@@ -267,10 +283,8 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
         final boolean enabled = isEnabled();
         final boolean singleColumnHint = isSingleColumnHint();
 
-        // Declare a variable to receive an edit text. Get the record tracker.
+        // Declare a variable to receive an edit text. Cycle for each column.
         EditText editText;
-        final RecordTracker<?> recordTracker = getRecordTracker();
-
         final int columns = getColumns();
         for (int column = 0; column < columns; ++column) {
 
@@ -522,24 +536,16 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
 
     @Override
     public void onEqual() {
-
-        output("onEqual()");
         notifyListeners(equalNotifier, getId());
     }
 
     @Override
     public void onGreater() {
-
-        // TODO: Fill this in.
-        output("onGreater()");
         notifyListeners(greaterNotifier, getId());
     }
 
     @Override
     public void onLess() {
-
-        // TODO: Fill this in.
-        output("onLess()");
         notifyListeners(lessNotifier, getId());
     }
 
