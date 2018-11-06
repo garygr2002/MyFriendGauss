@@ -10,8 +10,7 @@ import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 import java.util.List;
 
-public class MatrixFragment extends NumbersFragment<Matrix>
-        implements RecordTracker.CountListener {
+public class MatrixFragment extends NumbersFragment<Matrix> {
 
     // The tag for our logging
     private static final String TAG = MatrixFragment.class.getSimpleName();
@@ -172,21 +171,6 @@ public class MatrixFragment extends NumbersFragment<Matrix>
         // Set the matrix entries to null, and call the superclass method.
         matrixEntries = null;
         super.onDestroy();
-    }
-
-    @Override
-    public void onEqual() {
-        output("The matrix is now full.");
-    }
-
-    @Override
-    public void onGreater() {
-        output("The matrix is greater than full; I do not know how I got here.");
-    }
-
-    @Override
-    public void onLess() {
-        output("The matrix is less than full.");
     }
 
     @Override

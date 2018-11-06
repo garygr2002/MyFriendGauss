@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +21,8 @@ import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 import java.util.Locale;
 
-public abstract class NumbersFragment<T> extends ContentFragment<T> {
+public abstract class NumbersFragment<T> extends ContentFragment<T>
+        implements RecordTracker.CountListener {
 
     // The base control ID
     private static final int BASE_ID = 0;
@@ -50,6 +53,36 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     // The tag for our logging
     private static final String TAG = NumbersFragment.class.getSimpleName();
 
+    // Notifies a listener of an 'on equal' event
+    private final ListenerNotifier equalNotifier = new ListenerNotifier() {
+
+        @Override
+        public void notifyListener(@NonNull CountListener listener, int id) {
+            listener.onEqual(id);
+        }
+    };
+
+    // Notifies a listener of an 'on greater' event
+    private final ListenerNotifier greaterNotifier = new ListenerNotifier() {
+
+        @Override
+        public void notifyListener(@NonNull CountListener listener, int id) {
+            listener.onGreater(id);
+        }
+    };
+
+    // Notifies a listener of an 'on less' event
+    private final ListenerNotifier lessNotifier = new ListenerNotifier() {
+
+        @Override
+        public void notifyListener(@NonNull CountListener listener, int id) {
+            listener.onLess(id);
+        }
+    };
+
+    // The activity count listener
+    private CountListener activityListener;
+
     // The background color of this pane
     private int backgroundColor;
 
@@ -61,6 +94,9 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
 
     // The current locale
     private Locale locale;
+
+    // The parent fragment count listener
+    private CountListener parentListener;
 
     // The number or rows
     private int rows;
@@ -145,6 +181,22 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
         arguments.putInt(ROWS_ARGUMENT, rows);
         arguments.putInt(COLUMNS_ARGUMENT, columns);
         arguments.putBoolean(HINT_FORMAT_ARGUMENT, singleColumnHint);
+    }
+
+    /**
+     * Notifies a count listener of an event.
+     *
+     * @param countListener The count listener to notify
+     * @param notifier      The notifier containing the event to fire
+     * @param id            The ID of the fragment firing the callback
+     */
+    private static void notifyListener(CountListener countListener,
+                                       ListenerNotifier notifier, int id) {
+
+        // Only notify the listener if it is not null.
+        if (null != countListener) {
+            notifier.notifyListener(countListener, id);
+        }
     }
 
     /**
@@ -281,6 +333,15 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     }
 
     /**
+     * Gets the activity count listener.
+     *
+     * @return The activity count listener
+     */
+    private CountListener getActivityListener() {
+        return activityListener;
+    }
+
+    /**
      * Gets the background color for this pane.
      *
      * @return The background color for this pane
@@ -331,6 +392,15 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
     }
 
     /**
+     * Gets the parent fragment count listener.
+     *
+     * @return The parent fragment count listener
+     */
+    private CountListener getParentListener() {
+        return parentListener;
+    }
+
+    /**
      * Gets the number of rows.
      *
      * @return The number of rows
@@ -355,6 +425,33 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
      */
     protected boolean isSingleColumnHint() {
         return singleColumnHint;
+    }
+
+    /**
+     * Notifies the count listeners of an event.
+     *
+     * @param notifier The notifier containing the event to fire
+     * @param id       The ID of the fragment firing the callback
+     */
+    private void notifyListeners(ListenerNotifier notifier, int id) {
+
+        // Notify first the parent fragment listener, then the activity listener.
+        notifyListener(getParentListener(), notifier, id);
+        notifyListener(getActivityListener(), notifier, id);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+
+        // Call the superclass method, and set the activity listener.
+        super.onAttach(context);
+        setActivityListener((context instanceof CountListener) ?
+                ((CountListener) context) : null);
+
+        // Set the parent fragment listener.
+        final Fragment fragment = getParentFragment();
+        setParentListener((fragment instanceof CountListener) ?
+                ((CountListener) fragment) : null);
     }
 
     @Override
@@ -414,6 +511,47 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
         super.onDestroyView();
     }
 
+    @Override
+    public void onDetach() {
+
+        // Clear the listeners, and call the superclass method.
+        setParentListener(null);
+        setActivityListener(null);
+        super.onDetach();
+    }
+
+    @Override
+    public void onEqual() {
+
+        output("onEqual()");
+        notifyListeners(equalNotifier, getId());
+    }
+
+    @Override
+    public void onGreater() {
+
+        // TODO: Fill this in.
+        output("onGreater()");
+        notifyListeners(greaterNotifier, getId());
+    }
+
+    @Override
+    public void onLess() {
+
+        // TODO: Fill this in.
+        output("onLess()");
+        notifyListeners(lessNotifier, getId());
+    }
+
+    /**
+     * Sets the activity count listener.
+     *
+     * @param activityListener The activity count listener
+     */
+    private void setActivityListener(CountListener activityListener) {
+        this.activityListener = activityListener;
+    }
+
     /**
      * Sets the background color for this pane.
      *
@@ -455,6 +593,15 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
      */
     private void setLocale(Locale locale) {
         this.locale = locale;
+    }
+
+    /**
+     * Sets the parent fragment count listener.
+     *
+     * @param parentListener The parent fragment count listener
+     */
+    private void setParentListener(CountListener parentListener) {
+        this.parentListener = parentListener;
     }
 
     /**
@@ -515,6 +662,30 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
         });
     }
 
+    public interface CountListener {
+
+        /**
+         * Indicates the record count has transitioned to equal capacity.
+         *
+         * @param id The ID of the fragment firing the callback
+         */
+        void onEqual(int id);
+
+        /**
+         * Indicates the record count has transitioned to greater than capacity.
+         *
+         * @param id The ID of the fragment firing the callback
+         */
+        void onGreater(int id);
+
+        /**
+         * Indicates the record count has transitioned to less than capacity.
+         *
+         * @param id The ID of the fragment firing the callback
+         */
+        void onLess(int id);
+    }
+
     protected interface IndexProducer<U> {
 
         /**
@@ -524,6 +695,17 @@ public abstract class NumbersFragment<T> extends ContentFragment<T> {
          * @return An index for the given content item
          */
         int produceId(U contentItem);
+    }
+
+    private interface ListenerNotifier {
+
+        /**
+         * Notifies a count listener that an event has occurred.
+         *
+         * @param listener The listener to notify
+         * @param id       The ID of the fragment firing the callback
+         */
+        void notifyListener(@NonNull CountListener listener, int id);
     }
 
     private interface ViewAction {

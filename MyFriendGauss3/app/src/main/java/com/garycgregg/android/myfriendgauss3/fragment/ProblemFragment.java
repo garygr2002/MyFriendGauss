@@ -25,7 +25,7 @@ import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProblemFragment extends GaussFragment {
+public class ProblemFragment extends GaussFragment implements NumbersFragment.CountListener {
 
     // An illegal position
     private static final int ILLEGAL_POSITION = ~0;
@@ -70,9 +70,6 @@ public class ProblemFragment extends GaussFragment {
 
     // The problem ID associated with this instance
     private long problemId = ProblemLab.NULL_ID;
-
-    // The vector fragment
-    private VectorFragment vectorFragment;
 
     /**
      * Constructs the problem fragment.
@@ -405,6 +402,27 @@ public class ProblemFragment extends GaussFragment {
         // Reset the position. Call the superclass method.
         position = ILLEGAL_POSITION;
         super.onDestroy();
+    }
+
+    @Override
+    public void onEqual(int id) {
+
+        // TODO: Fill this in.
+        output(String.format("onEqual(int): %d", id));
+    }
+
+    @Override
+    public void onGreater(int id) {
+
+        // TODO: Fill this in.
+        output(String.format("onGreater(int): %d", id));
+    }
+
+    @Override
+    public void onLess(int id) {
+
+        // TODO: Fill this in.
+        output(String.format("onLess(int): %d", id));
     }
 
     @Override

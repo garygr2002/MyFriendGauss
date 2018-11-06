@@ -10,8 +10,7 @@ import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 import java.util.List;
 
-public class AnswerFragment extends NumbersFragment<Answer>
-        implements RecordTracker.CountListener {
+public class AnswerFragment extends NumbersFragment<Answer> {
 
     // The tag for our logging
     private static final String TAG = AnswerFragment.class.getSimpleName();
@@ -104,21 +103,6 @@ public class AnswerFragment extends NumbersFragment<Answer>
         // Set the answers to null, and call the superclass method.
         answers = null;
         super.onDestroy();
-    }
-
-    @Override
-    public void onEqual() {
-        output("The answers are now full.");
-    }
-
-    @Override
-    public void onGreater() {
-        output("The answers are greater than full; I do not know how I got here.");
-    }
-
-    @Override
-    public void onLess() {
-        output("The answers are less than full.");
     }
 
     @Override
