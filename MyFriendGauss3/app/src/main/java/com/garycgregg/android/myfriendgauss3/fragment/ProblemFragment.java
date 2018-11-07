@@ -1,5 +1,6 @@
 package com.garycgregg.android.myfriendgauss3.fragment;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -20,7 +21,6 @@ import com.garycgregg.android.myfriendgauss3.R;
 import com.garycgregg.android.myfriendgauss3.content.Problem;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProblemFragment extends GaussFragment implements NumbersFragment.CountListener {
@@ -59,6 +59,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
     // A factory for vector fragments
     private final NumbersFragmentFactory vectorFragmentFactory = new VectorFragmentFactory();
+
+    // Our state change listener
+    private StateChangeListener listener;
 
     // The position of this instance
     private int position = ILLEGAL_POSITION;
@@ -133,27 +136,6 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     }
 
     /**
-     * Gets the change list from a ContentFragment. Note: Clears the change list in the fragment
-     * after retrieving it. The changed content is then the responsibility of the caller!
-     *
-     * @param fragment A ContentFragment
-     * @param <T>      The type of the contained change list
-     * @return The change list from the content fragment.
-     */
-    private static <T> List<T> getChanges(@NonNull ContentFragment<T> fragment) {
-
-        /*
-         * Get the change list from the fragment. Clear the list in the fragment, and return the
-         * list.
-         */
-        // TODO: Fix this.
-        // final List<T> changeList = fragment.getChangeList();
-        // fragment.clearChanges();
-        // return changeList;
-        return new ArrayList<>();
-    }
-
-    /**
      * Gets the first element from a list, if any.
      *
      * @param list The list to examine
@@ -197,6 +179,44 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
             // There is no such existing fragment. Create one using the given factory.
             manager.beginTransaction().add(paneId, factory.createFragment(problemId)).commit();
         }
+    }
+
+    /**
+     * Determines the answer fragment contains missing entries.
+     *
+     * @return True if the answer fragment contains missing entries, false otherwise
+     */
+    private boolean areAnswerEntriesMissing() {
+        return areEntriesMissing(R.id.answer_pane);
+    }
+
+    /**
+     * Determines if a pane in the problem fragment contains missing entries.
+     *
+     * @param id The ID of the pane
+     * @return True if the identified pane contains missing entries, false otherwise
+     */
+    private boolean areEntriesMissing(int id) {
+        return ((NumbersFragment<?>)
+                getChildFragmentManager().findFragmentById(id)).areEntriesMissing();
+    }
+
+    /**
+     * Determines the matrix fragment contains missing entries.
+     *
+     * @return True if the matrix fragment contains missing entries, false otherwise
+     */
+    private boolean areMatrixEntriesMissing() {
+        return areEntriesMissing(R.id.matrix_pane);
+    }
+
+    /**
+     * Determines the vector fragment contains missing entries.
+     *
+     * @return True if the vector fragment contains missing entries, false otherwise
+     */
+    private boolean areVectorEntriesMissing() {
+        return areEntriesMissing(R.id.vector_pane);
     }
 
     /**
@@ -339,6 +359,15 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     }
 
     @Override
+    public void onAttach(Context context) {
+
+        // Call the superclass method. Set the state change listener.
+        super.onAttach(context);
+        listener = (context instanceof StateChangeListener) ?
+                ((StateChangeListener) context) : null;
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
         // Call the superclass method, and indicate that the fragment has an options menu.
@@ -400,6 +429,14 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         // Reset the position. Call the superclass method.
         position = ILLEGAL_POSITION;
         super.onDestroy();
+    }
+
+    @Override
+    public void onDetach() {
+
+        // Clear the state change listener, and call the superclass method.
+        listener = null;
+        super.onDetach();
     }
 
     @Override
@@ -487,6 +524,18 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                 output(String.format("Problem with ID '%d' has been unlocked.", problemId));
             }
         }
+    }
+
+    public interface StateChangeListener {
+
+        /**
+         * Indicates that the problem changed state in a way that will require the fragment to
+         * be redrawn.
+         *
+         * @param position  The position of the fragment, as identified by its arguments
+         * @param problemId The problem ID, as identified by the fragment arguments.
+         */
+        void onStateChange(int position, long problemId);
     }
 
     private static class AnswerFragmentFactory extends NumbersFragmentFactory {
