@@ -208,7 +208,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         // Make sure the caller did not give us a bum fragment ID.
         final NumbersFragment<?> fragment = ((NumbersFragment<?>)
                 getChildFragmentManager().findFragmentById(id));
-        return (null == fragment) ? true : fragment.areEntriesMissing();
+        return (null == fragment) || fragment.areEntriesMissing();
     }
 
     /**
