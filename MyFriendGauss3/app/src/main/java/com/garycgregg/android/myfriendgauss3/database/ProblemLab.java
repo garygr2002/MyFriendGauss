@@ -22,6 +22,9 @@ public class ProblemLab {
     // The maximum number of problem dimensions
     public static final int MAX_DIMENSIONS = 15;
 
+    // The minimum number of problem dimensions
+    public static final int MIN_DIMENSIONS = 1;
+
     // The null problem ID
     public static final long NULL_ID = 0L;
 

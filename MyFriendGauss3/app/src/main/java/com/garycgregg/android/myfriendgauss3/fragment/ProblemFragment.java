@@ -1,6 +1,8 @@
 package com.garycgregg.android.myfriendgauss3.fragment;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -8,7 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,6 +26,9 @@ import java.util.List;
 
 public class ProblemFragment extends GaussFragment implements NumbersFragment.CountListener {
 
+    // The dimensions dialog identifier
+    private static final String DIALOG_DIMENSIONS = "DialogDimensions";
+
     // An illegal position
     private static final int ILLEGAL_POSITION = ~0;
 
@@ -38,6 +42,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // The problem ID argument key
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "problem_id");
+
+    // The identifier for a dimensions request
+    private static final int REQUEST_DIMENSIONS = 0;
 
     // A tag for logging statements
     private static final String TAG = ProblemFragment.class.getSimpleName();
@@ -362,6 +369,16 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        // TODO: Change the dimensions of the problem.
+        if ((Activity.RESULT_OK == resultCode) && (REQUEST_DIMENSIONS == requestCode)) {
+            output(String.format("Received new dimensions of: %d.",
+                    data.getIntExtra(DimensionsFragment.EXTRA_DIMENSIONS, 0)));
+        }
+    }
+
+    @Override
     public void onAttach(Context context) {
 
         // Call the superclass method. Set the state change listener.
@@ -472,32 +489,40 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
             case R.id.change_dimension:
 
-                Log.d(TAG, "Change dimension menu item selected.");
+                output("Change dimension menu item selected.");
+
+                // Create a dimensions fragment.
+                final DimensionsFragment dialog =
+                        DimensionsFragment.createInstance(problem.getDimensions());
+
+                // Set the target fragment, and show the dialog.
+                dialog.setTargetFragment(this, REQUEST_DIMENSIONS);
+                dialog.show(getFragmentManager(), DIALOG_DIMENSIONS);
                 break;
 
             case R.id.copy_problem:
 
-                Log.d(TAG, "Copy problem menu item selected.");
+                output("Copy problem menu item selected.");
                 break;
 
             case R.id.edit_problem:
 
-                Log.d(TAG, "Edit problem menu item selected.");
+                output("Edit problem menu item selected.");
                 break;
 
             case R.id.prefill_entries:
 
-                Log.d(TAG, "Prefill entries menu item selected.");
+                output("Prefill entries menu item selected.");
                 break;
 
             case R.id.solve_problem:
 
-                Log.d(TAG, "Solve problem menu item selected.");
+                output("Solve problem menu item selected.");
                 break;
 
             default:
 
-                Log.d(TAG, "Unknown menu item selected.");
+                output("Unknown menu item selected.");
                 returnValue = super.onOptionsItemSelected(item);
                 break;
         }
