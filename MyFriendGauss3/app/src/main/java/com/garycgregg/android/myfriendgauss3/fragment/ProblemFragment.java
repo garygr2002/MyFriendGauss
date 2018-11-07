@@ -197,8 +197,11 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
      * @return True if the identified pane contains missing entries, false otherwise
      */
     private boolean areEntriesMissing(int id) {
-        return ((NumbersFragment<?>)
-                getChildFragmentManager().findFragmentById(id)).areEntriesMissing();
+
+        // Make sure the caller did not give us a bum fragment ID.
+        final NumbersFragment<?> fragment = ((NumbersFragment<?>)
+                getChildFragmentManager().findFragmentById(id));
+        return (null == fragment) ? true : fragment.areEntriesMissing();
     }
 
     /**
@@ -500,6 +503,55 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         }
 
         return returnValue;
+    }
+
+    /**
+     * Sets the value for entries in the answer fragment.
+     *
+     * @param value     The value to set
+     * @param forceFill Fill even controls that already have content
+     */
+    private void setAnswerValues(double value, boolean forceFill) {
+        setValue(R.id.answer_pane, value, forceFill);
+    }
+
+    /**
+     * Sets the value for entries in the matrix fragment.
+     *
+     * @param value     The value to set
+     * @param forceFill Fill even controls that already have content
+     */
+    private void setMatrixValues(double value, boolean forceFill) {
+        setValue(R.id.matrix_pane, value, forceFill);
+    }
+
+    /**
+     * Sets the value for entries in a pane.
+     *
+     * @param id        The ID of the pane
+     * @param value     The value to set
+     * @param forceFill Fill even controls that already have content
+     */
+    private void setValue(int id, double value, boolean forceFill) {
+
+        // Did the caller not give us a bum fragment ID?
+        final NumbersFragment<?> fragment = ((NumbersFragment<?>)
+                getChildFragmentManager().findFragmentById(id));
+        if (null != fragment) {
+
+            // The caller did not give us a bum fragment ID. Set values in the fragment.
+            fragment.setValue(value, forceFill);
+        }
+    }
+
+    /**
+     * Sets the value for entries in the vector fragment.
+     *
+     * @param value     The value to set
+     * @param forceFill Fill even controls that already have content
+     */
+    private void setVectorValues(double value, boolean forceFill) {
+        setValue(R.id.vector_pane, value, forceFill);
     }
 
     /**
