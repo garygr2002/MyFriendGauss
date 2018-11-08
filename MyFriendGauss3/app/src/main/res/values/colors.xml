@@ -4,6 +4,9 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="dialogBackground">#F2EEE4</color>
+    <color name="dialogBorder">#404040</color>
+
     <color name="tableEntryAnswer">#C8E6C9</color>
     <color name="tableEntryDefault">#B0BEC5</color>
     <color name="tableEntryMatrix">#BBDEFB</color>
