@@ -510,9 +510,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                 output("Edit problem menu item selected.");
                 break;
 
-            case R.id.prefill_entries:
+            case R.id.fill_entries:
 
-                output("Prefill entries menu item selected.");
+                output("Fill entries menu item selected.");
                 break;
 
             case R.id.solve_problem:
