@@ -6,6 +6,9 @@ import android.text.TextWatcher;
 
 abstract class GaussTextWatcher<T> implements TextWatcher {
 
+    // A regular expression for whitespace
+    private static final String WHITESPACE_PATTERN = "^\\s*$";
+
     // The content of the watcher
     private final T content;
 
@@ -16,6 +19,16 @@ abstract class GaussTextWatcher<T> implements TextWatcher {
      */
     public GaussTextWatcher(T content) {
         this.content = content;
+    }
+
+    /**
+     * Determines if a string is empty, or contains only whitespace.
+     *
+     * @param string Any non-null string
+     * @return True if the string is empty, or contains only whitespace; false otherwise
+     */
+    public static boolean isWhitespace(@NonNull String string) {
+        return string.matches(WHITESPACE_PATTERN);
     }
 
     @Override

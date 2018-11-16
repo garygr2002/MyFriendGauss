@@ -29,6 +29,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // The dimensions dialog identifier
     private static final String DIALOG_DIMENSIONS = "DialogDimensions";
 
+    // The fill dialog identifier
+    private static final String DIALOG_FILL = "DialogFill";
+
     // An illegal position
     private static final int ILLEGAL_POSITION = ~0;
 
@@ -45,6 +48,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
     // The identifier for a dimensions request
     private static final int REQUEST_DIMENSIONS = 0;
+
+    // The identifier for a fill request
+    private static final int REQUEST_FILL = 1;
 
     // A tag for logging statements
     private static final String TAG = ProblemFragment.class.getSimpleName();
@@ -491,13 +497,13 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
                 output("Change dimension menu item selected.");
 
-                // Create a dimensions fragment.
-                final DimensionsFragment dialog =
+                // Create a dimensions dialog.
+                final DimensionsFragment dimensionsDialog =
                         DimensionsFragment.createInstance(problem.getDimensions());
 
                 // Set the target fragment, and show the dialog.
-                dialog.setTargetFragment(this, REQUEST_DIMENSIONS);
-                dialog.show(getFragmentManager(), DIALOG_DIMENSIONS);
+                dimensionsDialog.setTargetFragment(this, REQUEST_DIMENSIONS);
+                dimensionsDialog.show(getFragmentManager(), DIALOG_DIMENSIONS);
                 break;
 
             case R.id.copy_problem:
@@ -513,6 +519,13 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
             case R.id.fill_entries:
 
                 output("Fill entries menu item selected.");
+
+                // Create a fill dialog. Set the target fragment.
+                final FillFragment fillDialog = FillFragment.createInstance();
+                fillDialog.setTargetFragment(this, REQUEST_FILL);
+
+                // Show the dialog.
+                fillDialog.show(getFragmentManager(), DIALOG_FILL);
                 break;
 
             case R.id.solve_problem:

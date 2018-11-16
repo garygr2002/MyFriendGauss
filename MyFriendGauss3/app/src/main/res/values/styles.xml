@@ -18,7 +18,6 @@
 
     <style name="EntryTextStyle">
         <item name="android:background">@drawable/rounded_edit_text</item>
-        <item name="android:hint">@string/table_item_hint</item>
         <item name="android:inputType">numberDecimal</item>
         <item name="android:minEms">5</item>
         <item name="android:padding">2dp</item>

@@ -1,12 +1,19 @@
 <resources>
+    <string name="all_cells">All Cells</string>
     <string name="app_name">My Friend Gauss</string>
+    <string name="both_matrix_vector">Both</string>
     <string name="change_dimension">Dimension</string>
     <string name="copy_problem">Copy</string>
     <string name="dimensions_title">Choose Problem Dimensions</string>
     <string name="edit_problem">Edit</string>
+    <string name="empty_cells">Empty Cells</string>
+    <string name="fill_title">Enter Fill Value</string>
     <string name="fill_entries">Fill</string>
+    <string name="fill_entry_hint">@string/fill_title</string>
+    <string name="matrix_only">Matrix</string>
     <string name="problem_name">Problem Name</string>
     <string name="solve_problem">Solve</string>
     <string name="table_item_hint">table item hint</string>
     <string name="table_title_hint">table title hint</string>
+    <string name="vector_only">Vector</string>
 </resources>
