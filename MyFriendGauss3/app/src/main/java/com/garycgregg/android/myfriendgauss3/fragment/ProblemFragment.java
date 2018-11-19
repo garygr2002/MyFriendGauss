@@ -377,10 +377,31 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        // TODO: Change the dimensions of the problem.
-        if ((Activity.RESULT_OK == resultCode) && (REQUEST_DIMENSIONS == requestCode)) {
-            output(String.format("Received new dimensions of: %d.",
-                    data.getIntExtra(DimensionsFragment.EXTRA_DIMENSIONS, 0)));
+        // TODO: Take effective action for each result.
+        if (Activity.RESULT_OK == resultCode) {
+
+            switch (requestCode) {
+
+                case REQUEST_DIMENSIONS:
+
+                    output(String.format("Received new dimensions of: '%d'.",
+                            data.getIntExtra(DimensionsFragment.EXTRA_DIMENSIONS, 0)));
+                    break;
+
+                case REQUEST_FILL:
+
+                    output(String.format("Received fill request of '%f'; pane of '%s'; " +
+                            "all entries: '%s'",
+                            data.getDoubleExtra(FillFragment.EXTRA_FILL, 0.),
+                            data.getSerializableExtra(FillFragment.EXTRA_PANE).toString(),
+                            data.getBooleanExtra(FillFragment.EXTRA_ALL_ENTRIES, false)));
+                    break;
+
+                default:
+
+                    output(String.format("Received unknown request code of '%d'", requestCode));
+                    break;
+            }
         }
     }
 
@@ -508,11 +529,13 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
             case R.id.copy_problem:
 
+                // TODO: Create dialog.
                 output("Copy problem menu item selected.");
                 break;
 
             case R.id.edit_problem:
 
+                // TODO: Delete this.
                 output("Edit problem menu item selected.");
                 break;
 
@@ -530,6 +553,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
             case R.id.solve_problem:
 
+                // TODO: Create dialog.
                 output("Solve problem menu item selected.");
                 break;
 

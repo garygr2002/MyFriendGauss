@@ -159,20 +159,20 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
         ((EditText) view.findViewById(R.id.fill_entry))
                 .addTextChangedListener(new GaussTextWatcher<Container<Double>>(fillValue) {
 
-            @Override
-            protected String getContentString() {
+                    @Override
+                    protected String getContentString() {
 
-                // Return a zero-length string if the content is null.
-                final Double value = getContent().getObject();
-                return (null == value) ? "" : value.toString();
-            }
+                        // Return a zero-length string if the content is null.
+                        final Double value = getContent().getObject();
+                        return (null == value) ? "" : value.toString();
+                    }
 
-            @Override
-            protected void setChange(@NonNull String change) {
-                getContent().setObject(GaussTextWatcher.isWhitespace(change) ? null :
-                        Double.parseDouble(change));
-            }
-        });
+                    @Override
+                    protected void setChange(@NonNull String change) {
+                        getContent().setObject(GaussTextWatcher.isWhitespace(change) ? null :
+                                Double.parseDouble(change));
+                    }
+                });
 
         // Create an on click listener for the dialog.
         final DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -219,38 +219,52 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
      * @param pane       The pane indicator
      * @param allEntries True to fill all entries (even those with existing settings), false
      *                   otherwise
-     * @return True if the target fragment exists to receive the results, false otherwise
+     * @return True if the fill value is not null and the target fragment exists to receive the
+     * results, false otherwise
      */
-    private boolean sendResult(int resultCode, double fill, @NonNull PaneChoice pane,
+    private boolean sendResult(int resultCode, Double fill, @NonNull PaneChoice pane,
                                boolean allEntries) {
 
-        // Get the target fragment. Is the target fragment not null?
-        final Fragment targetFragment = getTargetFragment();
-        final boolean result = (null != targetFragment);
+        // Is the fill value not null?
+        boolean result = (null != fill);
         if (result) {
 
             /*
-             * The target fragment is not null. Create a new intent to receive the extras. Put
-             * in the fill value extra and the pane extra.
+             * The fill value is not null. Get the target fragment. Is the target fragment not
+             * null?
              */
-            final Intent intent = new Intent();
-            intent.putExtra(EXTRA_FILL, fill);
-            intent.putExtra(EXTRA_PANE, pane);
+            final Fragment targetFragment = getTargetFragment();
+            result = (null != targetFragment);
+            if (result) {
 
-            /*
-             * Put in the all entries flag, and call the activity result on the target fragment
-             * with the intent.
-             */
-            intent.putExtra(EXTRA_ALL_ENTRIES, allEntries);
-            targetFragment.onActivityResult(getTargetRequestCode(), resultCode, intent);
+                /*
+                 * The target fragment is not null. Create a new intent to receive the extras. Put
+                 * in the fill value extra and the pane extra.
+                 */
+                final Intent intent = new Intent();
+                intent.putExtra(EXTRA_FILL, fill);
+                intent.putExtra(EXTRA_PANE, pane);
+
+                /*
+                 * Put in the all entries flag, and call the activity result on the target fragment
+                 * with the intent.
+                 */
+                intent.putExtra(EXTRA_ALL_ENTRIES, allEntries);
+                targetFragment.onActivityResult(getTargetRequestCode(), resultCode, intent);
+            }
+
+            // The target fragment is null!
+            else {
+                output("There is no target fragment!");
+            }
         }
 
-        // The target fragment is null!
+        // The fill value is null!
         else {
-            output("There is no target fragment!");
+            output("The fill value is null!");
         }
 
-        // Return whether results were successfully sent.
+        // Return whether the results were successfully sent.
         return result;
     }
 
