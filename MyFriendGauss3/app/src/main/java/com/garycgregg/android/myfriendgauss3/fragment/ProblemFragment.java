@@ -32,6 +32,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // The fill dialog identifier
     private static final String DIALOG_FILL = "DialogFill";
 
+    // The solve dialog identifier
+    private static final String DIALOG_SOLVE = "DialogSolve";
+
     // An illegal position
     private static final int ILLEGAL_POSITION = ~0;
 
@@ -51,6 +54,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
     // The identifier for a fill request
     private static final int REQUEST_FILL = 1;
+
+    // The identifier for a solve request
+    private static final int REQUEST_SOLVE = 2;
 
     // A tag for logging statements
     private static final String TAG = ProblemFragment.class.getSimpleName();
@@ -397,6 +403,11 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                             data.getBooleanExtra(FillFragment.EXTRA_ALL_ENTRIES, false)));
                     break;
 
+                case REQUEST_SOLVE:
+
+                    output("Received a request to solve a problem.");
+                    break;
+
                 default:
 
                     output(String.format("Received unknown request code of '%d'", requestCode));
@@ -553,8 +564,14 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
             case R.id.solve_problem:
 
-                // TODO: Create dialog.
                 output("Solve problem menu item selected.");
+
+                // Create the solve dialog. Set the target fragment.
+                final SolveFragment solveFragment = SolveFragment.createInstance();
+                solveFragment.setTargetFragment(this, REQUEST_SOLVE);
+
+                // Show the dialog.
+                solveFragment.show(getFragmentManager(), DIALOG_SOLVE);
                 break;
 
             default:

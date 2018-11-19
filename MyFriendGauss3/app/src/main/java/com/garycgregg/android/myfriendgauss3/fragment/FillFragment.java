@@ -184,7 +184,8 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
         };
 
         // Build a new alert dialog, configure it, create it, and return it.
-        return new AlertDialog.Builder(context).setTitle(R.string.fill_title)
+        return new AlertDialog.Builder(context)
+                .setTitle(R.string.fill_title)
                 .setView(view)
                 .setPositiveButton(android.R.string.ok, listener)
                 .setNegativeButton(android.R.string.cancel, null)

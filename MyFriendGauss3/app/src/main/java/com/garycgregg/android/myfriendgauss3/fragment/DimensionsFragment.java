@@ -80,7 +80,8 @@ public class DimensionsFragment extends GaussDialogFragment {
         };
 
         // Build a new alert dialog, configure it, create it, and return it.
-        return new AlertDialog.Builder(context).setTitle(R.string.dimensions_title)
+        return new AlertDialog.Builder(context)
+                .setTitle(R.string.dimensions_title)
                 .setView(view)
                 .setPositiveButton(android.R.string.ok, listener)
                 .setNegativeButton(android.R.string.cancel, null)

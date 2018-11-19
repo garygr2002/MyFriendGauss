@@ -4,10 +4,11 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <NumberPicker
-        android:id="@+id/dialog_dimensions_picker"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:layout_margin="10dp"
+        android:text="@string/solve_message"/>
 
 </RelativeLayout>
