@@ -105,7 +105,7 @@ public abstract class GaussFragment extends Fragment implements ProblemLabSource
 
         output("onDetach()");
 
-        // Clear the problem lab source, and call through to the superclass method.
+        // Clear the problem lab source, then call the superclass method.
         problemLabSource = null;
         super.onDetach();
     }

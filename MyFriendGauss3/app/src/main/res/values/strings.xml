@@ -12,9 +12,9 @@
     <string name="fill_entry_hint">@string/fill_title</string>
     <string name="matrix_only">Matrix</string>
     <string name="problem_name">Problem Name</string>
-    <string name="solve_message">A problem may not be edited once it has been submitted for
-        solution, or solved. You may copy a solved problem, and then edit the copy.
-        Submit this problem for solution now?</string>
+    <string name="solve_message">A problem may not be edited once it has been solved or submitted
+        for solution. You may copy a solved problem, and then edit the copy. Submit this problem
+        for solution now?</string>
     <string name="solve_problem">Solve</string>
     <string name="solve_title">Solve the Problem?</string>
     <string name="table_item_hint">table item hint</string>

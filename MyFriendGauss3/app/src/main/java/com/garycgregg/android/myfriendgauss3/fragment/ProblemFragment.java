@@ -38,16 +38,22 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // An illegal position
     private static final int ILLEGAL_POSITION = ~0;
 
+    // The instance state index for position
+    private static final String POSITION_INDEX = "position";
+
     // The prefix for instance arguments
     private static final String PREFIX_STRING = ProblemFragment.class.getName();
 
     // The position argument key
     private static final String POSITION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
-            PREFIX_STRING, "position");
+            PREFIX_STRING, POSITION_INDEX);
+
+    // The instance state index for problem ID
+    private static final String PROBLEM_ID_INDEX = "problem_id";
 
     // The problem ID argument key
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
-            PREFIX_STRING, "problem_id");
+            PREFIX_STRING, PROBLEM_ID_INDEX);
 
     // The identifier for a dimensions request
     private static final int REQUEST_DIMENSIONS = 0;
@@ -357,6 +363,29 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         vectorFragmentFactory.setSize(dimensions);
     }
 
+    /**
+     * Creates object state from fragment arguments.
+     */
+    private void createStateFromArguments() {
+
+        // Get the fragment arguments. Set the position and problem ID.
+        final Bundle arguments = getArguments();
+        position = arguments.getInt(POSITION_ARGUMENT, ILLEGAL_POSITION);
+        problemId = arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID);
+    }
+
+    /**
+     * Creates object state when a saved instance state bundle exists.
+     *
+     * @param savedInstanceState The saved instance state
+     */
+    private void createStateFromSaved(@NonNull Bundle savedInstanceState) {
+
+        // Set the position and problem ID.
+        position = savedInstanceState.getInt(POSITION_INDEX, ILLEGAL_POSITION);
+        problemId = savedInstanceState.getLong(PROBLEM_ID_INDEX, ProblemLab.NULL_ID);
+    }
+
     @Override
     protected String getLogTag() {
         return TAG;
@@ -397,7 +426,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                 case REQUEST_FILL:
 
                     output(String.format("Received fill request of '%f'; pane of '%s'; " +
-                            "all entries: '%s'",
+                                    "all entries: '%s'",
                             data.getDoubleExtra(FillFragment.EXTRA_FILL, 0.),
                             data.getSerializableExtra(FillFragment.EXTRA_PANE).toString(),
                             data.getBooleanExtra(FillFragment.EXTRA_ALL_ENTRIES, false)));
@@ -432,18 +461,15 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        // Get the fragment arguments, and set the position.
-        final Bundle arguments = getArguments();
-        position = arguments.getInt(POSITION_ARGUMENT, ILLEGAL_POSITION);
+        // Create state from the fragment arguments if the saved instance state is null...
+        if (null == savedInstanceState) {
+            createStateFromArguments();
+        }
 
-        // Set the problem ID and the problem.
-        problemId = arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID);
-        problem = contentProducer.getContent(problemId);
-
-        // Configure the mutable characteristics of the fragment factories.
-        output(String.format("Problem with ID '%d' has been locked.", problemId));
-        configureControlPaneFactory();
-        configureEntryPaneFactoriesMutable();
+        // ...otherwise create state from the non-null saved instance state.
+        else {
+            createStateFromSaved(savedInstanceState);
+        }
     }
 
     @Override
@@ -458,6 +484,14 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
+        /*
+         * Get the problem from the content producer using the problem ID. Configure the mutable
+         * characteristics of the fragment factories.
+         */
+        problem = contentProducer.getContent(problemId);
+        configureControlPaneFactory();
+        configureEntryPaneFactoriesMutable();
 
         /*
          * Inflate the problem fragment. Add the control and answer fragments to the problem
@@ -582,6 +616,15 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         }
 
         return returnValue;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        // Call the superclass method. Save the problem ID and the position.
+        super.onSaveInstanceState(outState);
+        outState.putLong(PROBLEM_ID_INDEX, problemId);
+        outState.putInt(POSITION_INDEX, position);
     }
 
     /**
