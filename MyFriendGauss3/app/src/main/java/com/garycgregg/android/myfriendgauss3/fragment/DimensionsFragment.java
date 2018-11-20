@@ -25,6 +25,9 @@ public class DimensionsFragment extends GaussDialogFragment {
     private static final String CURRENT_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             ARGUMENT_PREFIX, "current");
 
+    // The instance state index for dimensions
+    private static final String DIMENSIONS_INDEX = "dimensions_index";
+
     // The prefix for return values
     private static final String RETURN_PREFIX = DimensionsFragment.class.getPackage().getName();
 
@@ -68,7 +71,9 @@ public class DimensionsFragment extends GaussDialogFragment {
 
         // Set the maximum value and the current value of the dimensions picker.
         numberPicker.setMaxValue(ProblemLab.MAX_DIMENSIONS);
-        numberPicker.setValue(getArguments().getInt(CURRENT_ARGUMENT, numberPicker.getMinValue()));
+        numberPicker.setValue((null == savedInstanceState) ?
+                getArguments().getInt(CURRENT_ARGUMENT, numberPicker.getMinValue()) :
+                savedInstanceState.getInt(DIMENSIONS_INDEX, numberPicker.getMinValue()));
 
         // Create an on click listener for the dialog.
         final DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -86,6 +91,14 @@ public class DimensionsFragment extends GaussDialogFragment {
                 .setPositiveButton(android.R.string.ok, listener)
                 .setNegativeButton(android.R.string.cancel, null)
                 .create();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        // Call the superclass method, and save the current value of the number picker.
+        super.onSaveInstanceState(outState);
+        outState.putInt(DIMENSIONS_INDEX, numberPicker.getValue());
     }
 
     /**
