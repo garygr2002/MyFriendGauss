@@ -78,7 +78,8 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
     private void createState(@NonNull Bundle savedInstanceState) {
 
         // Set the fill value and the pane choice.
-        fillValue = new Container<>(savedInstanceState.getDouble(FILL_VALUE_INDEX));
+        fillValue = new Container<>(savedInstanceState.containsKey(FILL_VALUE_INDEX) ?
+                savedInstanceState.getDouble(FILL_VALUE_INDEX) : null);
         paneChoice = (PaneChoice) savedInstanceState.getSerializable(PANE_CHOICE_INDEX);
 
         // Give the pane choice a default setting if it is null.
@@ -97,6 +98,15 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
      */
     protected String getLogTag() {
         return TAG;
+    }
+
+    /**
+     * Determines if there is a fill value.
+     *
+     * @return True if there is a fill value, false otherwise
+     */
+    private boolean hasFillValue() {
+        return (null != fillValue) && (null != fillValue.getObject());
     }
 
     @Override
@@ -155,6 +165,34 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
         createState(null == savedInstanceState ? new Bundle() : savedInstanceState);
         setupButtons(view);
 
+        // Create an on-click listener for the dialog.
+        final DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialogInterface, int which) {
+                sendResult(Activity.RESULT_OK, fillValue.getObject(), paneChoice, allEntries);
+            }
+        };
+
+        // Create a new alert dialog using the listener.
+        final AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle(R.string.fill_title)
+                .setView(view)
+                .setPositiveButton(android.R.string.ok, listener)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+
+        // Give the dialog a show listener that sets the initial state of the ok button.
+        dialog.setOnShowListener(new Dialog.OnShowListener() {
+
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                ((AlertDialog) dialogInterface)
+                        .getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setEnabled(hasFillValue());
+            }
+        });
+
         // Find the fill entry, and give it a text changed listener.
         ((EditText) view.findViewById(R.id.fill_entry))
                 .addTextChangedListener(new GaussTextWatcher<Container<Double>>(fillValue) {
@@ -169,27 +207,19 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
 
                     @Override
                     protected void setChange(@NonNull String change) {
-                        getContent().setObject(GaussTextWatcher.isWhitespace(change) ? null :
+
+                        /*
+                         * Set the content depending on the change string. Enable or disable the
+                         * ok button depending on whether there is a fill value.
+                         */
+                        getContent().setObject((GaussTextWatcher.isDecimalPoint(change))? null :
                                 Double.parseDouble(change));
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(hasFillValue());
                     }
                 });
 
-        // Create an on click listener for the dialog.
-        final DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialogInterface, int which) {
-                sendResult(Activity.RESULT_OK, fillValue.getObject(), paneChoice, allEntries);
-            }
-        };
-
-        // Build a new alert dialog, configure it, create it, and return it.
-        return new AlertDialog.Builder(context)
-                .setTitle(R.string.fill_title)
-                .setView(view)
-                .setPositiveButton(android.R.string.ok, listener)
-                .setNegativeButton(android.R.string.cancel, null)
-                .create();
+        // Return the dialog.
+        return dialog;
     }
 
     @Override
