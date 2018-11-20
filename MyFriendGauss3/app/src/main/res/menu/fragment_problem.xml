@@ -26,10 +26,4 @@
         android:title="@string/copy_problem"
         app:showAsAction="ifRoom|withText" />
 
-    <item
-        android:id="@+id/edit_problem"
-        android:icon="@drawable/ic_menu_edit"
-        android:title="@string/edit_problem"
-        app:showAsAction="ifRoom|withText" />
-
 </menu>
