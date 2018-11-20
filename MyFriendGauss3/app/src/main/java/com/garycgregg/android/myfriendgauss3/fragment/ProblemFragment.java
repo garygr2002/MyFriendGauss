@@ -26,6 +26,9 @@ import java.util.List;
 
 public class ProblemFragment extends GaussFragment implements NumbersFragment.CountListener {
 
+    // The copy problem dialog identifier
+    private static final String DIALOG_COPY = "DialogCopy";
+
     // The dimensions dialog identifier
     private static final String DIALOG_DIMENSIONS = "DialogDimensions";
 
@@ -55,14 +58,17 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, PROBLEM_ID_INDEX);
 
+    // The identifier for a copy problem request
+    private static final int REQUEST_COPY = 0;
+
     // The identifier for a dimensions request
-    private static final int REQUEST_DIMENSIONS = 0;
+    private static final int REQUEST_DIMENSIONS = 1;
 
     // The identifier for a fill request
-    private static final int REQUEST_FILL = 1;
+    private static final int REQUEST_FILL = 2;
 
     // The identifier for a solve request
-    private static final int REQUEST_SOLVE = 2;
+    private static final int REQUEST_SOLVE = 3;
 
     // A tag for logging statements
     private static final String TAG = ProblemFragment.class.getSimpleName();
@@ -417,6 +423,12 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
             switch (requestCode) {
 
+                case REQUEST_COPY:
+
+                    output(String.format("Received request to copy problem with new name of '%s'.",
+                            data.getStringExtra(CopyFragment.EXTRA_NEW_NAME)));
+                    break;
+
                 case REQUEST_DIMENSIONS:
 
                     output(String.format("Received new dimensions of: '%d'.",
@@ -574,14 +586,14 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
             case R.id.copy_problem:
 
-                // TODO: Create dialog.
                 output("Copy problem menu item selected.");
-                break;
 
-            case R.id.edit_problem:
+                // Create the copy dialog. Set the target fragment.
+                final CopyFragment copyFragment = CopyFragment.createInstance();
+                copyFragment.setTargetFragment(this, REQUEST_COPY);
 
-                // TODO: Delete this.
-                output("Edit problem menu item selected.");
+                // Show the dialog.
+                copyFragment.show(getFragmentManager(), DIALOG_COPY);
                 break;
 
             case R.id.fill_entries:
