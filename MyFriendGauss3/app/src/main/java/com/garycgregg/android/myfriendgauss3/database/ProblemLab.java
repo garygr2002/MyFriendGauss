@@ -186,24 +186,7 @@ public class ProblemLab {
             addOrReplace(problem);
         }
 
-        final Matrix matrix = new Matrix();
-        matrix.setProblemId(2);
-
-        final Vector vector = new Vector();
-        vector.setProblemId(2);
-        for (int i = 0; i < 3; ++i) {
-
-            matrix.setRow(i);
-            for (int j = 0; j < 3; ++j) {
-
-                matrix.setColumn(j);
-                matrix.setEntry(i + j);
-                addOrReplace(matrix);
-            }
-
-            vector.setRow(i);
-            addOrReplace(vector);
-        }
+        // fillOutProblem();
     }
 
     public int delete(Answer answer) {
@@ -245,6 +228,31 @@ public class ProblemLab {
 
     public int deleteProblems() {
         return deleteProblem(null);
+    }
+
+    /**
+     * Gives one problem in the database some entries. TODO: Delete this.
+     */
+    private void fillOutProblem() {
+
+        final Matrix matrix = new Matrix();
+        matrix.setProblemId(2);
+
+        final Vector vector = new Vector();
+        vector.setProblemId(2);
+        for (int i = 0; i < 3; ++i) {
+
+            matrix.setRow(i);
+            for (int j = 0; j < 3; ++j) {
+
+                matrix.setColumn(j);
+                matrix.setEntry(i + j);
+                addOrReplace(matrix);
+            }
+
+            vector.setRow(i);
+            addOrReplace(vector);
+        }
     }
 
     private <T> T get(WrapperManager<T> wrapperManager, long problemId) {
