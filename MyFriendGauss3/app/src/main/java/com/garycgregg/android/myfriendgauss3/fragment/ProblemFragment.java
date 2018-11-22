@@ -91,8 +91,8 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // A factory for vector fragments
     private final NumbersFragmentFactory vectorFragmentFactory = new VectorFragmentFactory();
 
-    // Our state change listener
-    private StateChangeListener listener;
+    // Our callback listener
+    private Callbacks callbackListener;
 
     // The position of this instance
     private int position = ILLEGAL_POSITION;
@@ -462,8 +462,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
         // Call the superclass method. Set the state change listener.
         super.onAttach(context);
-        listener = (context instanceof StateChangeListener) ?
-                ((StateChangeListener) context) : null;
+        callbackListener = (context instanceof Callbacks) ? ((Callbacks) context) : null;
     }
 
     @Override
@@ -543,8 +542,8 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     @Override
     public void onDetach() {
 
-        // Clear the state change listener, and call the superclass method.
-        listener = null;
+        // Clear the callback listener before calling the superclass method.
+        callbackListener = null;
         super.onDetach();
     }
 
@@ -717,16 +716,37 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         }
     }
 
-    public interface StateChangeListener {
+    public interface Callbacks {
 
         /**
-         * Indicates that the problem changed state in a way that will require the fragment to
-         * be redrawn.
+         * Indicates that the dimensions of this problem changed.
          *
-         * @param position  The position of the fragment, as identified by its arguments
-         * @param problemId The problem ID, as identified by the fragment arguments.
+         * @param position   The position of this problem
+         * @param problemId  The ID of this problem
+         * @param dimensions The dimensions update
          */
-        void onStateChange(int position, long problemId);
+        void onDimensionsChanged(int position, long problemId, int dimensions);
+
+        /**
+         * Indicates that this problem has been copied.
+         *
+         * @param position     The position of this problem
+         * @param problemId    The ID of this problem
+         * @param problemName  The name of the copied problem
+         * @param newProblemId The ID of the copied problem
+         */
+        void onProblemCopied(int position, long problemId, String problemName, long newProblemId);
+
+        /**
+         * Indicates that values have been set in this problem have been set.
+         *
+         * @param position   The position of this problem
+         * @param problemId  The ID of this problem
+         * @param value      The value that has been set in the problem
+         * @param allEntries True if all entries in the problem were set;
+         *                   false if only missing entries
+         */
+        void onValuesSet(int position, long problemId, double value, boolean allEntries);
     }
 
     private static class AnswerFragmentFactory extends NumbersFragmentFactory {
