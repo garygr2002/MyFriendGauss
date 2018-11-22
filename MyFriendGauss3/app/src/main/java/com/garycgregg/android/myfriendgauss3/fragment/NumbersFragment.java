@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,12 +18,18 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.garycgregg.android.myfriendgauss3.R;
+import com.garycgregg.android.myfriendgauss3.content.BaseGaussEntry;
+import com.garycgregg.android.myfriendgauss3.content.Matrix;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
+import java.util.List;
 import java.util.Locale;
 
 public abstract class NumbersFragment<T> extends ContentFragment<T>
         implements RecordTracker.CountListener {
+
+    // TODO: Delete this; The special tag for database debugging
+    protected static final String SPECIAL = "DatabaseDebug";
 
     // The base control ID
     private static final int BASE_ID = 0;
@@ -196,6 +203,27 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
         // Only notify the listener if it is not null.
         if (null != countListener) {
             notifier.notifyListener(countListener, id);
+        }
+    }
+
+    /**
+     * Outputs a database debug string. TODO: Delete this.
+     *
+     * @param label The label to use for the debug string
+     * @param list  A list of BaseGaussEntries
+     * @param <U>   The type of BaseGaussEntry in the list
+     */
+    protected static <U extends BaseGaussEntry> void outputDatabaseDebugString(String label,
+                                                                               List<U> list) {
+
+        // Cycle for each element in the list.
+        for (BaseGaussEntry entry : list) {
+
+            // Output the debug string.
+            Log.d(SPECIAL, String.format("%s entry for problem ID %d, row %d, column %d: '%f'.",
+                    label, entry.getProblemId(), entry.getRow(),
+                    (entry instanceof Matrix) ? ((Matrix) entry).getColumn() : 0,
+                    entry.getEntry()));
         }
     }
 

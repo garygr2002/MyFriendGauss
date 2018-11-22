@@ -174,6 +174,14 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     }
 
     @Override
+    public void onPause() {
+
+        // TODO: Delete this method.
+        super.onPause();
+        outputDatabaseDebugString("Matrix", getProblemLab().getMatrices(getProblemId()));
+    }
+
+    @Override
     protected void setContent(EditText editText) {
 
         // Is there content for this control?

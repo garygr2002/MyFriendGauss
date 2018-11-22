@@ -171,6 +171,14 @@ public class VectorFragment extends NumbersFragment<Vector> {
     }
 
     @Override
+    public void onPause() {
+
+        // TODO: Delete this method.
+        super.onPause();
+        outputDatabaseDebugString("Vector", getProblemLab().getVectors(getProblemId()));
+    }
+
+    @Override
     protected void setContent(EditText editText) {
 
         // Is there content for this control?
