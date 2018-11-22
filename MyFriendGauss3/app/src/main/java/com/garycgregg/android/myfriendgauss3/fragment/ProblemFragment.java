@@ -525,14 +525,19 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     @Override
     public void onDestroy() {
 
-        // Unlock the problem. Reset the problem and problem ID.
-        unlockProblem();
-        problem = null;
+        // Reset the problem ID and position. Call the superclass method.
         problemId = ProblemLab.NULL_ID;
-
-        // Reset the position. Call the superclass method.
         position = ILLEGAL_POSITION;
         super.onDestroy();
+    }
+
+    @Override
+    public void onDestroyView() {
+
+        // Unlock the problem. Reset the problem before calling the superclass method.
+        unlockProblem();
+        problem = null;
+        super.onDestroyView();
     }
 
     @Override
