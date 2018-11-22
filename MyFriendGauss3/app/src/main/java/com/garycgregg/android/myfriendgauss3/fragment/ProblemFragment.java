@@ -94,6 +94,12 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // Our callback listener
     private Callbacks callbackListener;
 
+    // True if all the entries in the matrix pane is full, false otherwise
+    private boolean matrixPaneFull;
+
+    // The options menu
+    private Menu menu;
+
     // The position of this instance
     private int position = ILLEGAL_POSITION;
 
@@ -102,6 +108,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
     // The problem ID associated with this instance
     private long problemId = ProblemLab.NULL_ID;
+
+    // True if all entries in the vector pane is full, false otherwise
+    private boolean vectorPaneFull;
 
     /**
      * Constructs the problem fragment.
@@ -392,6 +401,37 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         problemId = savedInstanceState.getLong(PROBLEM_ID_INDEX, ProblemLab.NULL_ID);
     }
 
+    /**
+     * Enables or disables a menu item.
+     *
+     * @param itemId The ID of the menu item to enable or disable
+     * @param enable True to enable the menu item, false to disable it
+     * @return True if the indicated menu item was enabled or disabled, false otherwise
+     */
+    private boolean enableDisable(int itemId, boolean enable) {
+
+        // Try to find the menu item. Did we find it?
+        final MenuItem item = menu.findItem(itemId);
+        final boolean result = (null != item);
+        if (result) {
+
+            // We found the menu item. Enable or disable it.
+            item.setEnabled(enable);
+        }
+
+        // Return whether we found the indicated menu item.
+        return result;
+    }
+
+    /**
+     * Enables or disables the solve menu option.
+     *
+     * @return True if the solve menu item was enabled or disabled, false otherwise
+     */
+    private boolean enableSolve() {
+        return enableDisable(R.id.solve_problem, matrixPaneFull && vectorPaneFull);
+    }
+
     @Override
     protected String getLogTag() {
         return TAG;
@@ -487,8 +527,13 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
         // Call the superclass method, and inflate the options menu.
-        super.onCreateOptionsMenu(menu, inflater);
+        super.onCreateOptionsMenu(this.menu = menu, inflater);
         inflater.inflate(R.menu.fragment_problem, menu);
+
+        // Enable or disable the solve menu item.
+        setFullState(R.id.matrix_pane, !areMatrixEntriesMissing());
+        setFullState(R.id.vector_pane, !areVectorEntriesMissing());
+        enableSolve();
     }
 
     @Nullable
@@ -550,22 +595,22 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     @Override
     public void onEqual(int id) {
 
-        // TODO: Fill this in.
         output(String.format("onEqual(int): %d", id));
+        onPaneStateChange(id, true);
     }
 
     @Override
     public void onGreater(int id) {
 
-        // TODO: Fill this in.
         output(String.format("onGreater(int): %d", id));
+        onPaneStateChange(id, true);
     }
 
     @Override
     public void onLess(int id) {
 
-        // TODO: Fill this in.
         output(String.format("onLess(int): %d", id));
+        onPaneStateChange(id, false);
     }
 
     @Override
@@ -634,6 +679,27 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         return returnValue;
     }
 
+    /**
+     * Manages a pane state change.
+     *
+     * @param id     The ID of the pane that has undergone a change
+     * @param isFull True if the pane if full; false otherwise
+     * @return True if the pane state of the indicated pane changed; false otherwise
+     */
+    private boolean onPaneStateChange(int id, boolean isFull) {
+
+        // Set the full state of the pane. Did the full state of the pane change?
+        final boolean result = setFullState(id, isFull);
+        if (result) {
+
+            // The full state of the pane changed. Enable or disable the solve menu option.
+            enableSolve();
+        }
+
+        // Return whether the full state of the indicated pane changed.
+        return result;
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
@@ -651,6 +717,46 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
      */
     private void setAnswerValues(double value, boolean forceFill) {
         setValue(R.id.answer_pane, value, forceFill);
+    }
+
+    /**
+     * Sets the full state of the fragment.
+     *
+     * @param paneId The pane ID of the child fragment that is changing.
+     * @param isFull True if the indicated pane is now full; false otherwise
+     * @return True if the full state of the indicated pane changed; false otherwise
+     */
+    private boolean setFullState(int paneId, boolean isFull) {
+
+        // Is the indicated pane the matrix pane?
+
+        // Declare and initialize the return value. Is the indicated pane the matrix pane?
+        boolean result = false;
+        if (R.id.matrix_pane == paneId) {
+
+            /*
+             * The indicated pane is the matrix pane. Reinitialize the return value: It will
+             * be true if the matrix pane full flag is changing; false otherwise. Set the
+             * matrix pane full flag.
+             */
+            result = matrixPaneFull ^ isFull;
+            matrixPaneFull = isFull;
+        }
+
+        // Is the indicated pane the vector pane?
+        else if (R.id.vector_pane == paneId) {
+
+            /*
+             * The indicated pane is the vector pane. Reinitialize the return value: It will
+             * be true if the vector pane full flag is changing; false otherwise. Set the
+             * vector pane full flag.
+             */
+            result = vectorPaneFull ^ isFull;
+            vectorPaneFull = isFull;
+        }
+
+        // Return the result.
+        return result;
     }
 
     /**
