@@ -212,8 +212,7 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
                          * Set the content depending on the change string. Enable or disable the
                          * ok button depending on whether there is a fill value.
                          */
-                        getContent().setObject((GaussTextWatcher.isDecimalPoint(change))? null :
-                                Double.parseDouble(change));
+                        getContent().setObject(GaussTextWatcher.convert(change));
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(hasFillValue());
                     }
                 });

@@ -15,31 +15,6 @@ abstract class NumberTextWatcher<T extends BaseGaussEntry> extends GaussTextWatc
         super(content);
     }
 
-    /**
-     * Converts a string to a double.
-     *
-     * @param string A string to convert
-     * @return The converted string, or null if the string could not be converted
-     */
-    private static Double convert(String string) {
-
-        // Declare the result.
-        Double result;
-        try {
-
-            // Try to convert the argument.
-            result = Double.parseDouble(string);
-        }
-
-        // Set the result to null if the string is not a number.
-        catch (NumberFormatException exception) {
-            result = null;
-        }
-
-        // Return the result
-        return result;
-    }
-
     @Override
     protected String getContentString() {
         return Double.toString(getEntry());

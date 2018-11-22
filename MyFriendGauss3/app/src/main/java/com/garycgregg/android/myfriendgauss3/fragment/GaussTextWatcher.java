@@ -6,9 +6,6 @@ import android.text.TextWatcher;
 
 abstract class GaussTextWatcher<T> implements TextWatcher {
 
-    // A regular expression for a decimal point
-    private static final String DECIMAL_POINT_PATTERN = "^\\s*\\.*\\s*$";
-
     // A regular expression for whitespace
     private static final String WHITESPACE_PATTERN = "^\\s*$";
 
@@ -25,13 +22,28 @@ abstract class GaussTextWatcher<T> implements TextWatcher {
     }
 
     /**
-     * Determines if a string is a decimal point.
+     * Converts a string to a double.
      *
-     * @param string Any non-null string
-     * @return True if the string is a decimal point, false otherwise
+     * @param string A string to convert
+     * @return The converted string, or null if the string could not be converted
      */
-    public static boolean isDecimalPoint(@NonNull String string) {
-        return string.matches(DECIMAL_POINT_PATTERN);
+    protected static Double convert(String string) {
+
+        // Declare the result.
+        Double result;
+        try {
+
+            // Try to convert the argument.
+            result = Double.parseDouble(string);
+        }
+
+        // Set the result to null if the string is not a number.
+        catch (NumberFormatException exception) {
+            result = null;
+        }
+
+        // Return the result
+        return result;
     }
 
     /**
