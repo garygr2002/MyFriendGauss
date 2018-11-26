@@ -41,6 +41,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // An illegal position
     private static final int ILLEGAL_POSITION = ~0;
 
+    // The instance state index for 'needing redraw'
+    private static final String NEEDING_REDRAW_INDEX = "needing_redraw";
+
     // The instance state index for position
     private static final String POSITION_INDEX = "position";
 
@@ -94,11 +97,43 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // Our callback listener
     private Callbacks callbackListener;
 
+    // A wrapper for the callback listener
+    private Callbacks callbackWrapper = new Callbacks() {
+
+        @Override
+        public void onDimensionsChanged(int position, long problemId, int dimensions) {
+
+            if (null != callbackListener) {
+                callbackListener.onDimensionsChanged(position, problemId, dimensions);
+            }
+        }
+
+        @Override
+        public void onProblemCopied(int position, long problemId, String problemName,
+                                    long newProblemId) {
+
+            if (null != callbackListener) {
+                callbackListener.onProblemCopied(position, problemId, problemName, newProblemId);
+            }
+        }
+
+        @Override
+        public void onValuesSet(int position, long problemId, double value, boolean allEntries) {
+
+            if (null != callbackListener) {
+                callbackListener.onValuesSet(position, problemId, value, allEntries);
+            }
+        }
+    };
+
     // True if all the entries in the matrix pane is full, false otherwise
     private boolean matrixPaneFull;
 
     // The options menu
     private Menu menu;
+
+    // True if this fragment needs to be redrawn, false otherwise
+    private boolean needingRedraw;
 
     // The position of this instance
     private int position = ILLEGAL_POSITION;
@@ -218,6 +253,11 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
             // There is no such existing fragment. Create one using the given factory.
             manager.beginTransaction().add(paneId, factory.createFragment(problemId)).commit();
+        }
+
+        // There is an existing fragment. Replace it if this fragment needs a redraw.
+        else if (isNeedingRedraw()) {
+            manager.beginTransaction().replace(paneId, factory.createFragment(problemId)).commit();
         }
     }
 
@@ -383,8 +423,11 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
      */
     private void createStateFromArguments() {
 
-        // Get the fragment arguments. Set the position and problem ID.
+        // Get the fragment arguments. Clear the 'needing redraw' flag.
         final Bundle arguments = getArguments();
+        setNeedingRedraw(false);
+
+        // Set the position and problem ID.
         position = arguments.getInt(POSITION_ARGUMENT, ILLEGAL_POSITION);
         problemId = arguments.getLong(PROBLEM_ID_ARGUMENT, ProblemLab.NULL_ID);
     }
@@ -396,7 +439,8 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
      */
     private void createStateFromSaved(@NonNull Bundle savedInstanceState) {
 
-        // Set the position and problem ID.
+        // Set the 'needing redraw' flag, the position and the problem ID.
+        setNeedingRedraw(savedInstanceState.getBoolean(NEEDING_REDRAW_INDEX, false));
         position = savedInstanceState.getInt(POSITION_INDEX, ILLEGAL_POSITION);
         problemId = savedInstanceState.getLong(PROBLEM_ID_INDEX, ProblemLab.NULL_ID);
     }
@@ -410,16 +454,21 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
      */
     private boolean enableDisable(int itemId, boolean enable) {
 
-        // Try to find the menu item. Did we find it?
-        final MenuItem item = menu.findItem(itemId);
-        final boolean result = (null != item);
+        // Is the menu not null?
+        boolean result = (null != menu);
         if (result) {
 
-            // We found the menu item. Enable or disable it.
-            item.setEnabled(enable);
+            // The menu is not null. Try to find the menu item. Did we find it?
+            final MenuItem item = menu.findItem(itemId);
+            result = (null != item);
+            if (result) {
+
+                // We found the menu item. Enable or disable it.
+                item.setEnabled(enable);
+            }
         }
 
-        // Return whether we found the indicated menu item.
+        // Return whether the menu is not null, and we found the indicated menu item.
         return result;
     }
 
@@ -435,6 +484,15 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     @Override
     protected String getLogTag() {
         return TAG;
+    }
+
+    /**
+     * Determines if this fragment needs to be redrawn.
+     *
+     * @return True if this fragment needs to be redrawn, false otherwise
+     */
+    public boolean isNeedingRedraw() {
+        return needingRedraw;
     }
 
     /**
@@ -471,17 +529,85 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
                 case REQUEST_DIMENSIONS:
 
-                    output(String.format("Received new dimensions of: '%d'.",
-                            data.getIntExtra(DimensionsFragment.EXTRA_DIMENSIONS, 0)));
+                    /*
+                     * Declare and initialize a constant with a value that cannot be used as a
+                     * problem dimension. Get the new dimensions from the intent.
+                     */
+                    final int greatestUnusableDimensions = 0;
+                    final int dimensions = data.getIntExtra(DimensionsFragment.EXTRA_DIMENSIONS,
+                            greatestUnusableDimensions);
+
+                    // Are the new dimensions greater than the unusable dimensions constant?
+                    output(String.format("Received new dimensions of: '%d'.", dimensions));
+                    if (greatestUnusableDimensions < dimensions) {
+
+                        /*
+                         * The new dimensions are greater than the unusable dimensions constant.
+                         * Get the problem lab. Is the problem lab not null?
+                         */
+                        final ProblemLab problemLab = getProblemLab();
+                        if (null != problemLab) {
+
+                            // The problem lab is not null. Update the dimensions in the problem.
+                            problem.setDimensions(dimensions);
+                            problemLab.updateDimensions(problem);
+
+                            /*
+                             * Set the needing redraw flag, and notify the callback wrapper of a
+                             * dimensions change.
+                             */
+                            setNeedingRedraw(true);
+                            callbackWrapper.onDimensionsChanged(position, problemId, dimensions);
+                        }
+                    }
+
+                    // We are done processing this result.
                     break;
 
                 case REQUEST_FILL:
 
+                    // Get the fill value from the data.
+                    final double fillValue = data.getDoubleExtra(FillFragment.EXTRA_FILL,
+                            0.);
+
+                    // Get the pane choice from the data.
+                    final FillFragment.PaneChoice paneChoice = (FillFragment.PaneChoice)
+                            data.getSerializableExtra(FillFragment.EXTRA_PANE);
+
+                    // Get the 'all entries' flag from the data.
+                    final boolean allEntries = data.getBooleanExtra(FillFragment.EXTRA_ALL_ENTRIES,
+                            false);
+
                     output(String.format("Received fill request of '%f'; pane of '%s'; " +
-                                    "all entries: '%s'",
-                            data.getDoubleExtra(FillFragment.EXTRA_FILL, 0.),
-                            data.getSerializableExtra(FillFragment.EXTRA_PANE).toString(),
-                            data.getBooleanExtra(FillFragment.EXTRA_ALL_ENTRIES, false)));
+                                    "all entries: '%s'", fillValue, paneChoice.toString(),
+                            allEntries));
+
+                    // Get the matrix fragment.
+                    final NumbersFragment<?> matrixFragment = (NumbersFragment<?>)
+                            (FillFragment.PaneChoice.VECTOR.equals(paneChoice) ? null :
+                            getChildFragmentManager().findFragmentById(R.id.matrix_pane));
+
+                    // Get the vector fragment.
+                    final NumbersFragment<?> vectorFragment = (NumbersFragment<?>)
+                            (FillFragment.PaneChoice.MATRIX.equals(paneChoice) ? null :
+                                    getChildFragmentManager().findFragmentById(R.id.vector_pane));
+
+                    // Set the value in the matrix fragment if the matrix fragment is not null.
+                    if (null != matrixFragment) {
+                        matrixFragment.setValue(fillValue, allEntries);
+                    }
+
+                    // Set the value in the vector fragment if the vector fragment is not null.
+                    if (null != vectorFragment) {
+                        vectorFragment.setValue(fillValue, allEntries);
+                    }
+
+                    /*
+                     * Set the needing redraw flag, and notify the callback wrapper of a
+                     * value set.
+                     */
+                    setNeedingRedraw(true);
+                    callbackWrapper.onValuesSet(position, problemId, fillValue, allEntries);
                     break;
 
                 case REQUEST_SOLVE:
@@ -557,12 +683,12 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         addFragment(R.id.control_pane, controlFragmentFactory);
         addFragment(R.id.answer_pane, answerFragmentFactory);
 
-        /*
-         * Add the matrix and vector fragments to the problem fragment. Return the problem
-         * fragment.
-         */
+        // Add the matrix and vector fragments to the problem fragment.
         addFragment(R.id.matrix_pane, matrixFragmentFactory);
         addFragment(R.id.vector_pane, vectorFragmentFactory);
+
+        // Clear the needing redraw flag. Return the problem fragment.
+        setNeedingRedraw(false);
         return view;
     }
 
@@ -703,10 +829,13 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
-        // Call the superclass method. Save the problem ID and the position.
+        // Call the superclass method. Save the problem ID.
         super.onSaveInstanceState(outState);
         outState.putLong(PROBLEM_ID_INDEX, problemId);
+
+        // Save the position and the 'needing redraw' flag.
         outState.putInt(POSITION_INDEX, position);
+        outState.putBoolean(NEEDING_REDRAW_INDEX, isNeedingRedraw());
     }
 
     /**
@@ -767,6 +896,15 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
      */
     private void setMatrixValues(double value, boolean forceFill) {
         setValue(R.id.matrix_pane, value, forceFill);
+    }
+
+    /**
+     * Sets or clears the need of this fragment to be redrawn.
+     *
+     * @param needingRedraw True if this fragment needs to be redrawn, false otherwise
+     */
+    private void setNeedingRedraw(boolean needingRedraw) {
+        this.needingRedraw = needingRedraw;
     }
 
     /**
