@@ -29,8 +29,8 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemFr
     private static final String PREFIX_STRING = ProblemPagerActivity.class.getName();
 
     // The position argument key
-    private static final String POSITION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING, PREFIX_STRING,
-            "position");
+    private static final String POSITION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            PREFIX_STRING, "position");
 
     // A tag for logging statements
     private static final String TAG = ProblemPagerActivity.class.getSimpleName();
@@ -44,8 +44,19 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemFr
     // Our list of problems
     private List<Problem> problemList;
 
+    /**
+     * Creates a new intent for this activity than contains the list position to display.
+     *
+     * @param packageContext The context for this activity
+     * @param position       The list position to display
+     * @return A new intent for this activity
+     */
     public static Intent newIntent(Context packageContext, int position) {
 
+        /*
+         * Create an new intent for this context and class. Add the position argument, and return
+         * the intent.
+         */
         final Intent intent = new Intent(packageContext, ProblemPagerActivity.class);
         intent.putExtra(POSITION_ARGUMENT, position);
         return intent;
@@ -59,12 +70,15 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemFr
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
+        // Call the superclass method, and set the content view.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_problem_pager);
 
+        // Create the problem lab, and get the list of problems to display.
         problemLab = new ProblemLab(getApplicationContext());
         problemList = problemLab.getProblems();
 
+        // Find the view pager, and give it a fragment state pager adapter.
         final ViewPager viewPager = findViewById(R.id.problem_view_pager);
         viewPager.setAdapter(pagerAdapter =
                 new FragmentStatePagerAdapter(getSupportFragmentManager()) {
@@ -76,8 +90,8 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemFr
 
                     @Override
                     public Fragment getItem(int position) {
-                        return ProblemFragment.createInstance(problemList.get(position).getProblemId(),
-                                position);
+                        return ProblemFragment.createInstance(
+                                problemList.get(position).getProblemId(), position);
                     }
 
                     @Override
@@ -106,16 +120,18 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemFr
                     }
                 });
 
+        // Set the current item in the view pager.
         viewPager.setCurrentItem(getIntent().getIntExtra(POSITION_ARGUMENT, 0));
     }
 
     @Override
     public void onDimensionsChanged(int position, long problemId, int dimensions) {
 
-        // TODO: Implement this.
         Log.d(TAG, String.format(
                 "onDimensionsChanged(position: %d, problemId: %d, dimensions: %d)", position,
                 problemId, dimensions));
+
+        // Simply notify the pager adapter of a data set change.
         pagerAdapter.notifyDataSetChanged();
     }
 
@@ -127,6 +143,9 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemFr
                 "onProblemCopied(position: %d, problemId: %d, problemName: '%s', " +
                         "newProblemId: %d)",
                 position, problemId, problemName, newProblemId));
+
+        // Simply notify the pager adapter of a data set change.
+        pagerAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -137,5 +156,8 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemFr
                 "onValuesSet(position: %d, problemId: %d, value: %f, " +
                         "allEntries: %s)",
                 position, problemId, value, allEntries ? "true" : "false"));
+
+        // Simply notify the pager adapter of a data set change.
+        pagerAdapter.notifyDataSetChanged();
     }
 }

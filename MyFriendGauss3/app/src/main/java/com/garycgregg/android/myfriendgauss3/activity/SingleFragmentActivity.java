@@ -13,8 +13,14 @@ import com.garycgregg.android.myfriendgauss3.database.ProblemLabSource;
 public abstract class SingleFragmentActivity extends AppCompatActivity implements
         ProblemLabSource {
 
+    // Our problem lab
     private ProblemLab problemLab;
 
+    /**
+     * Creates a single fragment for this activity.
+     *
+     * @return A single fragment for this activity
+     */
     protected abstract Fragment createFragment();
 
     @Override
@@ -25,24 +31,30 @@ public abstract class SingleFragmentActivity extends AppCompatActivity implement
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
+        // Call the superclass method, and create the problem lab. Set the content view.
         super.onCreate(savedInstanceState);
         problemLab = new ProblemLab(getApplicationContext());
         setContentView(R.layout.activity_single_fragment);
 
+        /*
+         * Get the fragment manager, and find the fragment container. Is the fragment container not
+         * null?
+         */
         final FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
         if (null == fragment) {
 
-            fragment = createFragment();
+            // The fragment manager is not null. Create a new fragment for the container.
             fragmentManager.beginTransaction().add(R.id.fragment_container,
-                    fragment).commit();
+                    createFragment()).commit();
         }
     }
 
     @Override
     protected void onDestroy() {
 
-        super.onDestroy();
+        // Clear the problem lab, and call the superclass method.
         problemLab = null;
+        super.onDestroy();
     }
 }
