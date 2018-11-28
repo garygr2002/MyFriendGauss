@@ -532,108 +532,40 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        // TODO: Take effective action for each result.
+        // Is the result code okay?
         if (Activity.RESULT_OK == resultCode) {
 
+            // The result code is okay. Perform a request action based on the request code.
             switch (requestCode) {
 
                 case REQUEST_COPY:
 
-                    output(String.format("Received request to copy problem with new name of '%s'.",
-                            data.getStringExtra(CopyFragment.EXTRA_NEW_NAME)));
+                    // A request to copy the problem
+                    requestCopy(data);
                     break;
 
                 case REQUEST_DIMENSIONS:
 
-                    /*
-                     * Declare and initialize a constant with a value that cannot be used as a
-                     * problem dimension. Get the new dimensions from the intent.
-                     */
-                    final int greatestUnusableDimensions = 0;
-                    final int dimensions = data.getIntExtra(DimensionsFragment.EXTRA_DIMENSIONS,
-                            greatestUnusableDimensions);
-
-                    // Are the new dimensions greater than the unusable dimensions constant?
-                    output(String.format("Received new dimensions of: '%d'.", dimensions));
-                    if (greatestUnusableDimensions < dimensions) {
-
-                        /*
-                         * The new dimensions are greater than the unusable dimensions constant.
-                         * Get the problem lab. Is the problem lab not null?
-                         */
-                        final ProblemLab problemLab = getProblemLab();
-                        if (null != problemLab) {
-
-                            // The problem lab is not null. Update the dimensions in the problem.
-                            problem.setDimensions(dimensions);
-                            problemLab.updateDimensions(problem);
-
-                            /*
-                             * Set the needing redraw flag, and notify the callback wrapper of a
-                             * dimensions change.
-                             */
-                            setNeedingRedraw(true);
-                            callbackWrapper.onDimensionsChanged(position, problemId, dimensions);
-                        }
-                    }
-
-                    // We are done processing this result.
+                    // A request to change the problem dimensions
+                    requestDimensions(data);
                     break;
 
                 case REQUEST_FILL:
 
-                    // Get the fill value from the data.
-                    final double fillValue = data.getDoubleExtra(FillFragment.EXTRA_FILL,
-                            0.);
-
-                    // Get the pane choice from the data.
-                    final FillFragment.PaneChoice paneChoice = (FillFragment.PaneChoice)
-                            data.getSerializableExtra(FillFragment.EXTRA_PANE);
-
-                    // Get the 'all entries' flag from the data.
-                    final boolean allEntries = data.getBooleanExtra(FillFragment.EXTRA_ALL_ENTRIES,
-                            false);
-
-                    output(String.format("Received fill request of '%f'; pane of '%s'; " +
-                                    "all entries: '%s'", fillValue, paneChoice.toString(),
-                            allEntries));
-
-                    // Get the matrix fragment.
-                    final NumbersFragment<?> matrixFragment = (NumbersFragment<?>)
-                            (FillFragment.PaneChoice.VECTOR.equals(paneChoice) ? null :
-                                    getChildFragmentManager().findFragmentById(R.id.matrix_pane));
-
-                    // Get the vector fragment.
-                    final NumbersFragment<?> vectorFragment = (NumbersFragment<?>)
-                            (FillFragment.PaneChoice.MATRIX.equals(paneChoice) ? null :
-                                    getChildFragmentManager().findFragmentById(R.id.vector_pane));
-
-                    // Set the value in the matrix fragment if the matrix fragment is not null.
-                    if (null != matrixFragment) {
-                        matrixFragment.setValue(fillValue, allEntries);
-                    }
-
-                    // Set the value in the vector fragment if the vector fragment is not null.
-                    if (null != vectorFragment) {
-                        vectorFragment.setValue(fillValue, allEntries);
-                    }
-
-                    /*
-                     * Set the needing redraw flag, and notify the callback wrapper of a
-                     * value set.
-                     */
-                    setNeedingRedraw(true);
-                    callbackWrapper.onValuesSet(position, problemId, fillValue, allEntries);
+                    // A request to fill the number fragments
+                    requestFill(data);
                     break;
 
                 case REQUEST_SOLVE:
 
-                    output("Received a request to solve a problem.");
+                    // A request to solve the problem
+                    requestSolve(data);
                     break;
 
                 default:
 
-                    output(String.format("Received unknown request code of '%d'", requestCode));
+                    // An unknown request
+                    requestUnknown(data, requestCode);
                     break;
             }
         }
@@ -852,6 +784,130 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         // Save the position and the 'needing redraw' flag.
         outState.putInt(POSITION_INDEX, position);
         outState.putBoolean(NEEDING_REDRAW_INDEX, isNeedingRedraw());
+    }
+
+    /**
+     * Performs a request to copy a problem.
+     *
+     * @param data The intent containing the copy problem parameters
+     */
+    private void requestCopy(Intent data) {
+
+        // TODO: Fill this in.
+        output(String.format("Received request to copy problem with new name of '%s'.",
+                data.getStringExtra(CopyFragment.EXTRA_NEW_NAME)));
+    }
+
+    /**
+     * Performs a request to change problem dimensions.
+     *
+     * @param data The intent containing the change problem dimensions parameters
+     */
+    private void requestDimensions(Intent data) {
+
+        /*
+         * Declare and initialize a constant with a value that cannot be used as a
+         * problem dimension. Get the new dimensions from the intent.
+         */
+        final int greatestUnusableDimensions = 0;
+        final int dimensions = data.getIntExtra(DimensionsFragment.EXTRA_DIMENSIONS,
+                greatestUnusableDimensions);
+
+        // Are the new dimensions greater than the unusable dimensions constant?
+        output(String.format("Received new dimensions of: '%d'.", dimensions));
+        if (greatestUnusableDimensions < dimensions) {
+
+            /*
+             * The new dimensions are greater than the unusable dimensions constant.
+             * Get the problem lab. Is the problem lab not null?
+             */
+            final ProblemLab problemLab = getProblemLab();
+            if (null != problemLab) {
+
+                // The problem lab is not null. Update the dimensions in the problem.
+                problem.setDimensions(dimensions);
+                problemLab.updateDimensions(problem);
+
+                /*
+                 * Set the needing redraw flag, and notify the callback wrapper of a
+                 * dimensions change.
+                 */
+                setNeedingRedraw(true);
+                callbackWrapper.onDimensionsChanged(position, problemId, dimensions);
+            }
+        }
+    }
+
+    /**
+     * Performs a request to fill entry cells in the number fragments.
+     *
+     * @param data The intent containing the fill entry cells parameters
+     */
+    private void requestFill(Intent data) {
+
+        // Get the fill value from the data.
+        final double fillValue = data.getDoubleExtra(FillFragment.EXTRA_FILL,
+                0.);
+
+        // Get the pane choice from the data.
+        final FillFragment.PaneChoice paneChoice = (FillFragment.PaneChoice)
+                data.getSerializableExtra(FillFragment.EXTRA_PANE);
+
+        // Get the 'all entries' flag from the data.
+        final boolean allEntries = data.getBooleanExtra(FillFragment.EXTRA_ALL_ENTRIES,
+                false);
+
+        output(String.format("Received fill request of '%f'; pane of '%s'; " +
+                        "all entries: '%s'", fillValue, paneChoice.toString(),
+                allEntries));
+
+        // Get the matrix fragment.
+        final NumbersFragment<?> matrixFragment = (NumbersFragment<?>)
+                (FillFragment.PaneChoice.VECTOR.equals(paneChoice) ? null :
+                        getChildFragmentManager().findFragmentById(R.id.matrix_pane));
+
+        // Get the vector fragment.
+        final NumbersFragment<?> vectorFragment = (NumbersFragment<?>)
+                (FillFragment.PaneChoice.MATRIX.equals(paneChoice) ? null :
+                        getChildFragmentManager().findFragmentById(R.id.vector_pane));
+
+        // Set the value in the matrix fragment if the matrix fragment is not null.
+        if (null != matrixFragment) {
+            matrixFragment.setValue(fillValue, allEntries);
+        }
+
+        // Set the value in the vector fragment if the vector fragment is not null.
+        if (null != vectorFragment) {
+            vectorFragment.setValue(fillValue, allEntries);
+        }
+
+        /*
+         * Set the needing redraw flag, and notify the callback wrapper of a
+         * value set.
+         */
+        setNeedingRedraw(true);
+        callbackWrapper.onValuesSet(position, problemId, fillValue, allEntries);
+    }
+
+    /**
+     * Performs a request to solve a problem.
+     *
+     * @param data The intent containing the solve problem parameters
+     */
+    private void requestSolve(Intent data) {
+
+        // TODO: Fill this in.
+        output("Received a request to solve a problem.");
+    }
+
+    /**
+     * Performs an action for an unknown request code.
+     *
+     * @param data        The intent containing any data sent with an unknown request code
+     * @param requestCode The unknown request code
+     */
+    private void requestUnknown(Intent data, int requestCode) {
+        output(String.format("Received unknown request code of '%d'", requestCode));
     }
 
     /**
