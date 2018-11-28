@@ -113,7 +113,7 @@ public class AnswerFragment extends NumbersFragment<Answer> {
         if (null != answer) {
 
             // There is content for this control. Set it.
-            editText.setText(Double.toString(answer.getEntry()));
+            editText.setText(format(answer.getEntry()));
         }
     }
 

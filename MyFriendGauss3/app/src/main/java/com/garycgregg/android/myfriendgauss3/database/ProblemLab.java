@@ -186,7 +186,7 @@ public class ProblemLab {
             addOrReplace(problem);
         }
 
-        // fillOutProblem();
+        fillOutProblem();
     }
 
     public int delete(Answer answer) {

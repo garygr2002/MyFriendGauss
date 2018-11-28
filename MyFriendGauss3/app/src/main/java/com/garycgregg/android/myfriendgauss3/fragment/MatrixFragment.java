@@ -101,7 +101,11 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
     @Override
     protected void addWatcher(final EditText editText, int row, int column) {
 
-        // Get the record tracker. Calculate the control ID from the row and the column.
+        /*
+         * Call the superclass method. Get the record tracker. Calculate the control ID from the
+         * row and the column.
+         */
+        super.addWatcher(editText, row, column);
         final RecordTracker<Matrix> recordTracker = getRecordTracker();
         final int controlId = calculateId(row, column);
 
@@ -189,7 +193,7 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
         if (null != matrix) {
 
             // There is content for this control. Set it.
-            editText.setText(Double.toString(matrix.getEntry()));
+            editText.setText(format(matrix.getEntry()));
         }
     }
 

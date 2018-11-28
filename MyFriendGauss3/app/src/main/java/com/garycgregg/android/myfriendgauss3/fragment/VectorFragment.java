@@ -98,7 +98,11 @@ public class VectorFragment extends NumbersFragment<Vector> {
     @Override
     protected void addWatcher(final EditText editText, int row, int column) {
 
-        // Get the record tracker. Calculate the control ID from the row and the column.
+        /*
+         * Call the superclass method. Get the record tracker. Calculate the control ID from the
+         * row and the column.
+         */
+        super.addWatcher(editText, row, column);
         final RecordTracker<Vector> recordTracker = getRecordTracker();
         final int controlId = calculateId(row, column);
 
@@ -186,7 +190,7 @@ public class VectorFragment extends NumbersFragment<Vector> {
         if (null != vector) {
 
             // There is content for this control. Set it.
-            editText.setText(Double.toString(vector.getEntry()));
+            editText.setText(format(vector.getEntry()));
         }
     }
 

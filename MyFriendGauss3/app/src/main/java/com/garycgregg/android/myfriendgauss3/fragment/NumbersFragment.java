@@ -22,6 +22,9 @@ import com.garycgregg.android.myfriendgauss3.content.BaseGaussEntry;
 import com.garycgregg.android.myfriendgauss3.content.Matrix;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -96,6 +99,9 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     // The number of columns
     private int columns;
 
+    // The entry formatter
+    private NumberFormat formatter;
+
     // The label for this pane
     private String label;
 
@@ -158,6 +164,31 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
         for (T record : records) {
             recordTracker.put(indexProducer.produceId(record), record, true);
         }
+    }
+
+    /**
+     * Creates a number format given a precision and a flag indicating whether scientific notation
+     * is desired.
+     *
+     * @param precision  The precision of the output
+     * @param scientific True if the output will be in scientific notation, false otherwise
+     * @return A number format with the desired characteristics
+     */
+    private static NumberFormat createFormat(int precision, boolean scientific) {
+
+        /*
+         * Create a character array with the desired precision, and fill it with the DecimalFormat
+         * number character.
+         */
+        final char[] precisionChars = new char[precision > 0 ? precision - 1 : 0];
+        Arrays.fill(precisionChars, '#');
+
+        /*
+         * Create a format string for the non-exponent portion of the format. Create and return a
+         * new DecimalFormat in either non-scientific, or scientific notation.
+         */
+        final String format = String.format("0.0%s", new String(precisionChars));
+        return new DecimalFormat(scientific ? String.format("%sE0", format) : format);
     }
 
     /**
@@ -282,7 +313,29 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
      */
     protected void addWatcher(EditText editText, int row, int column) {
 
-        // The default action is to add no text watcher.
+        // Give the EditText a focus change listener.
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+
+                // Does the view not have focus?
+                if (!hasFocus) {
+
+                    /*
+                     * Cast the view to an EditText, and try to convert its content. Is the content
+                     * a decimal number?
+                     */
+                    final EditText field = (EditText) view;
+                    final Double entry = NumberTextWatcher.convert(field.getText().toString());
+                    if (null != entry) {
+
+                        // The content is a decimal number. Format it.
+                        field.setText(format(entry));
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -349,8 +402,11 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
 
         output("createContent(LayoutInflater, ViewGroup)");
 
-        // Inflate our content. Set the label for the table.
+        // Inflate our content. Create the formatter. TODO: Give the fragment arguments.
         inflater.inflate(R.layout.content_table, container, true);
+        formatter = createFormat(4, true);
+
+        // Set the label for the table.
         final TextView tableLabel = container.findViewById(R.id.table_label);
         tableLabel.setText(getLabel());
 
@@ -372,6 +428,16 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
             createContent(inflater, tableRow, row);
             tableLayout.addView(tableRow);
         }
+    }
+
+    /**
+     * Formats an entry.
+     *
+     * @param entry An entry to format
+     * @return The formatted entry
+     */
+    protected String format(double entry) {
+        return (null == formatter) ? Double.toString(entry) : formatter.format(entry);
     }
 
     /**
@@ -547,9 +613,12 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     @Override
     public void onDestroyView() {
 
-        // Release the changes, and set the table layout to null. Call the superclass method.
+        // Release the changes and set the table layout to null.
         releaseChanges();
         setTableLayout(null);
+
+        // Set the formatter to null. Call the superclass method.
+        formatter = null;
         super.onDestroyView();
     }
 
