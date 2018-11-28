@@ -56,14 +56,25 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     private static final String LABEL_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "label");
 
+    // The precision argument key
+    private static final String PRECISION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            PREFIX_STRING, "precision");
+
     // The number of rows argument key
     private static final String ROWS_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "rows");
 
+    // The scientific notation argument key
+    private static final String SCIENTIFIC_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            PREFIX_STRING, "scientific");
+
     // The tag for our logging
     private static final String TAG = NumbersFragment.class.getSimpleName();
 
+    // The default entry precision
+    public static int DEFAULT_PRECISION = 0;
     // Notifies a listener of an 'on equal' event
+
     private final ListenerNotifier equalNotifier = new ListenerNotifier() {
 
         @Override
@@ -90,9 +101,6 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
         }
     };
 
-    // The default entry precision
-    public int DEFAULT_PRECISION = -1;
-
     // The activity count listener
     private CountListener activityListener;
 
@@ -114,8 +122,14 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     // The parent fragment count listener
     private CountListener parentListener;
 
+    // The precision of entry expressions
+    private int precision;
+
     // The number or rows
     private int rows;
+
+    // True if the output will be in scientific notation, false otherwise
+    private boolean scientific;
 
     // True if the hint string will be a single column, false otherwise
     private boolean singleColumnHint;
@@ -182,15 +196,15 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     @Nullable
     private static NumberFormat createFormat(int precision, boolean scientific) {
 
-        // Declare and initialize the result. Is the precision non-negative?
+        // Declare and initialize the result. Is the precision not the default?
         NumberFormat result = null;
-        if (0 <= precision) {
+        if (DEFAULT_PRECISION < precision) {
 
             /*
-             * The precision is non-negative. Create a character array with the desired precision,
-             * and fill it with the DecimalFormat number character.
+             * The precision is not the default. Create a character array with the desired
+             * precision, and fill it with the DecimalFormat number character.
              */
-            final char[] precisionChars = new char[(0 < precision) ? (precision - 1) : 0];
+            final char[] precisionChars = new char[precision - 1];
             Arrays.fill(precisionChars, '#');
 
             /*
@@ -416,9 +430,9 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
 
         output("createContent(LayoutInflater, ViewGroup)");
 
-        // Inflate our content. Create the formatter. TODO: Give the fragment arguments.
+        // Inflate our content. Create the formatter.
         inflater.inflate(R.layout.content_table, container, true);
-        formatter = createFormat(DEFAULT_PRECISION, true);
+        formatter = createFormat(getPrecision(), isScientific());
 
         // Set the label for the table.
         final TextView tableLabel = container.findViewById(R.id.table_label);
@@ -524,6 +538,15 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     }
 
     /**
+     * Gets the precision of entry expressions.
+     *
+     * @return The precision of entry expressions
+     */
+    protected int getPrecision() {
+        return precision;
+    }
+
+    /**
      * Gets the number of rows.
      *
      * @return The number of rows
@@ -539,6 +562,15 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
      */
     protected TableLayout getTableLayout() {
         return tableLayout;
+    }
+
+    /**
+     * Determines if the output will be in scientific notation.
+     *
+     * @return True if the output will be in scientific notation, false otherwise
+     */
+    protected boolean isScientific() {
+        return scientific;
     }
 
     /**
@@ -603,6 +635,10 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
         // Get the number of columns, and the single hint format flag.
         setColumns(arguments.getInt(COLUMNS_ARGUMENT, defaultValue));
         setSingleColumnHint(arguments.getBoolean(HINT_FORMAT_ARGUMENT, false));
+
+        // Get the precision, and the scientific notation flag.
+        setPrecision(arguments.getInt(PRECISION_ARGUMENT, DEFAULT_PRECISION));
+        setScientific(arguments.getBoolean(SCIENTIFIC_ARGUMENT, false));
     }
 
     @Override
@@ -723,6 +759,15 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     }
 
     /**
+     * Sets the precision of entry expressions.
+     *
+     * @param precision The precision of entry expressions
+     */
+    private void setPrecision(int precision) {
+        this.precision = precision;
+    }
+
+    /**
      * Sets the record tracker.
      */
     protected abstract void setRecordTracker();
@@ -734,6 +779,15 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
      */
     private void setRows(int rows) {
         this.rows = rows;
+    }
+
+    /**
+     * Sets if the output will be in scientific notation, false otherwise
+     *
+     * @param scientific True if the output will be in scientific notation, false otherwise
+     */
+    private void setScientific(boolean scientific) {
+        this.scientific = scientific;
     }
 
     /**
