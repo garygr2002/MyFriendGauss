@@ -416,6 +416,22 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         // Set the problem size in the matrix and vector fragment factories.
         matrixFragmentFactory.setSize(dimensions);
         vectorFragmentFactory.setSize(dimensions);
+
+        // Get the precision of the entries. Set that precision in the answer fragment factory.
+        final int precision = 4;
+        answerFragmentFactory.setPrecision(precision);
+
+        // Set the precision in the matrix and vector fragment factories.
+        matrixFragmentFactory.setPrecision(precision);
+        vectorFragmentFactory.setPrecision(precision);
+
+        // Get the scientific notation flag. Set the flag in the answer fragment factory.
+        final boolean scientific = true;
+        answerFragmentFactory.setScientific(scientific);
+
+        // Set the scientific notation flag in the matrix and vector fragment factories.
+        matrixFragmentFactory.setScientific(scientific);
+        vectorFragmentFactory.setScientific(scientific);
     }
 
     /**
@@ -585,7 +601,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                     // Get the matrix fragment.
                     final NumbersFragment<?> matrixFragment = (NumbersFragment<?>)
                             (FillFragment.PaneChoice.VECTOR.equals(paneChoice) ? null :
-                            getChildFragmentManager().findFragmentById(R.id.matrix_pane));
+                                    getChildFragmentManager().findFragmentById(R.id.matrix_pane));
 
                     // Get the vector fragment.
                     final NumbersFragment<?> vectorFragment = (NumbersFragment<?>)
@@ -998,7 +1014,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         @Override
         public Fragment createFragment(long problemId) {
             return AnswerFragment.createInstance(problemId, getLabel(), getBackgroundColor(),
-                    getSize());
+                    getSize(), getPrecision(), isScientific());
         }
     }
 
@@ -1074,7 +1090,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
             // Use the size for both the number of rows and the number of columns.
             final int size = getSize();
             return MatrixFragment.createInstance(problemId, getLabel(), getBackgroundColor(),
-                    isEnabled(), size, size);
+                    isEnabled(), size, size, getPrecision(), isScientific());
         }
     }
 
@@ -1088,6 +1104,12 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
         // True if the factory output is matrix, otherwise a vector
         private boolean matrix;
+
+        // The precision of entry expressions
+        private int precision;
+
+        // True if the output will be in scientific notation, false otherwise
+        private boolean scientific;
 
         // The size of factory output
         private int size;
@@ -1106,11 +1128,11 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
             /*
              * Customize the given fragment with a label, problem ID, background color, enabled
-             * setting, size, and matrix flag.
+             * setting, size, matrix flag, precision and scientific notation flag.
              */
             NumbersFragment.customizeInstance(fragment, problemId, getLabel(),
                     getBackgroundColor(), isEnabled(),
-                    size, isNotMatrix ? 1 : size, isNotMatrix);
+                    size, isNotMatrix ? 1 : size, isNotMatrix, getPrecision(), isScientific());
         }
 
         /**
@@ -1132,6 +1154,15 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         }
 
         /**
+         * Gets the precision of entry expressions.
+         *
+         * @return The precision of entry expressions
+         */
+        int getPrecision() {
+            return precision;
+        }
+
+        /**
          * Gets the size of the factory output.
          *
          * @return The size of the factory output
@@ -1147,6 +1178,15 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
          */
         boolean isMatrix() {
             return matrix;
+        }
+
+        /**
+         * Gets the scientific notation flag of the factory output.
+         *
+         * @return The scientific flag of the factory output
+         */
+        boolean isScientific() {
+            return scientific;
         }
 
         /**
@@ -1174,6 +1214,24 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
          */
         void setMatrix(boolean matrix) {
             this.matrix = matrix;
+        }
+
+        /**
+         * Sets the precision of entry expressions.
+         *
+         * @param precision The precision of entry expressions
+         */
+        void setPrecision(int precision) {
+            this.precision = precision;
+        }
+
+        /**
+         * Sets the scientific notation flag of the factory output.
+         *
+         * @param scientific The scientific notation flag of the factory output
+         */
+        void setScientific(boolean scientific) {
+            this.scientific = scientific;
         }
 
         /**
@@ -1246,7 +1304,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         @Override
         public Fragment createFragment(long problemId) {
             return VectorFragment.createInstance(problemId, getLabel(), getBackgroundColor(),
-                    isEnabled(), getSize());
+                    isEnabled(), getSize(), getPrecision(), isScientific());
         }
     }
 }

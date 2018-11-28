@@ -55,10 +55,12 @@ public class AnswerFragment extends NumbersFragment<Answer> {
      * @param label           The label argument
      * @param backgroundColor The background color argument
      * @param rows            The number of rows argument
+     * @param precision       The precision of entry expressions
+     * @param scientific      True if the output will be in scientific notation, false otherwise
      * @return A properly configured AnswerFragment
      */
     public static AnswerFragment createInstance(long problemId, String label, int backgroundColor,
-                                                int rows) {
+                                                int rows, int precision, boolean scientific) {
 
         /*
          * Create an instance of an AnswerFragment, and customize it with parameters required
@@ -66,7 +68,7 @@ public class AnswerFragment extends NumbersFragment<Answer> {
          */
         final AnswerFragment fragment = new AnswerFragment();
         NumbersFragment.customizeInstance(fragment, problemId, label, backgroundColor,
-                false, rows, 1, true);
+                false, rows, 1, true, precision, scientific);
         return fragment;
     }
 

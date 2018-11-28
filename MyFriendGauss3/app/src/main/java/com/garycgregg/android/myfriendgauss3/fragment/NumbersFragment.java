@@ -73,8 +73,8 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
 
     // The default entry precision
     public static int DEFAULT_PRECISION = 0;
-    // Notifies a listener of an 'on equal' event
 
+    // Notifies a listener of an 'on equal' event
     private final ListenerNotifier equalNotifier = new ListenerNotifier() {
 
         @Override
@@ -229,11 +229,15 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
      * @param rows             The number of rows argument
      * @param columns          The number of columns argument
      * @param singleColumnHint True if the fragment will have a single column, false otherwise
+     * @param precision        The precision of entry expressions
+     * @param scientific       True if the output will be in scientific notation, false otherwise
      */
     public static void customizeInstance(NumbersFragment<?> fragment, long problemId,
                                          String label, int backgroundColor,
                                          boolean enabled, int rows, int columns,
-                                         boolean singleColumnHint) {
+                                         boolean singleColumnHint,
+                                         int precision,
+                                         boolean scientific) {
 
         // Customize the fragment for content arguments. Get the fragment arguments.
         ContentFragment.customizeInstance(fragment, problemId, enabled);
@@ -247,6 +251,10 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
         arguments.putInt(ROWS_ARGUMENT, rows);
         arguments.putInt(COLUMNS_ARGUMENT, columns);
         arguments.putBoolean(HINT_FORMAT_ARGUMENT, singleColumnHint);
+
+        // Add the precision and scientific notation arguments.
+        arguments.putInt(PRECISION_ARGUMENT, precision);
+        arguments.putBoolean(SCIENTIFIC_ARGUMENT, scientific);
     }
 
     /**

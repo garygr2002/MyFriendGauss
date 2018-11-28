@@ -57,11 +57,14 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
      * @param enabled         The fragment enabled argument
      * @param rows            The number of rows argument
      * @param columns         The number of columns argument
+     * @param precision       The precision of entry expressions
+     * @param scientific      True if the output will be in scientific notation, false otherwise
      * @return A properly configured MatrixFragment
      */
     public static MatrixFragment createInstance(long problemId,
                                                 String label, int backgroundColor,
-                                                boolean enabled, int rows, int columns) {
+                                                boolean enabled, int rows, int columns,
+                                                int precision, boolean scientific) {
 
         /*
          * Create an instance of a MatrixFragment, and customize it with parameters required
@@ -69,7 +72,7 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
          */
         final MatrixFragment fragment = new MatrixFragment();
         NumbersFragment.customizeInstance(fragment, problemId, label, backgroundColor,
-                enabled, rows, columns, false);
+                enabled, rows, columns, false, precision, scientific);
         return fragment;
     }
 

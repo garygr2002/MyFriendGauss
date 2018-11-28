@@ -56,10 +56,13 @@ public class VectorFragment extends NumbersFragment<Vector> {
      * @param backgroundColor The background color argument
      * @param enabled         The fragment enabled argument
      * @param rows            The number of rows argument
+     * @param precision       The precision of entry expressions
+     * @param scientific      True if the output will be in scientific notation, false otherwise
      * @return A properly configured MatrixFragment
      */
     public static VectorFragment createInstance(long problemId, String label, int backgroundColor,
-                                                boolean enabled, int rows) {
+                                                boolean enabled, int rows, int precision,
+                                                boolean scientific) {
 
         /*
          * Create an instance of an VectorFragment, and customize it with parameters required
@@ -67,7 +70,7 @@ public class VectorFragment extends NumbersFragment<Vector> {
          */
         final VectorFragment fragment = new VectorFragment();
         NumbersFragment.customizeInstance(fragment, problemId, label, backgroundColor,
-                enabled, rows, 1, true);
+                enabled, rows, 1, true, precision, scientific);
         return fragment;
     }
 
