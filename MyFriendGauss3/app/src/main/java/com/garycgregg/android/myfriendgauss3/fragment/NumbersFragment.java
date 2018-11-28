@@ -90,6 +90,9 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
         }
     };
 
+    // The default entry precision
+    public int DEFAULT_PRECISION = -1;
+
     // The activity count listener
     private CountListener activityListener;
 
@@ -171,24 +174,35 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
      * is desired.
      *
      * @param precision  The precision of the output
-     * @param scientific True if the output will be in scientific notation, false otherwise
+     * @param scientific True if the output will be in scientific notation, false otherwise (Note:
+     *                   this method ignores this parameter if the precision is DEFAULT_PRECISION,
+     *                   or is otherwise not a positive value).
      * @return A number format with the desired characteristics
      */
+    @Nullable
     private static NumberFormat createFormat(int precision, boolean scientific) {
 
-        /*
-         * Create a character array with the desired precision, and fill it with the DecimalFormat
-         * number character.
-         */
-        final char[] precisionChars = new char[precision > 0 ? precision - 1 : 0];
-        Arrays.fill(precisionChars, '#');
+        // Declare and initialize the result. Is the precision non-negative?
+        NumberFormat result = null;
+        if (0 <= precision) {
 
-        /*
-         * Create a format string for the non-exponent portion of the format. Create and return a
-         * new DecimalFormat in either non-scientific, or scientific notation.
-         */
-        final String format = String.format("0.0%s", new String(precisionChars));
-        return new DecimalFormat(scientific ? String.format("%sE0", format) : format);
+            /*
+             * The precision is non-negative. Create a character array with the desired precision,
+             * and fill it with the DecimalFormat number character.
+             */
+            final char[] precisionChars = new char[(0 < precision) ? (precision - 1) : 0];
+            Arrays.fill(precisionChars, '#');
+
+            /*
+             * Create a format string for the non-exponent portion of the format. Create and return
+             * a new DecimalFormat in either non-scientific, or scientific notation.
+             */
+            final String format = String.format("0.0%s", new String(precisionChars));
+            result = new DecimalFormat(scientific ? String.format("%sE0", format) : format);
+        }
+
+        // Return the result.
+        return result;
     }
 
     /**
@@ -404,7 +418,7 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
 
         // Inflate our content. Create the formatter. TODO: Give the fragment arguments.
         inflater.inflate(R.layout.content_table, container, true);
-        formatter = createFormat(4, true);
+        formatter = createFormat(DEFAULT_PRECISION, true);
 
         // Set the label for the table.
         final TextView tableLabel = container.findViewById(R.id.table_label);
@@ -437,7 +451,8 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
      * @return The formatted entry
      */
     protected String format(double entry) {
-        return (null == formatter) ? Double.toString(entry) : formatter.format(entry);
+        return ((null == formatter) ? Double.toString(entry) : formatter.format(entry))
+                .toLowerCase();
     }
 
     /**
