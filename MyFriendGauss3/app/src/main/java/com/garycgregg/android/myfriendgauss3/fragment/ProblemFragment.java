@@ -3,6 +3,7 @@ package com.garycgregg.android.myfriendgauss3.fragment;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -54,6 +55,10 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     private static final String POSITION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, POSITION_INDEX);
 
+    // The precision key
+    private static final String PRECISION_KEY = String.format(ARGUMENT_FORMAT_STRING,
+            PREFIX_STRING, "precision");
+
     // The instance state index for problem ID
     private static final String PROBLEM_ID_INDEX = "problem_id";
 
@@ -72,6 +77,10 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
     // The identifier for a solve request
     private static final int REQUEST_SOLVE = 3;
+
+    // The scientific notation key
+    private static final String SCIENTIFIC_KEY = String.format(ARGUMENT_FORMAT_STRING,
+            PREFIX_STRING, "scientific");
 
     // A tag for logging statements
     private static final String TAG = ProblemFragment.class.getSimpleName();
@@ -105,6 +114,14 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
             if (null != callbackListener) {
                 callbackListener.onDimensionsChanged(position, problemId, dimensions);
+            }
+        }
+
+        @Override
+        public void onPrecisionChanged(int position, long problemId, int precision, boolean scientific) {
+
+            if (null != callbackListener) {
+                callbackListener.onPrecisionChanged(position, problemId, precision, scientific);
             }
         }
 
@@ -418,7 +435,8 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         vectorFragmentFactory.setSize(dimensions);
 
         // Get the precision of the entries. Set that precision in the answer fragment factory.
-        final int precision = 4;
+        final SharedPreferences preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        final int precision = preferences.getInt(PRECISION_KEY, NumbersFragment.DEFAULT_PRECISION);
         answerFragmentFactory.setPrecision(precision);
 
         // Set the precision in the matrix and vector fragment factories.
@@ -426,7 +444,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         vectorFragmentFactory.setPrecision(precision);
 
         // Get the scientific notation flag. Set the flag in the answer fragment factory.
-        final boolean scientific = true;
+        final boolean scientific = preferences.getBoolean(SCIENTIFIC_KEY, false);
         answerFragmentFactory.setScientific(scientific);
 
         // Set the scientific notation flag in the matrix and vector fragment factories.
@@ -814,7 +832,6 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                 greatestUnusableDimensions);
 
         // Are the new dimensions greater than the unusable dimensions constant?
-        output(String.format("Received new dimensions of: '%d'.", dimensions));
         if (greatestUnusableDimensions < dimensions) {
 
             /*
@@ -857,10 +874,6 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         final boolean allEntries = data.getBooleanExtra(FillFragment.EXTRA_ALL_ENTRIES,
                 false);
 
-        output(String.format("Received fill request of '%f'; pane of '%s'; " +
-                        "all entries: '%s'", fillValue, paneChoice.toString(),
-                allEntries));
-
         // Get the matrix fragment.
         final NumbersFragment<?> matrixFragment = (NumbersFragment<?>)
                 (FillFragment.PaneChoice.VECTOR.equals(paneChoice) ? null :
@@ -887,6 +900,35 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
          */
         setNeedingRedraw(true);
         callbackWrapper.onValuesSet(position, problemId, fillValue, allEntries);
+    }
+
+    /**
+     * Performs a request to change the precision displayed in the number fragments.
+     *
+     * @param data The intent containing the change precision parameters
+     */
+    private void requestPrecision(Intent data) {
+
+        // Get the precision from the data.
+        final int precision = data.getIntExtra(PrecisionFragment.EXTRA_PRECISION,
+                NumbersFragment.DEFAULT_PRECISION);
+
+        // Get the scientific notation flag from the data.
+        final boolean scientific = data.getBooleanExtra(PrecisionFragment.EXTRA_SCIENTIFIC,
+                false);
+
+        // Get an editor for the shared preferences.
+        final SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).
+                edit();
+
+        // Add the precision value and scientific notation flag to the editor. Apply the edits.
+        editor.putInt(PRECISION_KEY, precision);
+        editor.putBoolean(SCIENTIFIC_KEY, scientific);
+        editor.apply();
+
+        // Set the needing redraw flag, and notify the callback wrapper of a precision change.
+        setNeedingRedraw(true);
+        callbackWrapper.onPrecisionChanged(position, problemId, precision, scientific);
     }
 
     /**
@@ -1042,6 +1084,16 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
          * @param dimensions The dimensions update
          */
         void onDimensionsChanged(int position, long problemId, int dimensions);
+
+        /**
+         * Indicates that the precision of the displayed entries have changed.
+         *
+         * @param position   The position of this problem
+         * @param problemId  The ID of this problem
+         * @param precision  The new precision of the displayed entries
+         * @param scientific True if scientific notation is now used, false otherwise
+         */
+        void onPrecisionChanged(int position, long problemId, int precision, boolean scientific);
 
         /**
          * Indicates that this problem has been copied.

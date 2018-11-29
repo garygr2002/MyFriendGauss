@@ -21,7 +21,7 @@ public class DimensionsFragment extends GaussDialogFragment {
     // The prefix for instance arguments
     private static final String ARGUMENT_PREFIX = DimensionsFragment.class.getName();
 
-    // The position argument key
+    // The current dimensions argument key
     private static final String CURRENT_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             ARGUMENT_PREFIX, "current");
 

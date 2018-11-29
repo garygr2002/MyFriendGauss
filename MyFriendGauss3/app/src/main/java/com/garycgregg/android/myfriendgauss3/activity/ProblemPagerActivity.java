@@ -136,6 +136,17 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemFr
     }
 
     @Override
+    public void onPrecisionChanged(int position, long problemId, int precision, boolean scientific) {
+
+        Log.d(TAG, String.format("onPrecisionChanged(position: %d, problemId: %d, precision: %d" +
+                        "scientific: %s)", position, problemId, precision,
+                scientific ? "true" : "false"));
+
+        // Simply notify the pager adapter of a data set change.
+        pagerAdapter.notifyDataSetChanged();
+    }
+
+    @Override
     public void onProblemCopied(int position, long problemId, String problemName, long newProblemId) {
 
         // TODO: Implement this.
