@@ -94,9 +94,12 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
             matrix = new Matrix();
             matrix.setProblemId(getProblemId());
 
-            // Set the row and column numbers, and add the content to the record tracker.
+            // Set the row and column numbers.
             matrix.setRow(row);
             matrix.setColumn(column);
+
+            // Set a non-number as the entry, and add the content to the record tracker.
+            matrix.setEntry(Double.NaN);
             recordTracker.put(controlId, matrix, false);
         }
     }
@@ -124,6 +127,8 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
 
                 @Override
                 protected void setChange(Double change) {
+
+                    output(String.format("I got called: %f", change));
 
                     // Was the change not a deletion?
                     final boolean deleted = (null == change);
