@@ -15,15 +15,21 @@
         app:showAsAction="ifRoom|withText" />
 
     <item
+        android:id="@+id/copy_problem"
+        android:icon="@drawable/ic_menu_copy"
+        android:title="@string/copy_problem"
+        app:showAsAction="ifRoom|withText" />
+
+    <item
         android:id="@+id/solve_problem"
         android:icon="@drawable/ic_menu_solve"
         android:title="@string/solve_problem"
         app:showAsAction="ifRoom|withText" />
 
     <item
-        android:id="@+id/copy_problem"
-        android:icon="@drawable/ic_menu_copy"
-        android:title="@string/copy_problem"
+        android:id="@+id/check_solution"
+        android:icon="@drawable/ic_menu_check"
+        android:title="@string/check_solution"
         app:showAsAction="ifRoom|withText" />
 
 </menu>
