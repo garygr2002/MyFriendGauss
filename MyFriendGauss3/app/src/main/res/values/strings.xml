@@ -4,6 +4,7 @@
     <string name="both_matrix_vector">Both</string>
     <string name="change_dimension">Dimension</string>
     <string name="check_solution">Check</string>
+    <string name="check_title">Solution Progress</string>
     <string name="copy_problem">Copy</string>
     <string name="copy_title">Copy Problem</string>
     <string name="dimensions_title">Choose Problem Dimensions</string>
@@ -14,6 +15,7 @@
     <string name="fill_entry_hint">@string/fill_title</string>
     <string name="matrix_only">Matrix</string>
     <string name="new_problem_name">Name for New Problem</string>
+    <string name="percent_solved">Percent Solved</string>
     <string name="problem_name">Problem Name</string>
     <string name="solve_message">A problem may not be edited once it has been submitted for
         solution. You may copy a solved problem, then edit the copy. Submit this problem for

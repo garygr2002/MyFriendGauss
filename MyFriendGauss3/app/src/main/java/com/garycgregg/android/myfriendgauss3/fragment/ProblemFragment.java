@@ -27,6 +27,9 @@ import java.util.List;
 
 public class ProblemFragment extends GaussFragment implements NumbersFragment.CountListener {
 
+    // The check solution dialog identifier
+    private static final String DIALOG_CHECK = "DialogCheck";
+
     // The copy problem dialog identifier
     private static final String DIALOG_COPY = "DialogCopy";
 
@@ -728,6 +731,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
             case R.id.check_solution:
 
                 output("Check solution menu item selected.");
+                CheckFragment.createInstance().show(getFragmentManager(), DIALOG_CHECK);
                 break;
 
             case R.id.copy_problem:
