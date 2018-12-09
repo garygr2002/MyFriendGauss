@@ -728,6 +728,11 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                 dimensionsDialog.show(getFragmentManager(), DIALOG_DIMENSIONS);
                 break;
 
+            case R.id.change_precision:
+
+                output("Change precision menu item selected.");
+                break;
+
             case R.id.solution_progress:
 
                 output("Check solution menu item selected.");

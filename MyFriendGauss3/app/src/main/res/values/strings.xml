@@ -3,6 +3,7 @@
     <string name="app_name">My Friend Gauss</string>
     <string name="both_matrix_vector">Both</string>
     <string name="change_dimension">Dimension</string>
+    <string name="change_precision">Precision</string>
     <string name="check_title">Solution Progress</string>
     <string name="copy_problem">Copy</string>
     <string name="copy_title">Copy Problem</string>

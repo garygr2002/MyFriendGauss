@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/change_precision"
+        android:icon="@drawable/ic_menu_precision"
+        android:title="@string/change_precision"
+        app:showAsAction="ifRoom|withText" />
+
+    <item
         android:id="@+id/change_dimension"
         android:icon="@drawable/ic_menu_dimension"
         android:title="@string/change_dimension"
