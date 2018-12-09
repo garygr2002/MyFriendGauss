@@ -728,10 +728,10 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                 dimensionsDialog.show(getFragmentManager(), DIALOG_DIMENSIONS);
                 break;
 
-            case R.id.check_solution:
+            case R.id.solution_progress:
 
                 output("Check solution menu item selected.");
-                CheckFragment.createInstance().show(getFragmentManager(), DIALOG_CHECK);
+                ProgressFragment.createInstance().show(getFragmentManager(), DIALOG_CHECK);
                 break;
 
             case R.id.copy_problem:

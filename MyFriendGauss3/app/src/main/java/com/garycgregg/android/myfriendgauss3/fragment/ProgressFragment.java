@@ -12,15 +12,15 @@ import android.widget.TextView;
 
 import com.garycgregg.android.myfriendgauss3.R;
 
-public class CheckFragment extends GaussDialogFragment {
+public class ProgressFragment extends GaussDialogFragment {
 
     /**
-     * Customizes an instance of a CheckFragment.
+     * Customizes an instance of a ProgressFragment.
      *
-     * @return A properly configured CheckFragment
+     * @return A properly configured ProgressFragment
      */
-    public static CheckFragment createInstance() {
-        return new CheckFragment();
+    public static ProgressFragment createInstance() {
+        return new ProgressFragment();
     }
 
     @NonNull
@@ -29,7 +29,7 @@ public class CheckFragment extends GaussDialogFragment {
 
         // Get the context, and inflate the fill dialog.
         final Context context = getActivity();
-        final View view = LayoutInflater.from(context).inflate(R.layout.dialog_check,
+        final View view = LayoutInflater.from(context).inflate(R.layout.dialog_progress,
                 null);
 
         /*

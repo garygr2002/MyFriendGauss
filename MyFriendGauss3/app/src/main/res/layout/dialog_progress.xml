@@ -11,11 +11,11 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:progressTint="@color/tableEntryAnswer"
+        android:layout_marginTop="15dp"
         app:layout_constraintBottom_toTopOf="@+id/percent_solved"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toRightOf="parent"
-        app:layout_constraintRight_toLeftOf="parent" />
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/percent_solved"

@@ -27,9 +27,9 @@
         app:showAsAction="ifRoom|withText" />
 
     <item
-        android:id="@+id/check_solution"
-        android:icon="@drawable/ic_menu_check"
-        android:title="@string/check_solution"
+        android:id="@+id/solution_progress"
+        android:icon="@drawable/ic_menu_progress"
+        android:title="@string/solution_progress"
         app:showAsAction="ifRoom|withText" />
 
 </menu>
