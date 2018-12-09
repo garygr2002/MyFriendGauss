@@ -20,6 +20,9 @@ public class BaseGaussEntry implements Parcelable {
                 }
             };
 
+    // An invalid entry
+    public static double INVALID_ENTRY = Double.NaN;
+
     // The entry in the row
     private double entry;
 

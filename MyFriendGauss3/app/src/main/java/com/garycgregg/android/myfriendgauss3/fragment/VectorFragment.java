@@ -92,12 +92,9 @@ public class VectorFragment extends NumbersFragment<Vector> {
             vector = new Vector();
             vector.setProblemId(getProblemId());
 
-            /*
-             * Set the row. Set a non-number as the entry, and add the content to the record
-             * tracker.
-             */
+            // Set the row. Set an invalid entry, and add the content to the record tracker.
             vector.setRow(row);
-            vector.setEntry(Double.NaN);
+            vector.setEntry(Vector.INVALID_ENTRY);
             recordTracker.put(controlId, vector, false);
         }
     }
