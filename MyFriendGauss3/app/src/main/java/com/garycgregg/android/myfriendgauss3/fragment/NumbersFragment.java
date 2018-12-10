@@ -71,8 +71,14 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     // The tag for our logging
     private static final String TAG = NumbersFragment.class.getSimpleName();
 
+    // The maximum entry precision
+    public static int MAXIMUM_PRECISION = 15;
+
+    // The minimum entry precision
+    public static int MINIMUM_PRECISION = 0;
+
     // The default entry precision
-    public static int DEFAULT_PRECISION = 0;
+    public static int DEFAULT_PRECISION = MINIMUM_PRECISION;
 
     // Notifies a listener of an 'on equal' event
     private final ListenerNotifier equalNotifier = new ListenerNotifier() {
