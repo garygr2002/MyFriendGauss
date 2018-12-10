@@ -18,32 +18,44 @@ import com.garycgregg.android.myfriendgauss3.R;
 
 public class FillFragment extends GaussDialogFragment implements View.OnClickListener {
 
-    // The instance state index for all entries
-    private static final String ALL_ENTRIES_INDEX = "all_entries_index";
+    // The bundle index for the 'all entries' flag
+    private static final String ALL_ENTRIES = "all_entries";
 
-    // The instance state index for fill value
-    private static final String FILL_VALUE_INDEX = "fill_value_index";
+    // The prefix for instance arguments
+    private static final String ARGUMENT_PREFIX = FillFragment.class.getName();
 
-    // The instance state index for pane choice
-    private static final String PANE_CHOICE_INDEX = "pane_choice_index";
+    // The 'all entries' flag argument key
+    private static final String ALL_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            ARGUMENT_PREFIX, ALL_ENTRIES);
+
+    // The bundle index for the the fill value
+    private static final String FILL_VALUE = "fill_value";
+
+    // The fill value argument key
+    private static final String FILL_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            ARGUMENT_PREFIX, FILL_VALUE);
+
+    // The bundle index for the pane choice
+    private static final String PANE_CHOICE = "pane_choice";
+
+    // The pane choice argument key
+    private static final String PANE_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            ARGUMENT_PREFIX, PANE_CHOICE);
 
     // The prefix for return values
     private static final String RETURN_PREFIX = FillFragment.class.getPackage().getName();
 
     // The fill value extra
     public static final String EXTRA_FILL = String.format(RETURN_FORMAT_STRING,
-            RETURN_PREFIX, "fill");
+            RETURN_PREFIX, FILL_VALUE);
 
     // The pane indicator extra
     public static final String EXTRA_PANE = String.format(RETURN_FORMAT_STRING,
-            RETURN_PREFIX, "pane");
+            RETURN_PREFIX, PANE_CHOICE);
 
     // The all entries flag
     public static final String EXTRA_ALL_ENTRIES = String.format(RETURN_FORMAT_STRING,
-            RETURN_PREFIX, "all");
-
-    // A tag for logging statements
-    private static final String TAG = FillFragment.class.getSimpleName();
+            RETURN_PREFIX, ALL_ENTRIES);
 
     // The IDs for all-entry radio buttons
     private static final int[] entryIds = {R.id.empty_cells, R.id.all_cells};
@@ -52,8 +64,20 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
     private static final int[] paneIds = {R.id.matrix_only, R.id.vector_only,
             R.id.both_matrix_vector};
 
+    static {
+
+        // Build the argument keys.
+        Bundle bundle = getArgumentKeys();
+        bundle.putString(ALL_ENTRIES, ALL_ARGUMENT);
+        bundle.putString(FILL_VALUE, FILL_ARGUMENT);
+        bundle.putString(PANE_CHOICE, PANE_ARGUMENT);
+    }
+
     // The all-entries flag
     private boolean allEntries;
+
+    // The fill edit text for this dialog
+    private EditText fillEditText;
 
     // The fill value
     private Container<Double> fillValue;
@@ -64,31 +88,51 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
     /**
      * Customizes an instance of a FillFragment.
      *
+     * @param fillValue  The value to pre-populate in the fill edit text (null for no
+     *                   pre-filled value)
+     * @param paneChoice The pane choice to check initially
+     * @param allEntries The 'all entries' initial selection
      * @return A properly configured FillFragment
      */
-    public static FillFragment createInstance() {
-        return new FillFragment();
+    public static FillFragment createInstance(Double fillValue, PaneChoice paneChoice,
+                                              boolean allEntries) {
+
+        // Create a new arguments bundle and add the fill argument.
+        final Bundle arguments = new Bundle();
+        arguments.putSerializable(FILL_ARGUMENT, fillValue);
+
+        // Add the pane argument and the 'all entries' flag.
+        arguments.putSerializable(PANE_ARGUMENT, paneChoice);
+        arguments.putBoolean(ALL_ARGUMENT, allEntries);
+
+        // Create a new FillFragment, set the argument and return the fragment.
+        final FillFragment fragment = new FillFragment();
+        fragment.setArguments(arguments);
+        return fragment;
     }
 
-    /**
-     * Creates object state when a saved instance state bundle exists.
-     *
-     * @param savedInstanceState The saved instance state
-     */
-    private void createState(@NonNull Bundle savedInstanceState) {
+    @Override
+    protected void createState(Bundle keys, Bundle values) {
 
-        // Set the fill value and the pane choice.
-        fillValue = new Container<>(savedInstanceState.containsKey(FILL_VALUE_INDEX) ?
-                savedInstanceState.getDouble(FILL_VALUE_INDEX) : null);
-        paneChoice = (PaneChoice) savedInstanceState.getSerializable(PANE_CHOICE_INDEX);
+        // Set the fill value. Is the fill value not null?
+        fillValue = new Container<>((Double) getSerializable(values, keys, FILL_VALUE));
+        final Double value = fillValue.getObject();
+        if (null != value) {
 
-        // Give the pane choice a default setting if it is null.
+            // The fill value is not null. Set the value in the fill edit text.
+            fillEditText.setText(Double.toString(value));
+        }
+
+        // Get the pane choice. Is the pane choice null?
+        paneChoice = (PaneChoice) getSerializable(values, keys, PANE_CHOICE);
         if (null == paneChoice) {
+
+            // The pane choice is null. Use 'both' as a default.
             paneChoice = PaneChoice.BOTH;
         }
 
-        // Get the all-entries flag.
-        allEntries = savedInstanceState.getBoolean(ALL_ENTRIES_INDEX, false);
+        // Get the 'all entries' flag.
+        allEntries = getBoolean(values, keys, ALL_ENTRIES, false);
     }
 
     /**
@@ -97,7 +141,7 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
      * @return A tag for logging statements
      */
     protected String getLogTag() {
-        return TAG;
+        return ARGUMENT_PREFIX;
     }
 
     /**
@@ -161,8 +205,13 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
         final View view = LayoutInflater.from(context).inflate(R.layout.dialog_fill,
                 null);
 
+        // Find the fill edit text. Create the object state, and setup the radio buttons.
+        fillEditText = view.findViewById(R.id.fill_entry);
+        createState(savedInstanceState);
+        setupButtons(view);
+
         // Create object state, and setup the radio buttons.
-        createState(null == savedInstanceState ? new Bundle() : savedInstanceState);
+        createState(savedInstanceState);
         setupButtons(view);
 
         // Create an on-click listener for the dialog.
@@ -170,7 +219,7 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
 
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
-                sendResult(Activity.RESULT_OK, fillValue.getObject(), paneChoice, allEntries);
+                sendResult(Activity.RESULT_OK);
             }
         };
 
@@ -193,29 +242,28 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
             }
         });
 
-        // Find the fill entry, and give it a text changed listener.
-        ((EditText) view.findViewById(R.id.fill_entry))
-                .addTextChangedListener(new GaussTextWatcher<Container<Double>>(fillValue) {
+        // Give the fill edit text a text changed listener.
+        fillEditText.addTextChangedListener(new GaussTextWatcher<Container<Double>>(fillValue) {
 
-                    @Override
-                    protected String getContentString() {
+            @Override
+            protected String getContentString() {
 
-                        // Return a zero-length string if the content is null.
-                        final Double value = getContent().getObject();
-                        return (null == value) ? "" : value.toString();
-                    }
+                // Return a zero-length string if the content is null.
+                final Double value = getContent().getObject();
+                return (null == value) ? "" : value.toString();
+            }
 
-                    @Override
-                    protected void setChange(@NonNull String change) {
+            @Override
+            protected void setChange(@NonNull String change) {
 
-                        /*
-                         * Set the content depending on the change string. Enable or disable the
-                         * ok button depending on whether there is a fill value.
-                         */
-                        getContent().setObject(GaussTextWatcher.convert(change));
-                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(hasFillValue());
-                    }
-                });
+                /*
+                 * Set the content depending on the change string. Enable or disable the
+                 * ok button depending on whether there is a fill value.
+                 */
+                getContent().setObject(GaussTextWatcher.convert(change));
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(hasFillValue());
+            }
+        });
 
         // Return the dialog.
         return dialog;
@@ -229,15 +277,15 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
          * out bundle.
          */
         super.onSaveInstanceState(outState);
-        outState.putBoolean(ALL_ENTRIES_INDEX, allEntries);
-        outState.putSerializable(PANE_CHOICE_INDEX, paneChoice);
+        outState.putBoolean(ALL_ENTRIES, allEntries);
+        outState.putSerializable(PANE_CHOICE, paneChoice);
 
         // Get the fill value. Is the fill value not null?
         final Double value = fillValue.getObject();
         if (null != value) {
 
             // The fill value is not null. Write the fill value to the out bundle.
-            outState.putDouble(FILL_VALUE_INDEX, value);
+            outState.putDouble(FILL_VALUE, value);
         }
     }
 
@@ -245,17 +293,13 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
      * Sets results to the target fragment.
      *
      * @param resultCode The result code
-     * @param fill       The fill value to use
-     * @param pane       The pane indicator
-     * @param allEntries True to fill all entries (even those with existing settings), false
-     *                   otherwise
      * @return True if the fill value is not null and the target fragment exists to receive the
      * results, false otherwise
      */
-    private boolean sendResult(int resultCode, Double fill, @NonNull PaneChoice pane,
-                               boolean allEntries) {
+    private boolean sendResult(int resultCode) {
 
         // Is the fill value not null?
+        final Double fill = fillValue.getObject();
         boolean result = (null != fill);
         if (result) {
 
@@ -273,7 +317,7 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
                  */
                 final Intent intent = new Intent();
                 intent.putExtra(EXTRA_FILL, fill);
-                intent.putExtra(EXTRA_PANE, pane);
+                intent.putExtra(EXTRA_PANE, paneChoice);
 
                 /*
                  * Put in the all entries flag, and call the activity result on the target fragment
@@ -299,73 +343,19 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
     }
 
     /**
-     * Sets this dialog as an on-click listener for each radio button.
-     *
-     * @param view      The view containing all the radio buttons
-     * @param buttonIds The button IDs for which to set the listener
-     */
-    private void setButtonListeners(@NonNull View view, int[] buttonIds) {
-
-        // Declare a button variable, and cycle for each of the known buttons.
-        RadioButton button;
-        for (int buttonId : buttonIds) {
-
-            // Try to find the first/next button. Is there no such button?
-            button = view.findViewById(buttonId);
-            if (null == button) {
-
-                // There is no such button.
-                output(String.format("I cannot find a button for which I need to set a " +
-                        "listener; the ID is: %d", buttonId));
-            }
-
-            // Found the required button. Set this dialog as a listener.
-            else {
-                button.setOnClickListener(this);
-            }
-        }
-    }
-
-    /**
-     * Checks a radio button.
-     *
-     * @param button The radio button to check
-     * @param id     The ID of the button that is being checked
-     */
-    private void setupButton(RadioButton button, int id) {
-
-        // Is the button null?
-        if (null == button) {
-
-            // Sorry, the button is null.
-            output(String.format("Could not find a pane button whose value I need to set; " +
-                    "the ID is: %d", id));
-        }
-
-        // The button is not null. Check it.
-        else {
-            button.setChecked(true);
-        }
-    }
-
-    /**
      * Sets up the radio buttons.
      *
      * @param view The view containing the buttons
      */
     private void setupButtons(@NonNull View view) {
 
-        // Set the correct pane ID button.
-        int id = paneIds[paneChoice.ordinal()];
-        setupButton((RadioButton) view.findViewById(id), id);
-
-        // Set the correct entry selection button.
-        id = entryIds[allEntries ? 1 : 0];
-        setupButton((RadioButton) view.findViewById(id), id);
+        // Set the correct pane ID and entry selection button.
+        setupButton((RadioButton) view.findViewById(paneIds[paneChoice.ordinal()]));
+        setupButton((RadioButton) view.findViewById(entryIds[allEntries ? 1 : 0]));
 
         // Give all the buttons this dialog as a listener.
-        setButtonListeners(view, paneIds);
-        setButtonListeners(view, entryIds);
+        setButtonListeners(view, paneIds, this);
+        setButtonListeners(view, entryIds, this);
     }
 
     public enum PaneChoice {

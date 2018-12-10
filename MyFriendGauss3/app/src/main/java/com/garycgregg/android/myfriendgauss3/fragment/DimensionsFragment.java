@@ -14,46 +14,100 @@ import android.view.View;
 import android.widget.NumberPicker;
 
 import com.garycgregg.android.myfriendgauss3.R;
-import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 public class DimensionsFragment extends GaussDialogFragment {
 
     // The prefix for instance arguments
     private static final String ARGUMENT_PREFIX = DimensionsFragment.class.getName();
 
+    // The bundle index for the current dimensions
+    private static final String CURRENT_DIMENSIONS = "current_dimensions";
+
     // The current dimensions argument key
     private static final String CURRENT_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
-            ARGUMENT_PREFIX, "current");
+            ARGUMENT_PREFIX, CURRENT_DIMENSIONS);
 
-    // The instance state index for dimensions
-    private static final String DIMENSIONS_INDEX = "dimensions_index";
+    // The bundle index for the maximum dimensions
+    private static final String MAXIMUM_DIMENSIONS = "maximum_dimensions";
+
+    // The maximum dimensions argument key
+    private static final String MAXIMUM_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            ARGUMENT_PREFIX, MAXIMUM_DIMENSIONS);
+
+    // The bundle index for the minimum dimensions
+    private static final String MINIMUM_DIMENSIONS = "minimum_dimensions";
+
+    // The minimum dimensions argument key
+    private static final String MINIMUM_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            ARGUMENT_PREFIX, MINIMUM_DIMENSIONS);
 
     // The prefix for return values
     private static final String RETURN_PREFIX = DimensionsFragment.class.getPackage().getName();
 
     // The dimensions extra
     public static final String EXTRA_DIMENSIONS = String.format(RETURN_FORMAT_STRING,
-            RETURN_PREFIX, "dimensions");
+            RETURN_PREFIX, CURRENT_DIMENSIONS);
+
+    static {
+
+        // Build the argument keys.
+        final Bundle bundle = getArgumentKeys();
+        bundle.putString(CURRENT_DIMENSIONS, CURRENT_ARGUMENT);
+        bundle.putString(MAXIMUM_DIMENSIONS, MAXIMUM_ARGUMENT);
+        bundle.putString(MINIMUM_DIMENSIONS, MINIMUM_ARGUMENT);
+    }
 
     // The number picker for this dialog
-    private NumberPicker numberPicker;
+    private NumberPicker dimensionsPicker;
 
     /**
      * Customizes an instance of a DimensionsFragment with the required argument(s).
      *
-     * @param current The current dimensions of a problem
+     * @param minimumPrecision The minimum dimensions
+     * @param maximumPrecision The maximum dimensions
+     * @param currentPrecision The current dimensions of the problem
      * @return A properly configured DimensionsFragment
      */
-    public static DimensionsFragment createInstance(int current) {
+    public static DimensionsFragment createInstance(int minimumPrecision,
+                                                    int maximumPrecision,
+                                                    int currentPrecision) {
 
-        // Create a new arguments bundle, and add the current dimensions argument.
+        /*
+         * Create a new arguments bundle. Add the minimum precision argument and the maximum
+         * dimensions argument.
+         */
         final Bundle arguments = new Bundle();
-        arguments.putInt(CURRENT_ARGUMENT, current);
+        arguments.putInt(MINIMUM_ARGUMENT, minimumPrecision);
+        arguments.putInt(MAXIMUM_ARGUMENT, maximumPrecision);
 
-        // Create a new DimensionsFragment, set the argument, and return the fragment.
+        // Add the current dimensions argument and create a new dimensions fragment.
+        arguments.putInt(CURRENT_ARGUMENT, currentPrecision);
         final DimensionsFragment fragment = new DimensionsFragment();
+
+        // Set the argument and return the fragment.
         fragment.setArguments(arguments);
         return fragment;
+    }
+
+    @Override
+    protected void createState(Bundle keys, Bundle values) {
+
+        // Declare the default value, and set the minimum in the dimensions picker.
+        final int defaultValue = 0;
+        dimensionsPicker.setMinValue(getInt(values, keys, MINIMUM_DIMENSIONS, defaultValue));
+
+        // Set the maximum in the dimensions picker, then set its current value.
+        dimensionsPicker.setMaxValue(getInt(values, keys, MAXIMUM_DIMENSIONS, defaultValue));
+        dimensionsPicker.setValue(getInt(values, keys, CURRENT_DIMENSIONS, defaultValue));
+    }
+
+    /**
+     * Gets a tag for logging statements.
+     *
+     * @return A tag for logging statements
+     */
+    protected String getLogTag() {
+        return ARGUMENT_PREFIX;
     }
 
     @NonNull
@@ -65,22 +119,16 @@ public class DimensionsFragment extends GaussDialogFragment {
         final View view = LayoutInflater.from(context).inflate(R.layout.dialog_dimensions,
                 null);
 
-        // Find the dimensions picker, and set its minimum value.
-        numberPicker = view.findViewById(R.id.dialog_dimensions_picker);
-        numberPicker.setMinValue(ProblemLab.MIN_DIMENSIONS);
-
-        // Set the maximum value and the current value of the dimensions picker.
-        numberPicker.setMaxValue(ProblemLab.MAX_DIMENSIONS);
-        numberPicker.setValue((null == savedInstanceState) ?
-                getArguments().getInt(CURRENT_ARGUMENT, numberPicker.getMinValue()) :
-                savedInstanceState.getInt(DIMENSIONS_INDEX, numberPicker.getMinValue()));
+        // Find the dimensions picker, and create state.
+        dimensionsPicker = view.findViewById(R.id.dimensions_picker);
+        createState(savedInstanceState);
 
         // Create an on click listener for the dialog.
         final DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
-                sendResult(Activity.RESULT_OK, numberPicker.getValue());
+                sendResult(Activity.RESULT_OK);
             }
         };
 
@@ -98,17 +146,16 @@ public class DimensionsFragment extends GaussDialogFragment {
 
         // Call the superclass method, and save the current value of the number picker.
         super.onSaveInstanceState(outState);
-        outState.putInt(DIMENSIONS_INDEX, numberPicker.getValue());
+        outState.putInt(CURRENT_DIMENSIONS, dimensionsPicker.getValue());
     }
 
     /**
      * Sets results to the target fragment.
      *
      * @param resultCode The result code
-     * @param dimensions The newly selected dimensions
      * @return True if the target fragment exists to receive the results, false otherwise
      */
-    private boolean sendResult(int resultCode, int dimensions) {
+    private boolean sendResult(int resultCode) {
 
         // Get the target fragment. Is the target fragment not null?
         final Fragment targetFragment = getTargetFragment();
@@ -120,7 +167,7 @@ public class DimensionsFragment extends GaussDialogFragment {
              * Call the activity result on the target fragment with the intent.
              */
             final Intent intent = new Intent();
-            intent.putExtra(EXTRA_DIMENSIONS, dimensions);
+            intent.putExtra(EXTRA_DIMENSIONS, dimensionsPicker.getValue());
             targetFragment.onActivityResult(getTargetRequestCode(), resultCode, intent);
         }
 

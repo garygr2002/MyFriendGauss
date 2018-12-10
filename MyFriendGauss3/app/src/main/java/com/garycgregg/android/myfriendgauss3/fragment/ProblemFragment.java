@@ -27,6 +27,12 @@ import java.util.List;
 
 public class ProblemFragment extends GaussFragment implements NumbersFragment.CountListener {
 
+    // The default 'all entries' flag
+    private static final boolean DEFAULT_ALL_ENTRIES = false;
+
+    // The default state of scientific notation
+    private static final boolean DEFAULT_SCIENTIFIC = false;
+
     // The check solution dialog identifier
     private static final String DIALOG_CHECK = "DialogCheck";
 
@@ -57,9 +63,17 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // The prefix for instance arguments
     private static final String PREFIX_STRING = ProblemFragment.class.getName();
 
+    // The all-entries key
+    private static final String ALL_KEY = String.format(ARGUMENT_FORMAT_STRING, PREFIX_STRING,
+            "all");
+
     // The position argument key
     private static final String POSITION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, POSITION_INDEX);
+
+    // The fill key
+    private static final String FILL_KEY = String.format(ARGUMENT_FORMAT_STRING, PREFIX_STRING,
+            "fill");
 
     // The precision key
     private static final String PRECISION_KEY = String.format(ARGUMENT_FORMAT_STRING,
@@ -116,7 +130,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     private Callbacks callbackListener;
 
     // A wrapper for the callback listener
-    private Callbacks callbackWrapper = new Callbacks() {
+    private final Callbacks callbackWrapper = new Callbacks() {
 
         @Override
         public void onDimensionsChanged(int position, long problemId, int dimensions) {
@@ -164,6 +178,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // The position of this instance
     private int position = ILLEGAL_POSITION;
 
+    // The shared preferences
+    private SharedPreferences preferences;
+
     // The problem
     private Problem problem;
 
@@ -191,6 +208,16 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
      */
     private static void configureFactory(FragmentFactory factory, boolean enabled) {
         factory.setEnabled(enabled);
+    }
+
+    /**
+     * Converts a floating point variable to a double.
+     *
+     * @param value The floating point variable to convert
+     * @return The converted floating point value
+     */
+    private static double convert(float value) {
+        return Double.parseDouble(String.format("%.6e", value));
     }
 
     /**
@@ -444,7 +471,6 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         vectorFragmentFactory.setSize(dimensions);
 
         // Get the precision of the entries. Set that precision in the answer fragment factory.
-        final SharedPreferences preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
         final int precision = preferences.getInt(PRECISION_KEY, NumbersFragment.DEFAULT_PRECISION);
         answerFragmentFactory.setPrecision(precision);
 
@@ -453,7 +479,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         vectorFragmentFactory.setPrecision(precision);
 
         // Get the scientific notation flag. Set the flag in the answer fragment factory.
-        final boolean scientific = preferences.getBoolean(SCIENTIFIC_KEY, false);
+        final boolean scientific = preferences.getBoolean(SCIENTIFIC_KEY, DEFAULT_SCIENTIFIC);
         answerFragmentFactory.setScientific(scientific);
 
         // Set the scientific notation flag in the matrix and vector fragment factories.
@@ -583,6 +609,12 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                     requestFill(data);
                     break;
 
+                case REQUEST_PRECISION:
+
+                    // A request to change the coefficient display precision
+                    requestPrecision(data);
+                    break;
+
                 case REQUEST_SOLVE:
 
                     // A request to solve the problem
@@ -601,9 +633,13 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     @Override
     public void onAttach(Context context) {
 
-        // Call the superclass method. Set the state change listener.
+        /*
+         * Call the superclass method. Set the state change listener, and get the shared
+         * preferences.
+         */
         super.onAttach(context);
         callbackListener = (context instanceof Callbacks) ? ((Callbacks) context) : null;
+        preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
     }
 
     @Override
@@ -717,7 +753,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        // TODO: Do correct actions with each options menu, and comment everything.
+        // Declare and initialize the return value. Take an action based on the item ID.
         boolean returnValue = true;
         switch (item.getItemId()) {
 
@@ -727,7 +763,10 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
                 // Create a dimensions dialog.
                 final DimensionsFragment dimensionsDialog =
-                        DimensionsFragment.createInstance(problem.getDimensions());
+                        DimensionsFragment.createInstance(
+                                ProblemLab.MIN_DIMENSIONS,
+                                ProblemLab.MAX_DIMENSIONS,
+                                problem.getDimensions());
 
                 // Set the target fragment, and show the dialog.
                 dimensionsDialog.setTargetFragment(this, REQUEST_DIMENSIONS);
@@ -738,25 +777,17 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
                 output("Change precision menu item selected.");
 
-                /*
-                 * Create the precision fragment. TODO: Get current precision and scientific
-                 * notation arguments.
-                 */
+                // Create the precision fragment.
                 final PrecisionFragment precisionFragment = PrecisionFragment.
                         createInstance(NumbersFragment.MINIMUM_PRECISION,
                                 NumbersFragment.MAXIMUM_PRECISION,
-                                NumbersFragment.DEFAULT_PRECISION,
-                                false);
+                                preferences.getInt(PRECISION_KEY,
+                                        NumbersFragment.DEFAULT_PRECISION),
+                                preferences.getBoolean(SCIENTIFIC_KEY, DEFAULT_SCIENTIFIC));
 
                 // Set the target fragment, and show the dialog.
                 precisionFragment.setTargetFragment(this, REQUEST_PRECISION);
                 precisionFragment.show(getFragmentManager(), DIALOG_PRECISION);
-                break;
-
-            case R.id.solution_progress:
-
-                output("Check solution menu item selected.");
-                ProgressFragment.createInstance().show(getFragmentManager(), DIALOG_CHECK);
                 break;
 
             case R.id.copy_problem:
@@ -764,7 +795,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                 output("Copy problem menu item selected.");
 
                 // Create the copy dialog. Set the target fragment.
-                final CopyFragment copyFragment = CopyFragment.createInstance();
+                final CopyFragment copyFragment = CopyFragment.createInstance(problem.getName());
                 copyFragment.setTargetFragment(this, REQUEST_COPY);
 
                 // Show the dialog.
@@ -775,12 +806,23 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
                 output("Fill entries menu item selected.");
 
-                // Create a fill dialog. Set the target fragment.
-                final FillFragment fillDialog = FillFragment.createInstance();
-                fillDialog.setTargetFragment(this, REQUEST_FILL);
+                // Create the fill dialog.
+                final FillFragment fillDialog = FillFragment
+                        .createInstance(preferences.contains(FILL_KEY) ?
+                                        (convert(preferences.getFloat(FILL_KEY, (float) 0.))) :
+                                        null,
+                                FillFragment.PaneChoice.BOTH,
+                                preferences.getBoolean(ALL_KEY, DEFAULT_ALL_ENTRIES));
 
-                // Show the dialog.
+                // Set the target fragment, and show the dialog.
+                fillDialog.setTargetFragment(this, REQUEST_FILL);
                 fillDialog.show(getFragmentManager(), DIALOG_FILL);
+                break;
+
+            case R.id.solution_progress:
+
+                output("Check solution menu item selected.");
+                ProgressFragment.createInstance().show(getFragmentManager(), DIALOG_CHECK);
                 break;
 
             case R.id.solve_problem:
@@ -802,6 +844,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                 break;
         }
 
+        // Return the result.
         return returnValue;
     }
 
@@ -897,8 +940,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     private void requestFill(Intent data) {
 
         // Get the fill value from the data.
+        final double defaultFillValue = 0.;
         final double fillValue = data.getDoubleExtra(FillFragment.EXTRA_FILL,
-                0.);
+                defaultFillValue);
 
         // Get the pane choice from the data.
         final FillFragment.PaneChoice paneChoice = (FillFragment.PaneChoice)
@@ -906,7 +950,15 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
         // Get the 'all entries' flag from the data.
         final boolean allEntries = data.getBooleanExtra(FillFragment.EXTRA_ALL_ENTRIES,
-                false);
+                DEFAULT_ALL_ENTRIES);
+
+        // Get an editor for the shared preferences. Add the fill value.
+        final SharedPreferences.Editor editor = preferences.edit();
+        editor.putFloat(FILL_KEY, (float) fillValue);
+
+        // Add the 'all entries' flag to the editor and apply the edits.
+        editor.putBoolean(ALL_KEY, allEntries);
+        editor.apply();
 
         // Get the matrix fragment.
         final NumbersFragment<?> matrixFragment = (NumbersFragment<?>)
@@ -951,12 +1003,11 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         final boolean scientific = data.getBooleanExtra(PrecisionFragment.EXTRA_SCIENTIFIC,
                 false);
 
-        // Get an editor for the shared preferences.
-        final SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).
-                edit();
-
-        // Add the precision value and scientific notation flag to the editor. Apply the edits.
+        // Get an editor for the shared preferences. Add the precision value.
+        final SharedPreferences.Editor editor = preferences.edit();
         editor.putInt(PRECISION_KEY, precision);
+
+        // Add the scientific notation flag to the editor and apply the edits.
         editor.putBoolean(SCIENTIFIC_KEY, scientific);
         editor.apply();
 

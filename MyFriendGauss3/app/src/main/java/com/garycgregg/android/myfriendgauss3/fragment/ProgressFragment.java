@@ -14,6 +14,9 @@ import com.garycgregg.android.myfriendgauss3.R;
 
 public class ProgressFragment extends GaussDialogFragment {
 
+    // The prefix for instance arguments
+    private static final String ARGUMENT_PREFIX = ProgressFragment.class.getName();
+
     /**
      * Customizes an instance of a ProgressFragment.
      *
@@ -21,6 +24,11 @@ public class ProgressFragment extends GaussDialogFragment {
      */
     public static ProgressFragment createInstance() {
         return new ProgressFragment();
+    }
+
+    @Override
+    protected String getLogTag() {
+        return ARGUMENT_PREFIX;
     }
 
     @NonNull

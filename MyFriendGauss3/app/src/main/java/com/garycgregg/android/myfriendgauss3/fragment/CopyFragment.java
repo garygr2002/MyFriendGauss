@@ -17,15 +17,26 @@ import com.garycgregg.android.myfriendgauss3.R;
 
 public class CopyFragment extends GaussDialogFragment {
 
-    // The instance state index for the new problem name
-    private static final String NEW_NAME_INDEX = "new_name_index";
+    // The prefix for instance arguments
+    private static final String ARGUMENT_PREFIX = CopyFragment.class.getName();
+
+    // The bundle index for the new problem name
+    private static final String NEW_NAME = "new_name";
+
+    // The name argument key
+    private static final String NAME_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
+            ARGUMENT_PREFIX, NEW_NAME);
 
     // The prefix for return values
-    private static final String RETURN_PREFIX = FillFragment.class.getPackage().getName();
+    private static final String RETURN_PREFIX = CopyFragment.class.getPackage().getName();
 
     // The new name extra
     public static final String EXTRA_NEW_NAME = String.format(RETURN_FORMAT_STRING,
-            RETURN_PREFIX, "new_name");
+            RETURN_PREFIX, NEW_NAME);
+
+    static {
+        getArgumentKeys().putString(NEW_NAME, NAME_ARGUMENT);
+    }
 
     // The edit text for the new problem name
     private EditText newProblemName;
@@ -35,8 +46,30 @@ public class CopyFragment extends GaussDialogFragment {
      *
      * @return A properly configured CopyFragment
      */
-    public static CopyFragment createInstance() {
-        return new CopyFragment();
+    public static CopyFragment createInstance(String existingName) {
+
+        // Create a new arguments bundle and add the name argument.
+        final Bundle arguments = new Bundle();
+        arguments.putString(NAME_ARGUMENT, existingName);
+
+        // Create a new CopyFragment, set the argument, and return the fragment.
+        final CopyFragment fragment = new CopyFragment();
+        fragment.setArguments(arguments);
+        return fragment;
+    }
+
+    @Override
+    protected void createState(@NonNull Bundle keys, @NonNull Bundle values) {
+        newProblemName.setText(getString(values, keys, NEW_NAME, ""));
+    }
+
+    /**
+     * Gets a tag for logging statements.
+     *
+     * @return A tag for logging statements
+     */
+    protected String getLogTag() {
+        return ARGUMENT_PREFIX;
     }
 
     @NonNull
@@ -48,13 +81,9 @@ public class CopyFragment extends GaussDialogFragment {
         final View view = LayoutInflater.from(context).inflate(R.layout.dialog_copy,
                 null);
 
-        // Get the new problem name edit text. Is the saved instance state not null?
+        // Get the new problem name edit text, and create state.
         newProblemName = view.findViewById(R.id.new_problem_name);
-        if (null != savedInstanceState) {
-
-            // The saved instance state is not null. Set the text of the new problem name.
-            newProblemName.setText(savedInstanceState.getString(NEW_NAME_INDEX, ""));
-        }
+        createState(savedInstanceState);
 
         // Create an on-click listener for the dialog.
         final DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -79,7 +108,7 @@ public class CopyFragment extends GaussDialogFragment {
 
         // Call the superclass method, and save the text of the new problem name.
         super.onSaveInstanceState(outState);
-        outState.putString(NEW_NAME_INDEX, newProblemName.getText().toString());
+        outState.putString(NEW_NAME, newProblemName.getText().toString());
     }
 
     /**

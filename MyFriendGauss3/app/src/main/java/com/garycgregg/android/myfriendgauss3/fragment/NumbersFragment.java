@@ -72,13 +72,13 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     private static final String TAG = NumbersFragment.class.getSimpleName();
 
     // The maximum entry precision
-    public static int MAXIMUM_PRECISION = 15;
+    public static final int MAXIMUM_PRECISION = 15;
 
     // The minimum entry precision
-    public static int MINIMUM_PRECISION = 0;
+    public static final int MINIMUM_PRECISION = 0;
 
     // The default entry precision
-    public static int DEFAULT_PRECISION = MINIMUM_PRECISION;
+    public static final int DEFAULT_PRECISION = MINIMUM_PRECISION;
 
     // Notifies a listener of an 'on equal' event
     private final ListenerNotifier equalNotifier = new ListenerNotifier() {
@@ -366,13 +366,19 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
 
                     /*
                      * Cast the view to an EditText, and try to convert its content. Is the content
-                     * a decimal number?
+                     * not a decimal number?
                      */
                     final EditText field = (EditText) view;
                     final Double entry = NumberTextWatcher.convert(field.getText().toString());
-                    if (null != entry) {
+                    // Format the number.
+                    if (null == entry) {
 
-                        // The content is a decimal number. Format it.
+                        // The content is not a decimal number. Clear the text field.
+                        field.setText("");
+                    }
+
+                    // The content is a decimal number.
+                    else {
                         field.setText(format(entry));
                     }
                 }
