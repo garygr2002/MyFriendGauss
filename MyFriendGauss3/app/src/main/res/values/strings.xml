@@ -7,6 +7,7 @@
     <string name="check_title">Solution Progress</string>
     <string name="copy_problem">Copy</string>
     <string name="copy_title">Copy Problem</string>
+    <string name="decimal_notation">Decimal</string>
     <string name="dimensions_title">Choose Problem Dimensions</string>
     <string name="edit_problem">Edit</string>
     <string name="empty_cells">Empty Cells</string>
@@ -16,7 +17,9 @@
     <string name="matrix_only">Matrix</string>
     <string name="new_problem_name">Name for New Problem</string>
     <string name="percent_solved">Percent Solved</string>
+    <string name="precision_title">Coefficient Display Precision</string>
     <string name="problem_name">Problem Name</string>
+    <string name="scientific_notation">Scientific</string>
     <string name="solution_progress">Progress</string>
     <string name="solve_message">A problem may not be edited once it has been submitted for
         solution. You may copy a solved problem, then edit the copy. Submit this problem for

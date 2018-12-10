@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <NumberPicker
-        android:id="@+id/dialog_dimensions_picker"
+        android:id="@+id/dimensions_picker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
