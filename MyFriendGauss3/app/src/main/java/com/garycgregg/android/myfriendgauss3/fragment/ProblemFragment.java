@@ -39,6 +39,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // The fill dialog identifier
     private static final String DIALOG_FILL = "DialogFill";
 
+    // The precision dialog identifier
+    private static final String DIALOG_PRECISION = "DialogPrecision";
+
     // The solve dialog identifier
     private static final String DIALOG_SOLVE = "DialogSolve";
 
@@ -78,8 +81,11 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // The identifier for a fill request
     private static final int REQUEST_FILL = 2;
 
+    // The identifier for the precision request
+    private static final int REQUEST_PRECISION = 3;
+
     // The identifier for a solve request
-    private static final int REQUEST_SOLVE = 3;
+    private static final int REQUEST_SOLVE = 4;
 
     // The scientific notation key
     private static final String SCIENTIFIC_KEY = String.format(ARGUMENT_FORMAT_STRING,
@@ -731,6 +737,20 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
             case R.id.change_precision:
 
                 output("Change precision menu item selected.");
+
+                /*
+                 * Create the precision fragment. TODO: Get current precision and scientific
+                 * notation arguments.
+                 */
+                final PrecisionFragment precisionFragment = PrecisionFragment.
+                        createInstance(NumbersFragment.MINIMUM_PRECISION,
+                                NumbersFragment.MAXIMUM_PRECISION,
+                                NumbersFragment.DEFAULT_PRECISION,
+                                false);
+
+                // Set the target fragment, and show the dialog.
+                precisionFragment.setTargetFragment(this, REQUEST_PRECISION);
+                precisionFragment.show(getFragmentManager(), DIALOG_PRECISION);
                 break;
 
             case R.id.solution_progress:
