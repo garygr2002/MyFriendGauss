@@ -66,11 +66,18 @@ public class PrecisionFragment extends GaussDialogFragment implements View.OnCli
     static {
 
         // Build the argument keys.
-        final Bundle bundle = getArgumentKeys();
+        Bundle bundle = getArgumentKeys();
         bundle.putString(CURRENT_PRECISION, CURRENT_ARGUMENT);
         bundle.putString(MAXIMUM_PRECISION, MAXIMUM_ARGUMENT);
         bundle.putString(MINIMUM_PRECISION, MINIMUM_ARGUMENT);
         bundle.putString(SCIENTIFIC_NOTATION, SCIENTIFIC_ARGUMENT);
+
+        // Build the saved instance state keys.
+        bundle = getSavedInstanceStateKeys();
+        bundle.putString(CURRENT_PRECISION, CURRENT_PRECISION);
+        bundle.putString(MAXIMUM_PRECISION, MAXIMUM_PRECISION);
+        bundle.putString(MINIMUM_PRECISION, MINIMUM_PRECISION);
+        bundle.putString(SCIENTIFIC_NOTATION, SCIENTIFIC_NOTATION);
     }
 
     // The number picker for this dialog
@@ -113,6 +120,14 @@ public class PrecisionFragment extends GaussDialogFragment implements View.OnCli
 
     @Override
     protected void createState(Bundle keys, Bundle values) {
+
+        output(String.format("Size of keys bundle: %d.", values.size()));
+        output(String.format("Size of values bundle: %d.", values.size()));
+
+        for (String key : values.keySet()) {
+
+            output(String.format("Key: '%s'", key));
+        }
 
         // Declare the default value, and set the minimum in the precision picker.
         final int defaultValue = 0;
@@ -192,10 +207,17 @@ public class PrecisionFragment extends GaussDialogFragment implements View.OnCli
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
-        // Call the superclass method.
+        /*
+         * Call the superclass method. Save the current scientific notation flag and the current
+         * precision.
+         */
         super.onSaveInstanceState(outState);
         outState.putBoolean(SCIENTIFIC_NOTATION, scientific);
         outState.putInt(CURRENT_PRECISION, precisionPicker.getValue());
+
+        // Save the maximum and minimum values of the precision picker.
+        outState.putInt(MAXIMUM_PRECISION, precisionPicker.getMaxValue());
+        outState.putInt(MINIMUM_PRECISION, precisionPicker.getMinValue());
     }
 
     /**

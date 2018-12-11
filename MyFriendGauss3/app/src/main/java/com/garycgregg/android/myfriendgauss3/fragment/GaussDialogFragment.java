@@ -50,6 +50,20 @@ public class GaussDialogFragment extends DialogFragment {
     }
 
     /**
+     * Gets a double from a values bundle.
+     *
+     * @param values       The values bundle
+     * @param keys         A keys bundle containing a key indirection
+     * @param key          The key to use for lookup in the keys bundle
+     * @param defaultValue The default value for return
+     * @return A double from the values bundle, or the default value
+     */
+    protected static double getDouble(Bundle values, Bundle keys, String key,
+                                      double defaultValue) {
+        return values.getDouble(keys.getString(key, key), defaultValue);
+    }
+
+    /**
      * Gets an integer from a values bundle.
      *
      * @param values       The values bundle

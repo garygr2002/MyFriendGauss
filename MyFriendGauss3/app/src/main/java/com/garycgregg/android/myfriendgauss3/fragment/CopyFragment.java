@@ -35,7 +35,9 @@ public class CopyFragment extends GaussDialogFragment {
             RETURN_PREFIX, NEW_NAME);
 
     static {
+
         getArgumentKeys().putString(NEW_NAME, NAME_ARGUMENT);
+        getSavedInstanceStateKeys().putString(NEW_NAME, NEW_NAME);
     }
 
     // The edit text for the new problem name

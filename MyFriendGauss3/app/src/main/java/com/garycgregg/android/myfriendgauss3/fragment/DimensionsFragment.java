@@ -51,10 +51,16 @@ public class DimensionsFragment extends GaussDialogFragment {
     static {
 
         // Build the argument keys.
-        final Bundle bundle = getArgumentKeys();
+        Bundle bundle = getArgumentKeys();
         bundle.putString(CURRENT_DIMENSIONS, CURRENT_ARGUMENT);
         bundle.putString(MAXIMUM_DIMENSIONS, MAXIMUM_ARGUMENT);
         bundle.putString(MINIMUM_DIMENSIONS, MINIMUM_ARGUMENT);
+
+        // Build the saved instance state keys.
+        bundle = getSavedInstanceStateKeys();
+        bundle.putString(CURRENT_DIMENSIONS, CURRENT_DIMENSIONS);
+        bundle.putString(MAXIMUM_DIMENSIONS, MAXIMUM_DIMENSIONS);
+        bundle.putString(MINIMUM_DIMENSIONS, MINIMUM_DIMENSIONS);
     }
 
     // The number picker for this dialog
@@ -144,9 +150,13 @@ public class DimensionsFragment extends GaussDialogFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
-        // Call the superclass method, and save the current value of the number picker.
+        // Call the superclass method, and save the current value of the dimensions picker.
         super.onSaveInstanceState(outState);
         outState.putInt(CURRENT_DIMENSIONS, dimensionsPicker.getValue());
+
+        // Save the maximum and minimum values of the dimensions picker.
+        outState.putInt(MAXIMUM_DIMENSIONS, dimensionsPicker.getMaxValue());
+        outState.putInt(MINIMUM_DIMENSIONS, dimensionsPicker.getMinValue());
     }
 
     /**

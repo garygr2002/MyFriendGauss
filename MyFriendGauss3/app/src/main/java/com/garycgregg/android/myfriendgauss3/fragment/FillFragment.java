@@ -71,6 +71,12 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
         bundle.putString(ALL_ENTRIES, ALL_ARGUMENT);
         bundle.putString(FILL_VALUE, FILL_ARGUMENT);
         bundle.putString(PANE_CHOICE, PANE_ARGUMENT);
+
+        // Build the saved instance state keys.
+        bundle = getArgumentKeys();
+        bundle.putString(ALL_ENTRIES, ALL_ENTRIES);
+        bundle.putString(FILL_VALUE, FILL_VALUE);
+        bundle.putString(PANE_CHOICE, PANE_CHOICE);
     }
 
     // The all-entries flag
@@ -97,9 +103,13 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
     public static FillFragment createInstance(Double fillValue, PaneChoice paneChoice,
                                               boolean allEntries) {
 
-        // Create a new arguments bundle and add the fill argument.
+        // Create a new arguments bundle. Is the fill value not null?
         final Bundle arguments = new Bundle();
-        arguments.putSerializable(FILL_ARGUMENT, fillValue);
+        if (null != fillValue) {
+
+            // The fill value is not null. Add it as a double.
+            arguments.putDouble(FILL_ARGUMENT, fillValue);
+        }
 
         // Add the pane argument and the 'all entries' flag.
         arguments.putSerializable(PANE_ARGUMENT, paneChoice);
@@ -114,12 +124,12 @@ public class FillFragment extends GaussDialogFragment implements View.OnClickLis
     @Override
     protected void createState(Bundle keys, Bundle values) {
 
-        // Set the fill value. Is the fill value not null?
-        fillValue = new Container<>((Double) getSerializable(values, keys, FILL_VALUE));
-        final Double value = fillValue.getObject();
-        if (null != value) {
+        // Set the fill value. Is the contained value not null?
+        final double value = getDouble(values, keys, FILL_VALUE, Double.NaN);
+        fillValue = new Container<>(Double.isNaN(value) ? null : value);
+        if (null != fillValue.getObject()) {
 
-            // The fill value is not null. Set the value in the fill edit text.
+            // The contained value is not null. Set the value in the fill edit text.
             fillEditText.setText(Double.toString(value));
         }
 
