@@ -89,20 +89,23 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     private static final String PROBLEM_ID_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, PROBLEM_ID_INDEX);
 
+    // The identifier for a clear request
+    private static final int REQUEST_CLEAR = 0;
+
     // The identifier for a copy problem request
-    private static final int REQUEST_COPY = 0;
+    private static final int REQUEST_COPY = REQUEST_CLEAR + 1;
 
     // The identifier for a dimensions request
-    private static final int REQUEST_DIMENSIONS = 1;
+    private static final int REQUEST_DIMENSIONS = REQUEST_COPY + 1;
 
     // The identifier for a fill request
-    private static final int REQUEST_FILL = 2;
+    private static final int REQUEST_FILL = REQUEST_DIMENSIONS + 1;
 
     // The identifier for the precision request
-    private static final int REQUEST_PRECISION = 3;
+    private static final int REQUEST_PRECISION = REQUEST_FILL + 1;
 
     // The identifier for a solve request
-    private static final int REQUEST_SOLVE = 4;
+    private static final int REQUEST_SOLVE = REQUEST_PRECISION + 1;
 
     // The scientific notation key
     private static final String SCIENTIFIC_KEY = String.format(ARGUMENT_FORMAT_STRING,
@@ -529,6 +532,14 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     }
 
     /**
+     * Display the clear dialog.
+     */
+    private void displayClearDialog() {
+
+        // TODO: Fill this in.
+    }
+
+    /**
      * Displays the copy dialog.
      */
     private void displayCopyDialog() {
@@ -685,6 +696,12 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
             // The result code is okay. Perform a request action based on the request code.
             switch (requestCode) {
+
+                case REQUEST_CLEAR:
+
+                    // A request to clear the number fragments
+                    requestClear(data);
+                    break;
 
                 case REQUEST_COPY:
 
@@ -864,6 +881,12 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                 displayPrecisionDialog();
                 break;
 
+            case R.id.clear_entries:
+
+                output("Clear entries menu item selected.");
+                displayClearDialog();
+                break;
+
             case R.id.copy_problem:
 
                 output("Copy problem menu item selected.");
@@ -930,6 +953,17 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         // Save the position and the 'needing redraw' flag.
         outState.putInt(POSITION_INDEX, position);
         outState.putBoolean(NEEDING_REDRAW_INDEX, isNeedingRedraw());
+    }
+
+    /**
+     * Performs a request to clear entries.
+     *
+     * @param data The intent containing the clear entries parameters
+     */
+    private void requestClear(Intent data) {
+
+        // TODO: Fill this in.
+        output("Received request to clear entries.");
     }
 
     /**

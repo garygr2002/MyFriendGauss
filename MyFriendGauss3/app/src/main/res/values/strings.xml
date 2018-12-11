@@ -5,6 +5,7 @@
     <string name="change_dimension">Dimension</string>
     <string name="change_precision">Precision</string>
     <string name="check_title">Solution Progress</string>
+    <string name="clear_entries">Clear</string>
     <string name="copy_problem">Copy</string>
     <string name="copy_title">Copy Problem</string>
     <string name="decimal_notation">Decimal</string>
