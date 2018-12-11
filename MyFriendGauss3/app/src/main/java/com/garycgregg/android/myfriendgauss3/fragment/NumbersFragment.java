@@ -23,8 +23,6 @@ import com.garycgregg.android.myfriendgauss3.content.BaseGaussEntry;
 import com.garycgregg.android.myfriendgauss3.content.Matrix;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
-import org.w3c.dom.Text;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;

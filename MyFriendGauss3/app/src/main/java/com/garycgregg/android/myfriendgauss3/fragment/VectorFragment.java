@@ -9,8 +9,6 @@ import android.widget.EditText;
 import com.garycgregg.android.myfriendgauss3.content.Vector;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
 
 public class VectorFragment extends NumbersFragment<Vector> {

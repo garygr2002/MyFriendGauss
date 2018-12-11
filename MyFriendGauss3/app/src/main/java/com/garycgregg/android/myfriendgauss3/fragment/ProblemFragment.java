@@ -161,10 +161,21 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         }
 
         @Override
-        public void onValuesSet(int position, long problemId, double value, boolean allEntries) {
+        public void onValuesCleared(int position, long problemId, boolean matrixPane,
+                                    boolean vectorPane) {
 
             if (null != callbackListener) {
-                callbackListener.onValuesSet(position, problemId, value, allEntries);
+                callbackListener.onValuesCleared(position, problemId, matrixPane, vectorPane);
+            }
+        }
+
+        @Override
+        public void onValuesSet(int position, long problemId, double value, boolean matrixPane,
+                                boolean vectorPane, boolean allEntries) {
+
+            if (null != callbackListener) {
+                callbackListener.onValuesSet(position, problemId, value, matrixPane, vectorPane,
+                        allEntries);
             }
         }
     };
@@ -518,6 +529,87 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     }
 
     /**
+     * Displays the copy dialog.
+     */
+    private void displayCopyDialog() {
+
+        // Create the copy dialog. Set the target fragment and show the dialog.
+        final CopyFragment copyFragment = CopyFragment.createInstance(problem.getName());
+        copyFragment.setTargetFragment(this, REQUEST_COPY);
+        copyFragment.show(getFragmentManager(), DIALOG_COPY);
+    }
+
+    /**
+     * Displays the dimensions dialog.
+     */
+    private void displayDimensionsDialog() {
+
+        // Create a dimensions dialog.
+        final DimensionsFragment dimensionsDialog =
+                DimensionsFragment.createInstance(
+                        ProblemLab.MIN_DIMENSIONS,
+                        ProblemLab.MAX_DIMENSIONS,
+                        problem.getDimensions());
+
+        // Set the target fragment, and show the dialog.
+        dimensionsDialog.setTargetFragment(this, REQUEST_DIMENSIONS);
+        dimensionsDialog.show(getFragmentManager(), DIALOG_DIMENSIONS);
+    }
+
+    /**
+     * Displays the fill dialog.
+     */
+    private void displayFillDialog() {
+
+        // Create the fill dialog.
+        final FillFragment fillDialog = FillFragment
+                .createInstance(preferences.contains(FILL_KEY) ?
+                                (convert(preferences.getFloat(FILL_KEY, (float) 0.))) :
+                                null,
+                        FillFragment.PaneChoice.BOTH,
+                        preferences.getBoolean(ALL_KEY, DEFAULT_ALL_ENTRIES));
+
+        // Set the target fragment, and show the dialog.
+        fillDialog.setTargetFragment(this, REQUEST_FILL);
+        fillDialog.show(getFragmentManager(), DIALOG_FILL);
+    }
+
+    /**
+     * Displays the precision dialog.
+     */
+    private void displayPrecisionDialog() {
+
+        // Create the precision fragment.
+        final PrecisionFragment precisionFragment = PrecisionFragment.
+                createInstance(NumbersFragment.MINIMUM_PRECISION,
+                        NumbersFragment.MAXIMUM_PRECISION,
+                        preferences.getInt(PRECISION_KEY, DEFAULT_PRECISION),
+                        preferences.getBoolean(SCIENTIFIC_KEY, DEFAULT_SCIENTIFIC));
+
+        // Set the target fragment, and show the dialog.
+        precisionFragment.setTargetFragment(this, REQUEST_PRECISION);
+        precisionFragment.show(getFragmentManager(), DIALOG_PRECISION);
+    }
+
+    /**
+     * Displays the progress dialog.
+     */
+    private void displayProgressDialog() {
+        ProgressFragment.createInstance().show(getFragmentManager(), DIALOG_CHECK);
+    }
+
+    /**
+     * Displays the solve dialog.
+     */
+    private void displaySolveDialog() {
+
+        // Create the solve dialog. Set the target fragment and show the dialog.
+        final SolveFragment solveFragment = SolveFragment.createInstance();
+        solveFragment.setTargetFragment(this, REQUEST_SOLVE);
+        solveFragment.show(getFragmentManager(), DIALOG_SOLVE);
+    }
+
+    /**
      * Enables or disables a menu item.
      *
      * @param itemId The ID of the menu item to enable or disable
@@ -763,80 +855,37 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
             case R.id.change_dimension:
 
                 output("Change dimension menu item selected.");
-
-                // Create a dimensions dialog.
-                final DimensionsFragment dimensionsDialog =
-                        DimensionsFragment.createInstance(
-                                ProblemLab.MIN_DIMENSIONS,
-                                ProblemLab.MAX_DIMENSIONS,
-                                problem.getDimensions());
-
-                // Set the target fragment, and show the dialog.
-                dimensionsDialog.setTargetFragment(this, REQUEST_DIMENSIONS);
-                dimensionsDialog.show(getFragmentManager(), DIALOG_DIMENSIONS);
+                displayDimensionsDialog();
                 break;
 
             case R.id.change_precision:
 
                 output("Change precision menu item selected.");
-
-                // Create the precision fragment.
-                final PrecisionFragment precisionFragment = PrecisionFragment.
-                        createInstance(NumbersFragment.MINIMUM_PRECISION,
-                                NumbersFragment.MAXIMUM_PRECISION,
-                                preferences.getInt(PRECISION_KEY, DEFAULT_PRECISION),
-                                preferences.getBoolean(SCIENTIFIC_KEY, DEFAULT_SCIENTIFIC));
-
-                // Set the target fragment, and show the dialog.
-                precisionFragment.setTargetFragment(this, REQUEST_PRECISION);
-                precisionFragment.show(getFragmentManager(), DIALOG_PRECISION);
+                displayPrecisionDialog();
                 break;
 
             case R.id.copy_problem:
 
                 output("Copy problem menu item selected.");
-
-                // Create the copy dialog. Set the target fragment.
-                final CopyFragment copyFragment = CopyFragment.createInstance(problem.getName());
-                copyFragment.setTargetFragment(this, REQUEST_COPY);
-
-                // Show the dialog.
-                copyFragment.show(getFragmentManager(), DIALOG_COPY);
+                displayCopyDialog();
                 break;
 
             case R.id.fill_entries:
 
                 output("Fill entries menu item selected.");
-
-                // Create the fill dialog.
-                final FillFragment fillDialog = FillFragment
-                        .createInstance(preferences.contains(FILL_KEY) ?
-                                        (convert(preferences.getFloat(FILL_KEY, (float) 0.))) :
-                                        null,
-                                FillFragment.PaneChoice.BOTH,
-                                preferences.getBoolean(ALL_KEY, DEFAULT_ALL_ENTRIES));
-
-                // Set the target fragment, and show the dialog.
-                fillDialog.setTargetFragment(this, REQUEST_FILL);
-                fillDialog.show(getFragmentManager(), DIALOG_FILL);
+                displayFillDialog();
                 break;
 
             case R.id.solution_progress:
 
                 output("Check solution menu item selected.");
-                ProgressFragment.createInstance().show(getFragmentManager(), DIALOG_CHECK);
+                displayProgressDialog();
                 break;
 
             case R.id.solve_problem:
 
                 output("Solve problem menu item selected.");
-
-                // Create the solve dialog. Set the target fragment.
-                final SolveFragment solveFragment = SolveFragment.createInstance();
-                solveFragment.setTargetFragment(this, REQUEST_SOLVE);
-
-                // Show the dialog.
-                solveFragment.show(getFragmentManager(), DIALOG_SOLVE);
+                displaySolveDialog();
                 break;
 
             default:
@@ -983,11 +1032,17 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         }
 
         /*
-         * Set the needing redraw flag, and notify the callback wrapper of a
-         * value set.
+         * Set the 'needing redraw' flag. Determine if the pane choice was both the matrix and
+         * vector panes.
          */
         setNeedingRedraw(true);
-        callbackWrapper.onValuesSet(position, problemId, fillValue, allEntries);
+        final boolean both = FillFragment.PaneChoice.BOTH.equals(paneChoice);
+
+        // Notify the callback of values set.
+        callbackWrapper.onValuesSet(position, problemId, fillValue,
+                both || FillFragment.PaneChoice.MATRIX.equals(paneChoice),
+                both || FillFragment.PaneChoice.VECTOR.equals(paneChoice),
+                allEntries);
     }
 
     /**
@@ -1193,15 +1248,28 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         void onProblemCopied(int position, long problemId, String problemName, long newProblemId);
 
         /**
-         * Indicates that values have been set in this problem have been set.
+         * Indicates that values have been cleared in this problem.
+         *
+         * @param position   The position of this problem
+         * @param problemId  The ID of this problem
+         * @param matrixPane True if the values were cleared in the matrix pane; false otherwise
+         * @param vectorPane True if the values were cleared in the vector pane; false otherwise
+         */
+        void onValuesCleared(int position, long problemId, boolean matrixPane, boolean vectorPane);
+
+        /**
+         * Indicates that values have been set in this problem.
          *
          * @param position   The position of this problem
          * @param problemId  The ID of this problem
          * @param value      The value that has been set in the problem
+         * @param matrixPane True if the value was set in the matrix pane; false otherwise
+         * @param vectorPane True if the value was set in the vector pane; false otherwise
          * @param allEntries True if all entries in the problem were set;
          *                   false if only missing entries
          */
-        void onValuesSet(int position, long problemId, double value, boolean allEntries);
+        void onValuesSet(int position, long problemId, double value, boolean matrixPane,
+                         boolean vectorPane, boolean allEntries);
     }
 
     private static class AnswerFragmentFactory extends NumbersFragmentFactory {

@@ -140,7 +140,7 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemFr
 
         Log.d(TAG, String.format("onPrecisionChanged(position: %d, problemId: %d, precision: %d" +
                         "scientific: %s)", position, problemId, precision,
-                scientific ? "true" : "false"));
+                Boolean.toString(scientific)));
 
         // Simply notify the pager adapter of a data set change.
         pagerAdapter.notifyDataSetChanged();
@@ -149,7 +149,6 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemFr
     @Override
     public void onProblemCopied(int position, long problemId, String problemName, long newProblemId) {
 
-        // TODO: Implement this.
         Log.d(TAG, String.format(
                 "onProblemCopied(position: %d, problemId: %d, problemName: '%s', " +
                         "newProblemId: %d)",
@@ -160,13 +159,27 @@ public class ProblemPagerActivity extends AppCompatActivity implements ProblemFr
     }
 
     @Override
-    public void onValuesSet(int position, long problemId, double value, boolean allEntries) {
+    public void onValuesCleared(int position, long problemId, boolean matrixPane,
+                                boolean vectorPane) {
 
-        // TODO: Implement this.
+        Log.d(TAG, String.format(
+                "onValuesCleared(position: %d, problemId: %d, " +
+                        "matrixPane: %s, vectorPane: %s)", position, problemId,
+                Boolean.toString(matrixPane), Boolean.toString(vectorPane)));
+
+        // Simply notify the pager adapter of a data set change.
+        pagerAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onValuesSet(int position, long problemId, double value, boolean matrixPane,
+                            boolean vectorPane, boolean allEntries) {
+
         Log.d(TAG, String.format(
                 "onValuesSet(position: %d, problemId: %d, value: %f, " +
-                        "allEntries: %s)",
-                position, problemId, value, allEntries ? "true" : "false"));
+                        "matrixPane: %s, vectorPane: %s, allEntries: %s)",
+                position, problemId, value, Boolean.toString(matrixPane),
+                Boolean.toString(vectorPane), Boolean.toString(allEntries)));
 
         // Simply notify the pager adapter of a data set change.
         pagerAdapter.notifyDataSetChanged();
