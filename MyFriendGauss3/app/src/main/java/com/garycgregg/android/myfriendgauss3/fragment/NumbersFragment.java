@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -22,6 +23,8 @@ import com.garycgregg.android.myfriendgauss3.content.BaseGaussEntry;
 import com.garycgregg.android.myfriendgauss3.content.Matrix;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
+import org.w3c.dom.Text;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -30,6 +33,15 @@ import java.util.Locale;
 
 public abstract class NumbersFragment<T> extends ContentFragment<T>
         implements RecordTracker.CountListener {
+
+    // The maximum entry precision
+    public static final int MAXIMUM_PRECISION = 15;
+
+    // The minimum entry precision
+    public static final int MINIMUM_PRECISION = 0;
+
+    // The default entry precision
+    public static final int DEFAULT_PRECISION = MINIMUM_PRECISION;
 
     // TODO: Delete this; The special tag for database debugging
     protected static final String SPECIAL = "DatabaseDebug";
@@ -60,8 +72,6 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     private static final String PRECISION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "precision");
 
-    private static final int PROGRAMMATIC_SET_KEY = 0;
-
     // The number of rows argument key
     private static final String ROWS_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "rows");
@@ -72,15 +82,6 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
 
     // The tag for our logging
     private static final String TAG = NumbersFragment.class.getSimpleName();
-
-    // The maximum entry precision
-    public static final int MAXIMUM_PRECISION = 15;
-
-    // The minimum entry precision
-    public static final int MINIMUM_PRECISION = 0;
-
-    // The default entry precision
-    public static final int DEFAULT_PRECISION = MINIMUM_PRECISION;
 
     // Notifies a listener of an 'on equal' event
     private final ListenerNotifier equalNotifier = new ListenerNotifier() {
@@ -378,9 +379,9 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
                         field.setText("");
                     }
 
-                    // The content is a decimal number.
+                    // The content as a decimal number.
                     else {
-                        field.setText(format(entry));
+                        setUnwatchedText(field, entry);
                     }
                 }
             }
@@ -827,6 +828,43 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
      */
     private void setTableLayout(TableLayout tableLayout) {
         this.tableLayout = tableLayout;
+    }
+
+    /**
+     * Removes a text watcher from an edit text before setting the text using a formatted double,
+     * then adds back the listener.
+     *
+     * @param field The edit text in which to set the entry
+     * @param entry The entry to set in the edit text
+     * @return True if a watcher was removed and re-added, false otherwise
+     */
+    private boolean setUnwatchedText(@NonNull EditText field, double entry) {
+
+        /*
+         * Get any object attached as a tag to the field. Try to cast the object to a text
+         * watcher.
+         */
+        final Object tag = field.getTag();
+        final TextWatcher watcher = (tag instanceof TextWatcher) ? (TextWatcher) tag : null;
+
+        // Is the object a text watcher?
+        final boolean result = (null != watcher);
+        if (result) {
+
+            // The object is a text watcher. Remove it from the field.
+            field.removeTextChangedListener(watcher);
+        }
+
+        // Set the text in the field using the formatted entry.
+        field.setText(format(entry));
+        if (result) {
+
+            // Add the watcher back to the field.
+            field.addTextChangedListener(watcher);
+        }
+
+        // Return the result.
+        return result;
     }
 
     /**

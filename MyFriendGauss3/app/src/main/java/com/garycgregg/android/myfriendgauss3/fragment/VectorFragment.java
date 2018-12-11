@@ -3,10 +3,13 @@ package com.garycgregg.android.myfriendgauss3.fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextWatcher;
 import android.widget.EditText;
 
 import com.garycgregg.android.myfriendgauss3.content.Vector;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
+
+import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -117,8 +120,11 @@ public class VectorFragment extends NumbersFragment<Vector> {
         final Vector vector = recordTracker.get(controlId);
         if (null != vector) {
 
-            // Give the control a number text changed listener.
-            editText.addTextChangedListener(new NumberTextWatcher<Vector>(vector) {
+            /*
+             * Found the existing vector entry for the control ID. Create a new number text
+             * watcher.
+             */
+            final TextWatcher watcher = new NumberTextWatcher<Vector>(vector) {
 
                 @Override
                 protected void setChange(Double change) {
@@ -137,7 +143,11 @@ public class VectorFragment extends NumbersFragment<Vector> {
                     // Update the delete status in the record tracker.
                     recordTracker.set(controlId, deleted);
                 }
-            });
+            };
+
+            // Set the watcher as a text changed listener, and as a tag.
+            editText.addTextChangedListener(watcher);
+            editText.setTag(watcher);
         }
     }
 

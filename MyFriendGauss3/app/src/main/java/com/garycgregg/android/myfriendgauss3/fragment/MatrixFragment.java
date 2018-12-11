@@ -3,6 +3,7 @@ package com.garycgregg.android.myfriendgauss3.fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextWatcher;
 import android.widget.EditText;
 
 import com.garycgregg.android.myfriendgauss3.content.Matrix;
@@ -122,8 +123,11 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
         final Matrix matrixEntry = recordTracker.get(controlId);
         if (null != matrixEntry) {
 
-            // Give the control a number text changed listener.
-            editText.addTextChangedListener(new NumberTextWatcher<Matrix>(matrixEntry) {
+            /*
+             * Found the existing matrix entry for the control ID. Create a new number text
+             * watcher.
+             */
+            final TextWatcher watcher = new NumberTextWatcher<Matrix>(matrixEntry) {
 
                 @Override
                 protected void setChange(Double change) {
@@ -142,7 +146,11 @@ public class MatrixFragment extends NumbersFragment<Matrix> {
                     // Update the delete status in the record tracker.
                     recordTracker.set(controlId, deleted);
                 }
-            });
+            };
+
+            // Set the watcher as a text changed listener, and as a tag.
+            editText.addTextChangedListener(watcher);
+            editText.setTag(watcher);
         }
     }
 
