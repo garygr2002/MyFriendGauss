@@ -30,6 +30,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // The default 'all entries' flag
     private static final boolean DEFAULT_ALL_ENTRIES = false;
 
+    // The default entry precision
+    private static final int DEFAULT_PRECISION = 4;
+
     // The default state of scientific notation
     private static final boolean DEFAULT_SCIENTIFIC = false;
 
@@ -471,7 +474,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         vectorFragmentFactory.setSize(dimensions);
 
         // Get the precision of the entries. Set that precision in the answer fragment factory.
-        final int precision = preferences.getInt(PRECISION_KEY, NumbersFragment.DEFAULT_PRECISION);
+        final int precision = preferences.getInt(PRECISION_KEY, DEFAULT_PRECISION);
         answerFragmentFactory.setPrecision(precision);
 
         // Set the precision in the matrix and vector fragment factories.

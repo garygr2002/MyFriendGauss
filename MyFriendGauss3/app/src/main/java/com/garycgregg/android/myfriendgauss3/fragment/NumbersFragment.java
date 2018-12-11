@@ -60,6 +60,8 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     private static final String PRECISION_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "precision");
 
+    private static final int PROGRAMMATIC_SET_KEY = 0;
+
     // The number of rows argument key
     private static final String ROWS_ARGUMENT = String.format(ARGUMENT_FORMAT_STRING,
             PREFIX_STRING, "rows");
@@ -370,7 +372,6 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
                      */
                     final EditText field = (EditText) view;
                     final Double entry = NumberTextWatcher.convert(field.getText().toString());
-                    // Format the number.
                     if (null == entry) {
 
                         // The content is not a decimal number. Clear the text field.
