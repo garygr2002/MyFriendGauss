@@ -179,9 +179,13 @@ public class ProblemLab {
         for (int i = 1; i <= 5; ++i) {
 
             problem.setName(String.format("Problem Number %d", i));
-            problem.setCreated(new Date());
-
             problem.setDimensions((i % 10) + 1);
+
+            problem.setCreated(new Date());
+            problem.setPrecision(4);
+            problem.setScientific(true);
+
+            problem.setRank(Problem.INVALID_RANK);
             problem.setWriteLocked(false);
             addOrReplace(problem);
         }
@@ -339,6 +343,34 @@ public class ProblemLab {
                 null);
     }
 
+    private ContentValues getContentPrecision(Problem problem) {
+        return getContentPrecision(problem, null);
+    }
+
+    private ContentValues getContentPrecision(Problem problem, ContentValues existingValues) {
+
+        final ContentValues values = (null == existingValues) ? new ContentValues() :
+                existingValues;
+        values.put(ProblemDbSchema.ProblemTable.Columns.PRECISION, problem.getPrecision());
+
+        values.put(ProblemDbSchema.ProblemTable.Columns.SCIENTIFIC,
+                Problem.translateBoolean(problem.isScientific()));
+        return values;
+    }
+
+    private ContentValues getContentRank(Problem problem, ContentValues existingValues) {
+
+        final ContentValues values = (null == existingValues) ? new ContentValues() :
+                existingValues;
+
+        values.put(ProblemDbSchema.ProblemTable.Columns.RANK, problem.getRank());
+        return values;
+    }
+
+    private ContentValues getContentRank(Problem problem) {
+        return getContentRank(problem, null);
+    }
+
     private ContentValues getContentSolved(Problem problem, ContentValues existingValues) {
 
         final ContentValues values = (null == existingValues) ? new ContentValues() :
@@ -389,6 +421,9 @@ public class ProblemLab {
             getContentCreated(problem, values);
         }
 
+        getContentPrecision(problem, values);
+        getContentRank(problem, values);
+
         getContentSolved(problem, values);
         getContentWriteLock(problem, values);
         return values;
@@ -414,7 +449,7 @@ public class ProblemLab {
                 existingValues;
 
         values.put(ProblemDbSchema.ProblemTable.Columns.WRITE_LOCK,
-                problem.isWriteLocked() ? Problem.TRUE : Problem.FALSE);
+                Problem.translateBoolean(problem.isWriteLocked()));
         return values;
     }
 
@@ -533,6 +568,20 @@ public class ProblemLab {
 
         return database.update(ProblemDbSchema.ProblemTable.name,
                 getContentName(problem),
+                PROBLEM_WHERE_CLAUSE, new String[]{Long.toString(problem.getProblemId())});
+    }
+
+    public int updatePrecision(Problem problem) {
+
+        return database.update(ProblemDbSchema.ProblemTable.name,
+                getContentPrecision(problem),
+                PROBLEM_WHERE_CLAUSE, new String[]{Long.toString(problem.getProblemId())});
+    }
+
+    public int updateRank(Problem problem) {
+
+        return database.update(ProblemDbSchema.ProblemTable.name,
+                getContentRank(problem),
                 PROBLEM_WHERE_CLAUSE, new String[]{Long.toString(problem.getProblemId())});
     }
 

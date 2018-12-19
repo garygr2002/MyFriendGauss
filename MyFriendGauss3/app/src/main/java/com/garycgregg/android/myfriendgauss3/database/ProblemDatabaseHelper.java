@@ -44,6 +44,9 @@ class ProblemDatabaseHelper extends SQLiteOpenHelper {
                     "\t%s text not null,\n" +
                     "\t%s integer not null,\n" +
                     "\t%s datetime not null,\n" +
+                    "\t%s integer not null,\n" +
+                    "\t%s integer not null,\n" +
+                    "\t%s integer not null,\n" +
                     "\t%s datetime,\n" +
                     "\t%s integer not null)",
             ProblemDbSchema.ProblemTable.name,
@@ -51,6 +54,9 @@ class ProblemDatabaseHelper extends SQLiteOpenHelper {
             ProblemDbSchema.ProblemTable.Columns.NAME,
             ProblemDbSchema.ProblemTable.Columns.DIMENSIONS,
             ProblemDbSchema.ProblemTable.Columns.CREATED,
+            ProblemDbSchema.ProblemTable.Columns.PRECISION,
+            ProblemDbSchema.ProblemTable.Columns.SCIENTIFIC,
+            ProblemDbSchema.ProblemTable.Columns.RANK,
             ProblemDbSchema.ProblemTable.Columns.SOLVED,
             ProblemDbSchema.ProblemTable.Columns.WRITE_LOCK);
 

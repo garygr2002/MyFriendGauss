@@ -118,7 +118,7 @@ public class Problem implements Parcelable {
      * @param encodedBoolean An encoded boolean integer
      * @return True if the flag indicates a write lock, false otherwise
      */
-    private static boolean translateBoolean(int encodedBoolean) {
+    public static boolean translateBoolean(int encodedBoolean) {
         return FALSE != encodedBoolean;
     }
 
@@ -128,7 +128,7 @@ public class Problem implements Parcelable {
      * @param bool The boolean
      * @return TRUE if the boolean is true, FALSE otherwise
      */
-    private static int translateBoolean(boolean bool) {
+    public static int translateBoolean(boolean bool) {
         return bool ? TRUE : FALSE;
     }
 
@@ -138,7 +138,7 @@ public class Problem implements Parcelable {
      * @param date A long integer representation of a date
      * @return A date object
      */
-    private static Date translateDate(long date) {
+    public static Date translateDate(long date) {
         return (INVALID_DATE < date) ? null : new Date(date);
     }
 
@@ -148,7 +148,7 @@ public class Problem implements Parcelable {
      * @param date A date object
      * @return A long integer representation of the date
      */
-    private static long translateDate(Date date) {
+    public static long translateDate(Date date) {
         return (null == date) ? INVALID_DATE : date.getTime();
     }
 

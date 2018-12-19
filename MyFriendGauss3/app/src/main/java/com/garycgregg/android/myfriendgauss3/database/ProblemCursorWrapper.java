@@ -21,6 +21,7 @@ public class ProblemCursorWrapper extends CursorWrapper {
 
     /**
      * Creates a Problem object.
+     *
      * @return A Problem object
      */
     public Problem getProblem() {
@@ -29,24 +30,27 @@ public class ProblemCursorWrapper extends CursorWrapper {
         final Problem problem = new Problem();
         problem.setProblemId(getLong(getColumnIndex(ProblemTable.Columns.PROBLEM_ID)));
 
-        // Set the name and dimensions.
+        // Set the name, dimensions, and date created fields.
         problem.setName(getString(getColumnIndex(ProblemTable.Columns.NAME)));
         problem.setDimensions(getInt(getColumnIndex(ProblemTable.Columns.DIMENSIONS)));
+        problem.setCreated(new Date(getLong(getColumnIndex(ProblemTable.Columns.CREATED))));
+
+        // Set the precision field, and the 'scientific notation' field.
+        problem.setPrecision(getInt(getColumnIndex(ProblemTable.Columns.PRECISION)));
+        problem.setScientific(Problem.translateBoolean(
+                getInt(getColumnIndex(ProblemTable.Columns.SCIENTIFIC))));
 
         /*
-         * Add the date and the solved field. The boolean 'solved' field is set if the 'solved'
-         * field in the record is not null. It is cleared otherwise.
+         * Set the rank field. The boolean 'solved' field is set if the 'solved' field in the
+         * record is not null. It is cleared otherwise.
          */
-        problem.setCreated(new Date(getLong(getColumnIndex(ProblemTable.Columns.CREATED))));
+        problem.setRank(getInt(getColumnIndex(ProblemTable.Columns.RANK)));
         final int columnIndex = getColumnIndex(ProblemTable.Columns.SOLVED);
         problem.setSolved(isNull(columnIndex) ? null : new Date(getLong(columnIndex)));
 
-        /*
-         * Set the 'write locked' field if the 'write locked' field in the record is anything other
-         * than numeric FALSE. Return the Problem object.
-         */
-        problem.setWriteLocked(Problem.FALSE !=
-                getInt(getColumnIndex(ProblemTable.Columns.WRITE_LOCK)));
+        // Set the 'write locked' field, and return the Problem object.
+        problem.setWriteLocked(Problem.translateBoolean(
+                getInt(getColumnIndex(ProblemTable.Columns.WRITE_LOCK))));
         return problem;
     }
 }

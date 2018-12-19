@@ -76,6 +76,9 @@ create table problem(
 	name text not null,
 	dimensions integer not null,
 	created datetime not null,
+	precision integer not null,
+	scientific integer not null,
+	rank integer not null,
 	solved datetime,
 	write_lock integer not null);
 
@@ -84,7 +87,10 @@ create table problem(
             String CREATED = "created";
             String DIMENSIONS = "dimensions";
             String NAME = "name";
+            String PRECISION = "precision";
             String PROBLEM_ID = "problem_id";
+            String RANK = "rank";
+            String SCIENTIFIC = "scientific";
             String SOLVED = "solved";
             String WRITE_LOCK = "write_lock";
         }
