@@ -38,7 +38,7 @@ public class Problem implements Parcelable {
     public static final int MIN_DIMENSIONS = 1;
 
     // The minimum entry precision
-    public static final int MIN_PRECISION = 0;
+    public static final int MIN_PRECISION = 1;
 
     // The null problem ID
     public static final long NULL_ID = 0L;

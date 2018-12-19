@@ -30,12 +30,6 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     // The default 'all entries' flag
     private static final boolean DEFAULT_ALL_ENTRIES = false;
 
-    // The default entry precision
-    private static final int DEFAULT_PRECISION = 4;
-
-    // The default state of scientific notation
-    private static final boolean DEFAULT_SCIENTIFIC = false;
-
     // The check solution dialog identifier
     private static final String DIALOG_CHECK = "DialogCheck";
 
@@ -78,10 +72,6 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     private static final String FILL_KEY = String.format(ARGUMENT_FORMAT_STRING, PREFIX_STRING,
             "fill");
 
-    // The precision key
-    private static final String PRECISION_KEY = String.format(ARGUMENT_FORMAT_STRING,
-            PREFIX_STRING, "precision");
-
     // The instance state index for problem ID
     private static final String PROBLEM_ID_INDEX = "problem_id";
 
@@ -106,10 +96,6 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
     // The identifier for a solve request
     private static final int REQUEST_SOLVE = REQUEST_PRECISION + 1;
-
-    // The scientific notation key
-    private static final String SCIENTIFIC_KEY = String.format(ARGUMENT_FORMAT_STRING,
-            PREFIX_STRING, "scientific");
 
     // A tag for logging statements
     private static final String TAG = ProblemFragment.class.getSimpleName();
@@ -487,8 +473,8 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         matrixFragmentFactory.setSize(dimensions);
         vectorFragmentFactory.setSize(dimensions);
 
-        // Get the precision of the entries. Set that precision in the answer fragment factory.
-        final int precision = preferences.getInt(PRECISION_KEY, DEFAULT_PRECISION);
+        // Get the precision of the problem. Set that precision in the answer fragment factory.
+        final int precision = problem.getPrecision();
         answerFragmentFactory.setPrecision(precision);
 
         // Set the precision in the matrix and vector fragment factories.
@@ -496,7 +482,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         vectorFragmentFactory.setPrecision(precision);
 
         // Get the scientific notation flag. Set the flag in the answer fragment factory.
-        final boolean scientific = preferences.getBoolean(SCIENTIFIC_KEY, DEFAULT_SCIENTIFIC);
+        final boolean scientific = problem.isScientific();
         answerFragmentFactory.setScientific(scientific);
 
         // Set the scientific notation flag in the matrix and vector fragment factories.
@@ -545,9 +531,9 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     private void displayCopyDialog() {
 
         // Create the copy dialog. Set the target fragment and show the dialog.
-        final CopyFragment copyFragment = CopyFragment.createInstance(problem.getName());
-        copyFragment.setTargetFragment(this, REQUEST_COPY);
-        copyFragment.show(getFragmentManager(), DIALOG_COPY);
+        final CopyFragment copyDialog = CopyFragment.createInstance(problem.getName());
+        copyDialog.setTargetFragment(this, REQUEST_COPY);
+        copyDialog.show(getFragmentManager(), DIALOG_COPY);
     }
 
     /**
@@ -558,8 +544,8 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         // Create a dimensions dialog.
         final DimensionsFragment dimensionsDialog =
                 DimensionsFragment.createInstance(
-                        ProblemLab.MIN_DIMENSIONS,
-                        ProblemLab.MAX_DIMENSIONS,
+                        Problem.MIN_DIMENSIONS,
+                        Problem.MAX_DIMENSIONS,
                         problem.getDimensions());
 
         // Set the target fragment, and show the dialog.
@@ -591,14 +577,13 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     private void displayPrecisionDialog() {
 
         // Create the precision fragment.
-        final PrecisionFragment precisionFragment = PrecisionFragment.
+        final PrecisionFragment precisionDialog = PrecisionFragment.
                 createInstance(Problem.MIN_PRECISION, Problem.MAX_PRECISION,
-                        preferences.getInt(PRECISION_KEY, DEFAULT_PRECISION),
-                        preferences.getBoolean(SCIENTIFIC_KEY, DEFAULT_SCIENTIFIC));
+                        problem.getPrecision(), problem.isScientific());
 
         // Set the target fragment, and show the dialog.
-        precisionFragment.setTargetFragment(this, REQUEST_PRECISION);
-        precisionFragment.show(getFragmentManager(), DIALOG_PRECISION);
+        precisionDialog.setTargetFragment(this, REQUEST_PRECISION);
+        precisionDialog.show(getFragmentManager(), DIALOG_PRECISION);
     }
 
     /**
@@ -985,10 +970,10 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
     private void requestDimensions(Intent data) {
 
         /*
-         * Declare and initialize a constant with a value that cannot be used as a
-         * problem dimension. Get the new dimensions from the intent.
+         * Declare and initialize a constant with a value that cannot be used as a problem
+         * dimension. Get the new dimensions from the intent.
          */
-        final int greatestUnusableDimensions = 0;
+        final int greatestUnusableDimensions = Problem.MIN_DIMENSIONS - 1;
         final int dimensions = data.getIntExtra(DimensionsFragment.EXTRA_DIMENSIONS,
                 greatestUnusableDimensions);
 
@@ -996,8 +981,8 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
         if (greatestUnusableDimensions < dimensions) {
 
             /*
-             * The new dimensions are greater than the unusable dimensions constant.
-             * Get the problem lab. Is the problem lab not null?
+             * The new dimensions are greater than the unusable dimensions constant. Get the
+             * problem lab. Is the problem lab not null?
              */
             final ProblemLab problemLab = getProblemLab();
             if (null != problemLab) {
@@ -1007,8 +992,8 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
                 problemLab.updateDimensions(problem);
 
                 /*
-                 * Set the needing redraw flag, and notify the callback wrapper of a
-                 * dimensions change.
+                 * Set the needing redraw flag, and notify the callback wrapper of a dimensions
+                 * change.
                  */
                 setNeedingRedraw(true);
                 callbackWrapper.onDimensionsChanged(position, problemId, dimensions);
@@ -1085,25 +1070,47 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
      */
     private void requestPrecision(Intent data) {
 
-        // Get the precision from the data.
+        /*
+         * Declare and initialize a constant with a value that cannot be used as an entry
+         * precision. Get the new precision from the intent.
+         */
+        final int greatestUnusablePrecision = Problem.MIN_PRECISION - 1;
         final int precision = data.getIntExtra(PrecisionFragment.EXTRA_PRECISION,
-                NumbersFragment.DEFAULT_PRECISION);
+                greatestUnusablePrecision);
 
-        // Get the scientific notation flag from the data.
-        final boolean scientific = data.getBooleanExtra(PrecisionFragment.EXTRA_SCIENTIFIC,
-                false);
+        // Is the new precision greater than the unusable precision constant?
+        if (greatestUnusablePrecision < precision) {
 
-        // Get an editor for the shared preferences. Add the precision value.
-        final SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt(PRECISION_KEY, precision);
+            /*
+             * The new precision is greater than the unusable precision constant. Get the problem
+             * lab. Is the problem lab not null?
+             */
+            final ProblemLab problemLab = getProblemLab();
+            if (null != problemLab) {
 
-        // Add the scientific notation flag to the editor and apply the edits.
-        editor.putBoolean(SCIENTIFIC_KEY, scientific);
-        editor.apply();
+                /*
+                 * The problem lab is not null. Update the precision in the problem. Get the
+                 * 'scientific notation' flag.
+                 */
+                problem.setPrecision(precision);
+                final boolean scientific = data.getBooleanExtra(PrecisionFragment.EXTRA_SCIENTIFIC,
+                        false);
 
-        // Set the needing redraw flag, and notify the callback wrapper of a precision change.
-        setNeedingRedraw(true);
-        callbackWrapper.onPrecisionChanged(position, problemId, precision, scientific);
+                /*
+                 * Update the 'scientific notation' flag in the problem. Update the precision and
+                 * the 'scientific notation' flag in the problem.
+                 */
+                problem.setScientific(scientific);
+                problemLab.updatePrecision(problem);
+
+                /*
+                 * Set the needing redraw flag, and notify the callback wrapper of a precision
+                 * change.
+                 */
+                setNeedingRedraw(true);
+                callbackWrapper.onPrecisionChanged(position, problemId, precision, scientific);
+            }
+        }
     }
 
     /**

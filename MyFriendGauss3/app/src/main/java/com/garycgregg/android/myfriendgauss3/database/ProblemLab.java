@@ -19,12 +19,6 @@ import java.util.List;
 
 public class ProblemLab {
 
-    // The maximum number of problem dimensions
-    public static final int MAX_DIMENSIONS = Problem.MAX_DIMENSIONS;
-
-    // The minimum number of problem dimensions
-    public static final int MIN_DIMENSIONS = Problem.MIN_DIMENSIONS;
-
     // The null problem ID
     public static final long NULL_ID = Problem.NULL_ID;
 

@@ -22,7 +22,6 @@ import com.garycgregg.android.myfriendgauss3.R;
 import com.garycgregg.android.myfriendgauss3.content.BaseGaussEntry;
 import com.garycgregg.android.myfriendgauss3.content.Matrix;
 import com.garycgregg.android.myfriendgauss3.content.Problem;
-import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -32,9 +31,6 @@ import java.util.Locale;
 
 public abstract class NumbersFragment<T> extends ContentFragment<T>
         implements RecordTracker.CountListener {
-
-    // The default entry precision
-    public static final int DEFAULT_PRECISION = Problem.MIN_PRECISION;
 
     // TODO: Delete this; The special tag for database debugging
     protected static final String SPECIAL = "DatabaseDebug";
@@ -147,7 +143,7 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
      * @return A control ID
      */
     protected static int calculateId(int row, int column) {
-        return row * ProblemLab.MAX_DIMENSIONS + column + BASE_ID;
+        return row * Problem.MAX_DIMENSIONS + column + BASE_ID;
     }
 
     /**
@@ -160,10 +156,10 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
 
         // Remove the base ID, and calculate the row number.
         final int minusBase = controlId - BASE_ID;
-        final int row = minusBase / ProblemLab.MAX_DIMENSIONS;
+        final int row = minusBase / Problem.MAX_DIMENSIONS;
 
         // Calculate the column number. Create and return the row/column pair.
-        final int column = minusBase % ProblemLab.MAX_DIMENSIONS;
+        final int column = minusBase % Problem.MAX_DIMENSIONS;
         return new Pair<>(row, column);
     }
 
@@ -198,12 +194,12 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
     @Nullable
     private static NumberFormat createFormat(int precision, boolean scientific) {
 
-        // Declare and initialize the result. Is the precision not the default?
+        // Declare and initialize the result. Is the precision greater than zero?
         NumberFormat result = null;
-        if (DEFAULT_PRECISION < precision) {
+        if (0 < precision) {
 
             /*
-             * The precision is not the default. Create a character array with the desired
+             * The precision is greater than zero. Create a character array with the desired
              * precision, and fill it with the DecimalFormat number character.
              */
             final char[] precisionChars = new char[precision - 1];
@@ -652,7 +648,7 @@ public abstract class NumbersFragment<T> extends ContentFragment<T>
         setSingleColumnHint(arguments.getBoolean(HINT_FORMAT_ARGUMENT, false));
 
         // Get the precision, and the scientific notation flag.
-        setPrecision(arguments.getInt(PRECISION_ARGUMENT, DEFAULT_PRECISION));
+        setPrecision(arguments.getInt(PRECISION_ARGUMENT, Problem.MIN_PRECISION));
         setScientific(arguments.getBoolean(SCIENTIFIC_ARGUMENT, false));
     }
 
