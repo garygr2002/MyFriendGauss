@@ -20,13 +20,13 @@ import java.util.List;
 public class ProblemLab {
 
     // The maximum number of problem dimensions
-    public static final int MAX_DIMENSIONS = 15;
+    public static final int MAX_DIMENSIONS = Problem.MAX_DIMENSIONS;
 
     // The minimum number of problem dimensions
-    public static final int MIN_DIMENSIONS = 1;
+    public static final int MIN_DIMENSIONS = Problem.MIN_DIMENSIONS;
 
     // The null problem ID
-    public static final long NULL_ID = 0L;
+    public static final long NULL_ID = Problem.NULL_ID;
 
     // Our conflict record conflict algorithm
     private static final int CONFLICT_ALGORITHM = SQLiteDatabase.CONFLICT_REPLACE;

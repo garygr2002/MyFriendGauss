@@ -11,8 +11,9 @@ import static com.garycgregg.android.myfriendgauss3.database.ProblemDbSchema.*;
 
 public class ProblemCursorWrapper extends CursorWrapper {
 
-    /**
-     * Creates a Problem object.
+    /***
+     * Constructs a wrapper for production of Problem objects.
+     * @param cursor A cursor
      */
     public ProblemCursorWrapper(Cursor cursor) {
         super(cursor);
@@ -20,7 +21,6 @@ public class ProblemCursorWrapper extends CursorWrapper {
 
     /**
      * Creates a Problem object.
-     *
      * @return A Problem object
      */
     public Problem getProblem() {

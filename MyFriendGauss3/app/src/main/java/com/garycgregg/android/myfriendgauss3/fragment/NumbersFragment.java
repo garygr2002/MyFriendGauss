@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.garycgregg.android.myfriendgauss3.R;
 import com.garycgregg.android.myfriendgauss3.content.BaseGaussEntry;
 import com.garycgregg.android.myfriendgauss3.content.Matrix;
+import com.garycgregg.android.myfriendgauss3.content.Problem;
 import com.garycgregg.android.myfriendgauss3.database.ProblemLab;
 
 import java.text.DecimalFormat;
@@ -32,14 +33,8 @@ import java.util.Locale;
 public abstract class NumbersFragment<T> extends ContentFragment<T>
         implements RecordTracker.CountListener {
 
-    // The maximum entry precision
-    public static final int MAXIMUM_PRECISION = 15;
-
-    // The minimum entry precision
-    public static final int MINIMUM_PRECISION = 0;
-
     // The default entry precision
-    public static final int DEFAULT_PRECISION = MINIMUM_PRECISION;
+    public static final int DEFAULT_PRECISION = Problem.MIN_PRECISION;
 
     // TODO: Delete this; The special tag for database debugging
     protected static final String SPECIAL = "DatabaseDebug";

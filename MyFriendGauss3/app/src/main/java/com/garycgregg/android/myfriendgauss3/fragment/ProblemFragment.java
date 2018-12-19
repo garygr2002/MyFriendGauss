@@ -592,8 +592,7 @@ public class ProblemFragment extends GaussFragment implements NumbersFragment.Co
 
         // Create the precision fragment.
         final PrecisionFragment precisionFragment = PrecisionFragment.
-                createInstance(NumbersFragment.MINIMUM_PRECISION,
-                        NumbersFragment.MAXIMUM_PRECISION,
+                createInstance(Problem.MIN_PRECISION, Problem.MAX_PRECISION,
                         preferences.getInt(PRECISION_KEY, DEFAULT_PRECISION),
                         preferences.getBoolean(SCIENTIFIC_KEY, DEFAULT_SCIENTIFIC));
 

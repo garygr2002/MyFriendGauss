@@ -22,14 +22,32 @@ public class Problem implements Parcelable {
                 }
             };
 
-    // Constant for the unlocked problem state
+    // Constant for integer encoded FALSE boolean values
     public static final int FALSE = 0;
 
-    // Constant for the locked problem state
+    // The invalid rank
+    public static final int INVALID_RANK = -1;
+
+    // The maximum number of problem dimensions
+    public static final int MAX_DIMENSIONS = 15;
+
+    // The maximum entry precision
+    public static final int MAX_PRECISION = 15;
+
+    // The minimum number of problem dimensions
+    public static final int MIN_DIMENSIONS = 1;
+
+    // The minimum entry precision
+    public static final int MIN_PRECISION = 0;
+
+    // The null problem ID
+    public static final long NULL_ID = 0L;
+
+    // Constant for integer encoded TRUE boolean values
     public static final int TRUE = ~FALSE;
 
     // Constant for an invalid date
-    private static final long INVALID_DATE = ~0;
+    private static final long INVALID_DATE = -1L;
 
     // The date the problem was created
     private Date created;
@@ -40,8 +58,17 @@ public class Problem implements Parcelable {
     // The name of the problem
     private String name;
 
+    // The precision of the problem
+    private int precision;
+
     // The ID associated with the problem
     private long problemId;
+
+    // The rank of the problem
+    private int rank;
+
+    // TRUE if scientific notation is to be used in entries display, FALSE otherwise
+    private int scientific;
 
     // The date the problem was solved
     private Date solved;
@@ -74,30 +101,35 @@ public class Problem implements Parcelable {
             setDimensions(parcel.readInt());
             setCreated(translateDate(parcel.readLong()));
 
-            // Read the date the problem was solved, and the write lock flag.
+            // Read the precision, and the scientific notation flag.
+            setPrecision(parcel.readInt());
+            setScientific(translateBoolean(parcel.readInt()));
+
+            // Read the rank, the date the problem was solved, and the write lock flag.
+            setRank(parcel.readInt());
             setSolved(translateDate(parcel.readLong()));
-            setWriteLocked(isWriteLocked(parcel.readInt()));
+            setWriteLocked(translateBoolean(parcel.readInt()));
         }
     }
 
     /**
-     * Determines if a value indicates a write lock.
+     * Translate an encoded boolean integer.
      *
-     * @param writeLocked An integer value
+     * @param encodedBoolean An encoded boolean integer
      * @return True if the flag indicates a write lock, false otherwise
      */
-    private static boolean isWriteLocked(int writeLocked) {
-        return FALSE != writeLocked;
+    private static boolean translateBoolean(int encodedBoolean) {
+        return FALSE != encodedBoolean;
     }
 
     /**
-     * Translates a date.
+     * Translates a boolean.
      *
-     * @param date A date object
-     * @return A long integer representation of the date
+     * @param bool The boolean
+     * @return TRUE if the boolean is true, FALSE otherwise
      */
-    private static long translateDate(Date date) {
-        return (null == date) ? INVALID_DATE : date.getTime();
+    private static int translateBoolean(boolean bool) {
+        return bool ? TRUE : FALSE;
     }
 
     /**
@@ -111,13 +143,13 @@ public class Problem implements Parcelable {
     }
 
     /**
-     * Translates a write lock flag.
+     * Translates a date.
      *
-     * @param writeLocked The write lock flag
-     * @return TRUE if the flag is true, FALSE otherwise
+     * @param date A date object
+     * @return A long integer representation of the date
      */
-    private static int translateWriteLock(boolean writeLocked) {
-        return writeLocked ? TRUE : FALSE;
+    private static long translateDate(Date date) {
+        return (null == date) ? INVALID_DATE : date.getTime();
     }
 
     @Override
@@ -153,12 +185,25 @@ public class Problem implements Parcelable {
     }
 
     /**
+     * Gets the precision of the problem.
+     *
+     * @return The precision of the problem
+     */
+    public int getPrecision() {
+        return precision;
+    }
+
+    /**
      * Gets the ID associated with the problem.
      *
      * @return The ID associated with the problem
      */
     public long getProblemId() {
         return problemId;
+    }
+
+    public int getRank() {
+        return rank;
     }
 
     /**
@@ -171,6 +216,15 @@ public class Problem implements Parcelable {
     }
 
     /**
+     * Determines if the problem entries use scientific notation.
+     *
+     * @return True if the problem entries use scientific notation, false otherwise
+     */
+    public boolean isScientific() {
+        return translateBoolean(scientific);
+    }
+
+    /**
      * Determines if the problem has been solved.
      *
      * @return True if the problem has been solved, false otherwise
@@ -180,12 +234,12 @@ public class Problem implements Parcelable {
     }
 
     /**
-     * Determine if the problem is write locked.
+     * Determines if the problem is write locked.
      *
      * @return True if the problem is write locked, false otherwise
      */
     public boolean isWriteLocked() {
-        return isWriteLocked(writeLocked);
+        return translateBoolean(writeLocked);
     }
 
     /**
@@ -216,12 +270,39 @@ public class Problem implements Parcelable {
     }
 
     /**
+     * Sets the precision of the problem.
+     *
+     * @param precision The precision of the problem
+     */
+    public void setPrecision(int precision) {
+        this.precision = precision;
+    }
+
+    /**
      * Sets the ID associated with the problem.
      *
      * @param problemId The ID associated with the problem
      */
     public void setProblemId(long problemId) {
         this.problemId = problemId;
+    }
+
+    /**
+     * Sets the rank of the problem.
+     *
+     * @param rank The rank of the problem
+     */
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
+
+    /**
+     * Sets whether the problem entries use scientific notation.
+     *
+     * @param scientific True if the problem entries use scientific notation, false otherwise
+     */
+    public void setScientific(boolean scientific) {
+        this.scientific = translateBoolean(scientific);
     }
 
     /**
@@ -239,15 +320,20 @@ public class Problem implements Parcelable {
      * @param writeLocked True if the problem is write locked, false otherwise
      */
     public void setWriteLocked(boolean writeLocked) {
-        this.writeLocked = translateWriteLock(writeLocked);
+        this.writeLocked = translateBoolean(writeLocked);
     }
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
 
-        // Write the write lock flag and the date the problem was solved.
-        parcel.writeInt(translateWriteLock(isWriteLocked()));
+        // Write the write lock flag, the date the problem was solved, and the rank.
+        parcel.writeInt(translateBoolean(isWriteLocked()));
         parcel.writeLong(translateDate(getSolved()));
+        parcel.writeInt(getRank());
+
+        // Write the scientific notation flag, and the precision.
+        parcel.writeInt(translateBoolean(isScientific()));
+        parcel.writeInt(getPrecision());
 
         // Write the date the problem was solved, and the number of dimensions.
         parcel.writeLong(translateDate(getCreated()));

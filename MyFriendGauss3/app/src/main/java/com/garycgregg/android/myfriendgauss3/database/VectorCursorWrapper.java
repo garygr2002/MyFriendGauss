@@ -7,8 +7,9 @@ import com.garycgregg.android.myfriendgauss3.content.Vector;
 
 public class VectorCursorWrapper extends CursorWrapper {
 
-    /**
-     * Creates a Vector object.
+    /***
+     * Constructs a wrapper for production of Vector objects.
+     * @param cursor A cursor
      */
     public VectorCursorWrapper(Cursor cursor) {
         super(cursor);
@@ -16,7 +17,6 @@ public class VectorCursorWrapper extends CursorWrapper {
 
     /**
      * Creates a Vector object.
-     *
      * @return A Vector object
      */
     public Vector getVector() {
